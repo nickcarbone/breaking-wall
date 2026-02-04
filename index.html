@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Wall</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2px;
+            min-height: 100vh;
+            padding: 2px;
+        }
+
+        @media (max-width: 1400px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panel */
+        .panel {
+            position: relative;
+            background: #0a0a0a;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .panel.active {
+            box-shadow: 0 0 0 2px #00d9ff, 0 0 20px rgba(0, 217, 255, 0.4);
+        }
+
+        .panel iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .empty-title {
+            font-size: 3rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .empty-subtitle {
+            font-size: 1rem;
+            opacity: 0.6;
+        }
+
+        .empty-btn {
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .empty-btn:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #333;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .footer.visible {
+            transform: translateY(0);
+        }
+
+        .footer-left {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .footer-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        .footer-toggle {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.2s ease;
+        }
+
+        .footer-toggle:hover {
+            background: #00d9ff;
+            color: #000;
+            border-color: #00d9ff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .sources-list {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .source-item {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-info {
+            flex: 1;
+        }
+
+        .source-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .source-meta {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .source-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-btn, .delete-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        .delete-btn:hover {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .add-btn {
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #00b8e6;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00d9ff;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            flex: 1;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.75rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: 4px;
+            flex: 1;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Grid -->
+    <div id="gridContainer"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state">
+        <div class="empty-title">NEWS WALL</div>
+        <div class="empty-subtitle">Click below to add your first news source</div>
+        <button class="empty-btn" onclick="openAddSource()">+ ADD SOURCE</button>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer" class="footer">
+        <div class="footer-left">NEWS WALL</div>
+        <div class="footer-right">
+            <button class="footer-btn" onclick="openManageSources()">MANAGE SOURCES</button>
+            <button class="footer-btn" onclick="exportSources()">EXPORT</button>
+            <button class="footer-btn" onclick="importSources()">IMPORT</button>
+        </div>
+    </div>
+
+    <!-- Footer Toggle -->
+    <button id="footerToggle" class="footer-toggle" onclick="toggleFooter()">⚙</button>
+
+    <!-- Manage Sources Modal -->
+    <div id="manageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Manage Sources</div>
+                <button class="close-btn" onclick="closeManageModal()">&times;</button>
+            </div>
+            <div id="sourcesList" class="sources-list"></div>
+            <button class="add-btn" onclick="openAddSource()">+ ADD NEW SOURCE</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Source Modal -->
+    <div id="sourceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="sourceModalTitle">Add Source</div>
+                <button class="close-btn" onclick="closeSourceModal()">&times;</button>
+            </div>
+            <form id="sourceForm">
+                <div class="form-group">
+                    <label class="form-label">Name *</label>
+                    <input type="text" id="sourceName" class="form-input" placeholder="e.g., BBC News" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">YouTube Video URL *</label>
+                    <input type="text" id="sourceUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeSourceModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importInput" accept=".json" style="display: none;" onchange="handleImport(event)">
+
+    <script>
+        // Load sources from localStorage
+        let sources = JSON.parse(localStorage.getItem('newsWallSources')) || [];
+        let activePanel = null;
+        let editingIndex = null;
+
+        function saveSources() {
+            localStorage.setItem('newsWallSources', JSON.stringify(sources));
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('gridContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (sources.length === 0) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.style.display = 'grid';
+            container.className = 'grid';
+            container.innerHTML = '';
+
+            sources.forEach((source, index) => {
+                const panel = document.createElement('div');
+                panel.className = 'panel';
+                panel.dataset.index = index;
+
+                const embedUrl = source.url.replace('watch?v=', 'embed/');
+                panel.innerHTML = `
+                    <iframe 
+                        id="player-${index}"
+                        src="${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                `;
+
+                panel.addEventListener('click', () => toggleAudio(index));
+                container.appendChild(panel);
+            });
+
+            // Auto-activate first panel
+            if (activePanel === null && sources.length > 0) {
+                setTimeout(() => toggleAudio(0), 1000);
+            }
+        }
+
+        function toggleAudio(index) {
+            const panels = document.querySelectorAll('.panel');
+            
+            // Mute previous
+            if (activePanel !== null && activePanel !== index) {
+                panels[activePanel].classList.remove('active');
+                const prevIframe = document.getElementById(`player-${activePanel}`);
+                if (prevIframe) {
+                    prevIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                }
+            }
+
+            // If clicking the same panel, just return (keep it active)
+            if (activePanel === index) {
+                return;
+            }
+
+            // Unmute new
+            activePanel = index;
+            panels[index].classList.add('active');
+            const iframe = document.getElementById(`player-${index}`);
+            if (iframe) {
+                iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            }
+        }
+
+        function toggleFooter() {
+            document.getElementById('footer').classList.toggle('visible');
+        }
+
+        function openManageSources() {
+            const list = document.getElementById('sourcesList');
+            list.innerHTML = '';
+
+            if (sources.length === 0) {
+                list.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 2rem;">No sources yet</div>';
+            } else {
+                sources.forEach((source, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'source-item';
+                    item.innerHTML = `
+                        <div class="source-info">
+                            <div class="source-name">${source.name}</div>
+                            <div class="source-meta">${source.url}</div>
+                        </div>
+                        <div class="source-actions">
+                            <button class="edit-btn" onclick="editSource(${index})">Edit</button>
+                            <button class="delete-btn" onclick="deleteSource(${index})">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            document.getElementById('manageModal').classList.add('active');
+        }
+
+        function closeManageModal() {
+            document.getElementById('manageModal').classList.remove('active');
+        }
+
+        function openAddSource() {
+            editingIndex = null;
+            document.getElementById('sourceModalTitle').textContent = 'Add Source';
+            document.getElementById('sourceName').value = '';
+            document.getElementById('sourceUrl').value = '';
+            closeManageModal();
+            document.getElementById('sourceModal').classList.add('active');
+        }
+
+        function editSource(index) {
+            editingIndex = index;
+            const source = sources[index];
+            document.getElementById('sourceModalTitle').textContent = 'Edit Source';
+            document.getElementById('sourceName').value = source.name;
+            document.getElementById('sourceUrl').value = source.url;
+            closeManageModal();
+            document.getElementById('sourceModal').classList.add('active');
+        }
+
+        function deleteSource(index) {
+            if (confirm(`Delete ${sources[index].name}?`)) {
+                sources.splice(index, 1);
+                saveSources();
+                renderGrid();
+                openManageSources();
+            }
+        }
+
+        function closeSourceModal() {
+            document.getElementById('sourceModal').classList.remove('active');
+        }
+
+        document.getElementById('sourceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('sourceName').value.trim();
+            const url = document.getElementById('sourceUrl').value.trim();
+
+            if (!name || !url) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (editingIndex !== null) {
+                sources[editingIndex] = { name, url };
+            } else {
+                sources.push({ name, url });
+            }
+
+            saveSources();
+            closeSourceModal();
+            renderGrid();
+        });
+
+        function exportSources() {
+            const dataStr = JSON.stringify(sources, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'news-wall-sources.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importSources() {
+            document.getElementById('importInput').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        sources = imported;
+                        saveSources();
+                        renderGrid();
+                        alert('Sources imported successfully!');
+                    } else {
+                        alert('Invalid file format');
+                    }
+                } catch (err) {
+                    alert('Error reading file');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset input
+            event.target.value = '';
+        }
+
+        // Initialize
+        renderGrid();
+
+        // Keyboard shortcut for settings
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 's' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                toggleFooter();
+            }
+        });
+    </script>
+</body>
+</html>
