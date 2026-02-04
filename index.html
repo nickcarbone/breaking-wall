@@ -81,11 +81,11 @@
         }
 
         .panel.favorite {
-            box-shadow: 0 0 0 2px #ffd60a, 0 0 10px rgba(255, 214, 10, 0.3);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
         }
 
         .panel.favorite.active {
-            box-shadow: 0 0 0 2px #ffd60a, 0 0 0 4px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 0 4px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4);
         }
 
         .panel.active {
@@ -143,6 +143,41 @@
 
         .panel.favorite .favorite-star {
             color: #ffd60a;
+        }
+
+        .panel-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .panel:hover .panel-actions {
+            opacity: 1;
+        }
+
+        .panel-action-btn {
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .panel-action-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
         }
 
         .panel.active iframe {
@@ -533,6 +568,17 @@
     <div id="footer" class="footer">
         <div class="footer-left">NEWS WALL</div>
         <div class="footer-right">
+            <select id="regionFilter" class="footer-btn" onchange="filterByRegion(this.value)" style="padding: 0.4rem 0.8rem;">
+                <option value="all">All Regions</option>
+                <option value="us">United States</option>
+                <option value="europe">Europe</option>
+                <option value="latam">Latin America</option>
+                <option value="mena">MENA</option>
+                <option value="asia">Asia-Pacific</option>
+                <option value="africa">Africa</option>
+                <option value="other">Other</option>
+            </select>
+            <button class="footer-btn" onclick="muteAll()">MUTE ALL</button>
             <div class="grid-size-controls">
                 <button class="grid-size-btn" onclick="setGridSize('compact')" title="Compact">◾◾◾</button>
                 <button class="grid-size-btn active" onclick="setGridSize('medium')" title="Medium">◾◾</button>
@@ -572,6 +618,18 @@
                     <input type="text" id="sourceName" class="form-input" placeholder="e.g., BBC News" required>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Region *</label>
+                    <select id="sourceRegion" class="form-input" required>
+                        <option value="us">United States</option>
+                        <option value="europe">Europe</option>
+                        <option value="latam">Latin America</option>
+                        <option value="mena">MENA</option>
+                        <option value="asia">Asia-Pacific</option>
+                        <option value="africa">Africa</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label class="form-label">YouTube Video URL *</label>
                     <input type="text" id="sourceUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
                 </div>
@@ -590,6 +648,7 @@
         // Load sources from localStorage
         let sources = JSON.parse(localStorage.getItem('newsWallSources')) || [];
         let gridSize = localStorage.getItem('newsWallGridSize') || 'medium';
+        let currentRegionFilter = 'all';
         let activePanel = null;
         let editingIndex = null;
         let draggedIndex = null;
@@ -606,22 +665,42 @@
             const container = document.getElementById('gridContainer');
             const emptyState = document.getElementById('emptyState');
             
-            if (sources.length === 0) {
+            // Filter sources by region
+            let displaySources = sources;
+            if (currentRegionFilter !== 'all') {
+                displaySources = sources.filter(s => s.region === currentRegionFilter);
+            }
+            
+            if (displaySources.length === 0) {
                 container.innerHTML = '';
                 container.style.display = 'none';
-                emptyState.style.display = 'flex';
+                if (sources.length === 0) {
+                    emptyState.style.display = 'flex';
+                } else {
+                    emptyState.style.display = 'none';
+                    container.innerHTML = '<div style="text-align: center; padding: 4rem; opacity: 0.6;">No sources in this region</div>';
+                    container.style.display = 'block';
+                }
                 return;
             }
 
             emptyState.style.display = 'none';
             container.style.display = 'grid';
             container.className = `grid ${gridSize}`;
-            container.innerHTML = '';
+            
+            // Only clear and rebuild if major change (otherwise just update classes)
+            const existingPanels = container.querySelectorAll('.panel');
+            const needsRebuild = existingPanels.length !== displaySources.length;
+            
+            if (needsRebuild) {
+                container.innerHTML = '';
+            }
 
-            // Sort: favorites first, then regular
-            const sortedSources = [...sources].sort((a, b) => {
+            // Sort: favorites first, then by region grouping, then regular
+            const sortedSources = [...displaySources].sort((a, b) => {
                 if (a.favorite && !b.favorite) return -1;
                 if (!a.favorite && b.favorite) return 1;
+                if (a.region !== b.region) return (a.region || '').localeCompare(b.region || '');
                 return 0;
             });
 
@@ -629,48 +708,77 @@
                 // Find original index
                 const originalIndex = sources.indexOf(source);
                 
-                const panel = document.createElement('div');
-                panel.className = 'panel';
-                if (source.favorite) panel.classList.add('favorite');
-                panel.dataset.index = originalIndex;
-                panel.draggable = true;
+                let panel;
+                if (needsRebuild) {
+                    panel = document.createElement('div');
+                    panel.className = 'panel';
+                    panel.dataset.index = originalIndex;
+                    panel.draggable = true;
 
-                const embedUrl = source.url.replace('watch?v=', 'embed/');
-                panel.innerHTML = `
-                    <iframe 
-                        id="player-${originalIndex}"
-                        src="${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
-                    <div class="favorite-star">${source.favorite ? '★' : '☆'}</div>
-                    <div class="panel-overlay"></div>
-                `;
+                    const embedUrl = source.url.replace('watch?v=', 'embed/');
+                    panel.innerHTML = `
+                        <iframe 
+                            id="player-${originalIndex}"
+                            src="${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                        <div class="favorite-star">${source.favorite ? '★' : '☆'}</div>
+                        <div class="panel-actions">
+                            <button class="panel-action-btn" title="Pop Out">⛶</button>
+                            <button class="panel-action-btn" title="Edit">✎</button>
+                        </div>
+                        <div class="panel-overlay"></div>
+                    `;
 
-                // Drag and drop handlers
-                panel.addEventListener('dragstart', handleDragStart);
-                panel.addEventListener('dragend', handleDragEnd);
-                panel.addEventListener('dragover', handleDragOver);
-                panel.addEventListener('drop', handleDrop);
-                panel.addEventListener('dragleave', handleDragLeave);
+                    // Drag and drop handlers
+                    panel.addEventListener('dragstart', handleDragStart);
+                    panel.addEventListener('dragend', handleDragEnd);
+                    panel.addEventListener('dragover', handleDragOver);
+                    panel.addEventListener('drop', handleDrop);
+                    panel.addEventListener('dragleave', handleDragLeave);
 
-                // Click handler on the overlay
-                const overlay = panel.querySelector('.panel-overlay');
-                overlay.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleAudio(originalIndex);
-                });
+                    // Click handler on the overlay
+                    const overlay = panel.querySelector('.panel-overlay');
+                    overlay.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleAudio(originalIndex);
+                    });
 
-                // Favorite star click handler
-                const star = panel.querySelector('.favorite-star');
-                star.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleFavorite(originalIndex);
-                });
-                star.style.pointerEvents = 'auto';
-                star.style.cursor = 'pointer';
+                    // Favorite star click handler
+                    const star = panel.querySelector('.favorite-star');
+                    star.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(originalIndex);
+                    });
+                    star.style.pointerEvents = 'auto';
+                    star.style.cursor = 'pointer';
 
-                container.appendChild(panel);
+                    // Panel action buttons
+                    const actionBtns = panel.querySelectorAll('.panel-action-btn');
+                    actionBtns[0].addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        popOutPanel(originalIndex);
+                    });
+                    actionBtns[0].style.pointerEvents = 'auto';
+                    
+                    actionBtns[1].addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editSource(originalIndex);
+                    });
+                    actionBtns[1].style.pointerEvents = 'auto';
+
+                    container.appendChild(panel);
+                } else {
+                    panel = existingPanels[displayIndex];
+                }
+
+                // Update classes without rebuild
+                if (source.favorite) {
+                    panel.classList.add('favorite');
+                } else {
+                    panel.classList.remove('favorite');
+                }
             });
 
             // Restore active state
@@ -775,7 +883,54 @@
         function toggleFavorite(index) {
             sources[index].favorite = !sources[index].favorite;
             saveSources();
+            
+            // Update UI without full refresh
+            const panel = document.querySelector(`[data-index="${index}"]`);
+            if (panel) {
+                const star = panel.querySelector('.favorite-star');
+                if (sources[index].favorite) {
+                    panel.classList.add('favorite');
+                    star.textContent = '★';
+                } else {
+                    panel.classList.remove('favorite');
+                    star.textContent = '☆';
+                }
+            }
+            
+            // Re-sort without rebuild
+            setTimeout(() => renderGrid(), 10);
+        }
+
+        function filterByRegion(region) {
+            currentRegionFilter = region;
             renderGrid();
+        }
+
+        function muteAll() {
+            if (activePanel !== null) {
+                const panels = document.querySelectorAll('.panel');
+                panels[activePanel].classList.remove('active');
+                const iframe = document.getElementById(`player-${activePanel}`);
+                if (iframe) {
+                    iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                }
+                activePanel = null;
+            }
+        }
+
+        function popOutPanel(index) {
+            const source = sources[index];
+            const embedUrl = source.url.replace('watch?v=', 'embed/');
+            const width = 1280;
+            const height = 720;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            window.open(
+                embedUrl + '?autoplay=1&controls=1',
+                source.name,
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
+            );
         }
 
         function openManageSources() {
@@ -791,7 +946,7 @@
                     item.innerHTML = `
                         <div class="source-info">
                             <div class="source-name">${source.favorite ? '★ ' : ''}${source.name}</div>
-                            <div class="source-meta">${source.url}</div>
+                            <div class="source-meta">${source.region ? source.region.toUpperCase() : 'OTHER'} • ${source.url}</div>
                         </div>
                         <div class="source-actions">
                             <button class="fav-btn ${source.favorite ? 'active' : ''}" onclick="toggleFavoriteFromModal(${index})">${source.favorite ? '★' : '☆'}</button>
@@ -819,6 +974,7 @@
             editingIndex = null;
             document.getElementById('sourceModalTitle').textContent = 'Add Source';
             document.getElementById('sourceName').value = '';
+            document.getElementById('sourceRegion').value = 'us';
             document.getElementById('sourceUrl').value = '';
             closeManageModal();
             document.getElementById('sourceModal').classList.add('active');
@@ -829,6 +985,7 @@
             const source = sources[index];
             document.getElementById('sourceModalTitle').textContent = 'Edit Source';
             document.getElementById('sourceName').value = source.name;
+            document.getElementById('sourceRegion').value = source.region || 'other';
             document.getElementById('sourceUrl').value = source.url;
             closeManageModal();
             document.getElementById('sourceModal').classList.add('active');
@@ -851,18 +1008,20 @@
             e.preventDefault();
             
             const name = document.getElementById('sourceName').value.trim();
+            const region = document.getElementById('sourceRegion').value;
             const url = document.getElementById('sourceUrl').value.trim();
 
-            if (!name || !url) {
+            if (!name || !url || !region) {
                 alert('Please fill in all required fields');
                 return;
             }
 
             if (editingIndex !== null) {
                 sources[editingIndex].name = name;
+                sources[editingIndex].region = region;
                 sources[editingIndex].url = url;
             } else {
-                sources.push({ name, url, favorite: false });
+                sources.push({ name, region, url, favorite: false });
             }
 
             saveSources();
