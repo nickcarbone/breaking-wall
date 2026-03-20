@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: write   # needed to commit the updated JSON back to the repo
+  issues: write
 
 jobs:
   validate:
