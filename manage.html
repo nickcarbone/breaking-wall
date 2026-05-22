@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Wall — Source Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            border-bottom: 1px solid #1a1a1a;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(0,0,0,0.97);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo { font-size: 0.875rem; font-weight: 600; letter-spacing: 0.12em; color: #bf5af2; }
+        .logo-sub { font-size: 0.65rem; opacity: 0.4; letter-spacing: 0.08em; margin-top: 0.1rem; }
+
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+
+        .sync-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #30d158;
+            transition: background 0.3s;
+        }
+
+        .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #111;
+        }
+
+        .stat {
+            padding: 0.875rem 2rem;
+            border-right: 1px solid #111;
+            min-width: 110px;
+        }
+
+        .stat-value { font-size: 1.5rem; font-weight: 600; line-height: 1; }
+        .stat-label { font-size: 0.6rem; opacity: 0.35; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.25rem; }
+
+        .stat.live .stat-value { color: #30d158; }
+        .stat.dead .stat-value { color: #ff453a; }
+        .stat.fav .stat-value { color: #ffd60a; }
+        .stat.showing { margin-left: auto; border-right: none; border-left: 1px solid #111; }
+        .stat.showing .stat-value { color: #00d9ff; }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            padding: 0.75rem 2rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            border-bottom: 1px solid #111;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            background: #080808;
+            border: 1px solid #1e1e1e;
+            color: #fff;
+            padding: 0.45rem 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            width: 220px;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { outline: none; border-color: #bf5af2; }
+        .search-input::placeholder { opacity: 0.25; }
+
+        .filter-select {
+            background: #080808;
+            border: 1px solid #1e1e1e;
+            color: #fff;
+            padding: 0.45rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: #bf5af2; }
+
+        .spacer { flex: 1; }
+
+        .btn {
+            padding: 0.45rem 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 3px;
+            letter-spacing: 0.05em;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid #222;
+            color: #aaa;
+        }
+        .btn-ghost:hover { border-color: #00d9ff; color: #00d9ff; }
+        .btn-primary { background: #00d9ff; border: none; color: #000; }
+        .btn-primary:hover { background: #00c4e8; }
+        .btn-danger { background: transparent; border: 1px solid #333; color: #ff453a; }
+        .btn-danger:hover { background: rgba(255,69,58,0.1); border-color: #ff453a; }
+        .btn-back {
+            background: transparent;
+            border: 1px solid rgba(191,90,242,0.3);
+            color: #bf5af2;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-back:hover { border-color: #bf5af2; }
+
+        /* ── Expandable panels ── */
+        .panel-section {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease, border-bottom 0.2s;
+            border-bottom: 0 solid #111;
+        }
+        .panel-section.open {
+            max-height: 400px;
+            border-bottom: 1px solid #111;
+        }
+
+        .panel-inner {
+            padding: 1.25rem 2rem 1.5rem;
+            background: #040404;
+        }
+
+        .panel-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.35;
+            margin-bottom: 1rem;
+        }
+
+        .add-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+        .form-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.35; }
+
+        .form-input {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            color: #fff;
+            padding: 0.45rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: #00d9ff; }
+        .form-input.w-name { width: 200px; }
+        .form-input.w-url { width: 380px; }
+
+        /* Batch panel specifics */
+        .batch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .batch-textarea {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            color: #fff;
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            border-radius: 3px;
+            width: 100%;
+            height: 140px;
+            resize: none;
+            transition: border-color 0.2s;
+            line-height: 1.7;
+        }
+        .batch-textarea:focus { outline: none; border-color: #00d9ff; }
+
+        .batch-preview-list { max-height: 140px; overflow-y: auto; }
+
+        .batch-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #0d0d0d;
+        }
+
+        .batch-item-name {
+            background: transparent;
+            border: 1px solid #1e1e1e;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            border-radius: 3px;
+            flex: 1;
+            min-width: 0;
+        }
+        .batch-item-name:focus { outline: none; border-color: #00d9ff; }
+
+        .batch-item-vid {
+            font-size: 0.65rem;
+            opacity: 0.35;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+        }
+
+        .batch-footer { display: flex; gap: 0.5rem; margin-top: 1rem; align-items: center; }
+        .batch-hint { font-size: 0.65rem; opacity: 0.3; }
+
+        /* ── Table ── */
+        .table-wrap { overflow-x: auto; padding-bottom: 5rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.3;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid #111;
+            transition: opacity 0.15s;
+        }
+        thead th:hover { opacity: 0.8; }
+        thead th.sorted { opacity: 1; color: #bf5af2; }
+        thead th.no-sort { cursor: default; }
+        thead th.no-sort:hover { opacity: 0.3; }
+
+        tbody tr {
+            border-bottom: 1px solid #080808;
+            transition: background 0.1s;
+        }
+        tbody tr:hover { background: #080808; }
+        tbody tr.is-dead { opacity: 0.55; }
+        tbody tr.is-selected { background: rgba(191,90,242,0.06); }
+
+        td {
+            padding: 0.6rem 1rem;
+            font-size: 0.78rem;
+            vertical-align: middle;
+        }
+
+        .td-check { width: 36px; }
+        .td-check input[type=checkbox] { cursor: pointer; accent-color: #bf5af2; width: 14px; height: 14px; }
+
+        /* Inline editable fields */
+        .field-input {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            width: 100%;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .field-input:hover { border-color: #1e1e1e; }
+        .field-input:focus { outline: none; border-color: #00d9ff; background: #0a0a0a; }
+
+        .field-select {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .field-select:hover { border-color: #1e1e1e; }
+        .field-select:focus { outline: none; border-color: #00d9ff; background: #0a0a0a; }
+
+        /* URL column */
+        .url-display {
+            font-size: 0.68rem;
+            opacity: 0.35;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 260px;
+            display: block;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            transition: opacity 0.15s, color 0.15s;
+        }
+        .url-display:hover { opacity: 1; color: #00d9ff; }
+
+        /* Status */
+        .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .badge {
+            padding: 0.1rem 0.45rem;
+            border-radius: 2px;
+            font-size: 0.58rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .b-live { background: rgba(48,209,88,0.12); color: #30d158; border: 1px solid rgba(48,209,88,0.25); }
+        .b-dead { background: rgba(255,69,58,0.12); color: #ff453a; border: 1px solid rgba(255,69,58,0.25); }
+        .b-fav  { background: rgba(255,214,10,0.12); color: #ffd60a; border: 1px solid rgba(255,214,10,0.25); }
+
+        /* Action buttons */
+        .td-actions { white-space: nowrap; }
+        .act {
+            background: transparent;
+            border: 1px solid #1a1a1a;
+            color: #444;
+            width: 26px;
+            height: 26px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            margin-right: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .act:hover { color: #fff; border-color: #333; }
+        .act-preview:hover { color: #00d9ff; border-color: rgba(0,217,255,0.4); }
+        .act-fav:hover, .act-fav.on { color: #ffd60a; border-color: rgba(255,214,10,0.4); background: rgba(255,214,10,0.08); }
+        .act-dead:hover { color: #ff453a; border-color: rgba(255,69,58,0.4); }
+        .act-alive:hover { color: #30d158; border-color: rgba(48,209,88,0.4); }
+        .act-del:hover { color: #ff453a; border-color: rgba(255,69,58,0.4); background: rgba(255,69,58,0.08); }
+
+        /* Empty state */
+        .empty-row td {
+            text-align: center;
+            padding: 4rem;
+            opacity: 0.25;
+            font-size: 0.8rem;
+        }
+
+        /* ── Bulk bar ── */
+        .bulk-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.97);
+            border-top: 1px solid rgba(191,90,242,0.4);
+            padding: 0.875rem 2rem;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(12px);
+        }
+        .bulk-bar.on { display: flex; }
+
+        .bulk-count {
+            color: #bf5af2;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .bulk-btns { display: flex; gap: 0.5rem; }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            top: 4.5rem;
+            right: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+        }
+        #toast.show { opacity: 1; }
+
+        /* ── Drag overlay ── */
+        #dropOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(191,90,242,0.08);
+            border: 2px dashed rgba(191,90,242,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #bf5af2;
+            pointer-events: none;
+        }
+        #dropOverlay.show { display: flex; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2a2a2a; }
+
+        @media (max-width: 800px) {
+            .batch-grid { grid-template-columns: 1fr; }
+            .form-input.w-url { width: 100%; }
+            .stats-bar { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Drop overlay -->
+<div id="dropOverlay">Drop JSON file to import</div>
+
+<!-- Header -->
+<div class="header">
+    <div style="display:flex; align-items:center; gap:2rem;">
+        <div>
+            <div class="logo">NEWS WALL</div>
+            <div class="logo-sub">SOURCE MANAGER</div>
+        </div>
+        <div class="sync-indicator">
+            <div class="sync-dot" id="syncDot"></div>
+            <span id="syncLabel">Synced</span>
+        </div>
+    </div>
+    <div class="header-actions">
+        <a href="index.html" class="btn btn-back">← WALL</a>
+        <button class="btn btn-ghost" onclick="exportJSON()">EXPORT JSON</button>
+        <button class="btn btn-primary" onclick="triggerImport()">IMPORT JSON</button>
+    </div>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+    <div class="stat">
+        <div class="stat-value" id="s-total">0</div>
+        <div class="stat-label">Total</div>
+    </div>
+    <div class="stat live">
+        <div class="stat-value" id="s-live">0</div>
+        <div class="stat-label">Live</div>
+    </div>
+    <div class="stat dead">
+        <div class="stat-value" id="s-dead">0</div>
+        <div class="stat-label">Dead</div>
+    </div>
+    <div class="stat fav">
+        <div class="stat-value" id="s-fav">0</div>
+        <div class="stat-label">Favorites</div>
+    </div>
+    <div class="stat showing">
+        <div class="stat-value" id="s-showing">0</div>
+        <div class="stat-label">Showing</div>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search name or URL…" oninput="renderTable()">
+    <select class="filter-select" id="regionFilter" onchange="renderTable()">
+        <option value="all">All Regions</option>
+        <option value="us">United States</option>
+        <option value="europe">Europe</option>
+        <option value="mena">MENA</option>
+        <option value="latam">Latin America</option>
+        <option value="asia">Asia-Pacific</option>
+        <option value="africa">Africa</option>
+        <option value="other">Other</option>
+    </select>
+    <select class="filter-select" id="statusFilter" onchange="renderTable()">
+        <option value="all">All Status</option>
+        <option value="live">Live Only</option>
+        <option value="dead">Dead Only</option>
+        <option value="favorites">Favorites Only</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" id="batchToggleBtn" onclick="togglePanel('batch')">BATCH ADD</button>
+    <button class="btn btn-primary" id="addToggleBtn" onclick="togglePanel('add')">+ ADD SOURCE</button>
+</div>
+
+<!-- Add source panel -->
+<div class="panel-section" id="addSection">
+    <div class="panel-inner">
+        <div class="panel-title">Add New Source</div>
+        <div class="add-row">
+            <div class="form-group">
+                <div class="form-label">Name</div>
+                <input type="text" class="form-input w-name" id="addName" placeholder="e.g., Press TV Arabic">
+            </div>
+            <div class="form-group">
+                <div class="form-label">Region</div>
+                <select class="form-input" id="addRegion">
+                    <option value="us">United States</option>
+                    <option value="europe">Europe</option>
+                    <option value="mena" selected>MENA</option>
+                    <option value="latam">Latin America</option>
+                    <option value="asia">Asia-Pacific</option>
+                    <option value="africa">Africa</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1; min-width:260px;">
+                <div class="form-label">YouTube URL</div>
+                <input type="text" class="form-input w-url" id="addUrl" placeholder="https://www.youtube.com/watch?v=…" style="width:100%;"
+                    onkeydown="if(event.key==='Enter') addSingleSource()">
+            </div>
+            <button class="btn btn-primary" onclick="addSingleSource()">ADD</button>
+            <button class="btn btn-ghost" onclick="togglePanel('add')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Batch add panel -->
+<div class="panel-section" id="batchSection">
+    <div class="panel-inner">
+        <div class="panel-title">Batch Add — paste YouTube URLs (one per line)</div>
+        <div style="display:flex; gap:0.75rem; margin-bottom:0.75rem; align-items:flex-end; flex-wrap:wrap;">
+            <div class="form-group">
+                <div class="form-label">Default Region for all</div>
+                <select class="form-input" id="batchRegion">
+                    <option value="us">United States</option>
+                    <option value="europe">Europe</option>
+                    <option value="mena" selected>MENA</option>
+                    <option value="latam">Latin America</option>
+                    <option value="asia">Asia-Pacific</option>
+                    <option value="africa">Africa</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div style="font-size:0.65rem; opacity:0.3; padding-bottom:0.5rem;">Names are editable before adding. Supports watch?v=, youtu.be/, and /live/ links.</div>
+        </div>
+        <div class="batch-grid">
+            <div>
+                <div class="form-label" style="margin-bottom:0.4rem;">Paste URLs here</div>
+                <textarea class="batch-textarea" id="batchInput" placeholder="https://www.youtube.com/watch?v=abc123&#10;https://youtu.be/def456&#10;https://www.youtube.com/live/ghi789" oninput="processBatch()"></textarea>
+            </div>
+            <div>
+                <div class="form-label" style="margin-bottom:0.4rem;">Preview — edit names before adding</div>
+                <div class="batch-preview-list" id="batchPreview">
+                    <div style="opacity:0.25; font-size:0.72rem; padding:0.5rem 0;">Paste URLs on the left</div>
+                </div>
+            </div>
+        </div>
+        <div class="batch-footer">
+            <button class="btn btn-primary" onclick="commitBatch()">ADD ALL</button>
+            <button class="btn btn-ghost" onclick="togglePanel('batch')">Cancel</button>
+            <div class="batch-hint" id="batchCount"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th class="td-check no-sort">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" style="accent-color:#bf5af2; cursor:pointer;">
+                </th>
+                <th onclick="sortBy('name')">Name <span id="sort-name"></span></th>
+                <th onclick="sortBy('region')">Region <span id="sort-region"></span></th>
+                <th class="no-sort">URL</th>
+                <th onclick="sortBy('status')">Status <span id="sort-status"></span></th>
+                <th class="no-sort">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<!-- Bulk bar -->
+<div class="bulk-bar" id="bulkBar">
+    <div class="bulk-count" id="bulkCount">0 selected</div>
+    <div class="bulk-btns">
+        <button class="btn btn-ghost" onclick="bulkFavorite()">★ Favorite</button>
+        <button class="btn btn-ghost" onclick="bulkLive()">🔄 Mark Live</button>
+        <button class="btn btn-ghost" onclick="bulkDead()">💀 Mark Dead</button>
+        <button class="btn btn-danger" onclick="bulkDelete()">Delete</button>
+        <button class="btn btn-ghost" onclick="clearSel()">✕</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Hidden file input -->
+<input type="file" id="fileInput" accept=".json" style="display:none;" onchange="handleFileImport(event)">
+
+<script>
+    // ── State ──
+    let sources = [];
+    let view = [];           // filtered + sorted subset, each item has ._i (original index)
+    let selected = new Set();
+    let sortKey = null;
+    let sortDir = 1;
+    let batchItems = [];     // { url, name }
+    let openPanel = null;    // 'add' | 'batch' | null
+
+    // ── Persistence (same key as news-wall.html) ──
+    const STORAGE_KEY = 'newsWallSources';
+
+    function load() {
+        try { sources = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+        catch(e) { sources = []; }
+        refresh();
+    }
+
+    function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sources));
+        flashSync();
+        updateStats();
+    }
+
+    function flashSync() {
+        const dot = document.getElementById('syncDot');
+        const lbl = document.getElementById('syncLabel');
+        dot.style.background = '#ffd60a';
+        lbl.textContent = 'Saved';
+        setTimeout(() => {
+            dot.style.background = '#30d158';
+            lbl.textContent = 'Synced with wall';
+        }, 900);
+    }
+
+    function updateStats() {
+        document.getElementById('s-total').textContent   = sources.length;
+        document.getElementById('s-live').textContent    = sources.filter(s => !s.dead).length;
+        document.getElementById('s-dead').textContent    = sources.filter(s => s.dead).length;
+        document.getElementById('s-fav').textContent     = sources.filter(s => s.favorite).length;
+        document.getElementById('s-showing').textContent = view.length;
+    }
+
+    // ── Filtering & Sorting ──
+    function getFiltered() {
+        const q      = document.getElementById('searchInput').value.toLowerCase();
+        const region = document.getElementById('regionFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        return sources
+            .map((s, i) => ({ ...s, _i: i }))
+            .filter(s => {
+                if (q && !s.name?.toLowerCase().includes(q) && !s.url?.toLowerCase().includes(q)) return false;
+                if (region !== 'all' && s.region !== region) return false;
+                if (status === 'live'      && s.dead)      return false;
+                if (status === 'dead'      && !s.dead)     return false;
+                if (status === 'favorites' && !s.favorite) return false;
+                return true;
+            });
+    }
+
+    function applySortToView() {
+        if (!sortKey) return;
+        view.sort((a, b) => {
+            if (sortKey === 'name')   return a.name?.localeCompare(b.name || '') * sortDir || 0;
+            if (sortKey === 'region') return a.region?.localeCompare(b.region || '') * sortDir || 0;
+            if (sortKey === 'status') {
+                const score = s => (s.dead ? 2 : 0) - (s.favorite ? 1 : 0);
+                return (score(a) - score(b)) * sortDir;
+            }
+            return 0;
+        });
+    }
+
+    function sortBy(key) {
+        if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+        ['name','region','status'].forEach(k => document.getElementById('sort-' + k).textContent = '');
+        document.getElementById('sort-' + key).textContent = sortDir === 1 ? ' ↑' : ' ↓';
+        renderTable();
+    }
+
+    // ── Render ──
+    function refresh() { renderTable(); updateStats(); }
+
+    function renderTable() {
+        view = getFiltered();
+        applySortToView();
+        document.getElementById('s-showing').textContent = view.length;
+
+        const tbody = document.getElementById('tableBody');
+
+        if (view.length === 0) {
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="6">${
+                sources.length === 0
+                    ? 'No sources yet — add one above or import a JSON file'
+                    : 'No sources match your filters'
+            }</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        view.forEach(src => {
+            const i = src._i;
+            const isSel = selected.has(i);
+            const tr = document.createElement('tr');
+            if (src.dead) tr.classList.add('is-dead');
+            if (isSel)    tr.classList.add('is-selected');
+
+            const regionOpts = ['us','europe','mena','latam','asia','africa','other']
+                .map(r => `<option value="${r}" ${src.region === r ? 'selected' : ''}>${r.toUpperCase()}</option>`)
+                .join('');
+
+            const shortUrl = (src.url || '').replace('https://www.youtube.com/watch?v=', 'yt/v=');
+
+            tr.innerHTML = `
+                <td class="td-check">
+                    <input type="checkbox" ${isSel ? 'checked' : ''} onchange="toggleSel(${i}, this.checked)" style="accent-color:#bf5af2; cursor:pointer;">
+                </td>
+                <td style="min-width:180px;">
+                    <input class="field-input" type="text" value="${esc(src.name || '')}"
+                        onchange="updateF(${i},'name',this.value)"
+                        placeholder="Add name…">
+                </td>
+                <td>
+                    <select class="field-select" onchange="updateF(${i},'region',this.value)">
+                        ${regionOpts}
+                    </select>
+                </td>
+                <td style="max-width:240px;">
+                    <span class="url-display" onclick="copyUrl(${i})" title="Click to copy · ${esc(src.url || '')}">${esc(shortUrl)}</span>
+                </td>
+                <td>
+                    <div class="badges">
+                        ${src.dead ? '<span class="badge b-dead">dead</span>' : '<span class="badge b-live">live</span>'}
+                        ${src.favorite ? '<span class="badge b-fav">★ fav</span>' : ''}
+                    </div>
+                </td>
+                <td class="td-actions">
+                    <button class="act act-preview" title="Open in new tab" onclick="openTab(${i})">↗</button>
+                    <button class="act act-fav ${src.favorite ? 'on' : ''}" title="${src.favorite ? 'Remove favorite' : 'Favorite'}" onclick="toggleFav(${i})">★</button>
+                    ${src.dead
+                        ? `<button class="act act-alive" title="Mark as Live" onclick="toggleDead(${i})">🔄</button>`
+                        : `<button class="act act-dead" title="Mark as Dead" onclick="toggleDead(${i})">💀</button>`
+                    }
+                    <button class="act act-del" title="Delete" onclick="del(${i})">✕</button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+
+        updateBulkBar();
+    }
+
+    function esc(s) {
+        return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Field updates (inline edit) ──
+    function updateF(i, field, val) {
+        sources[i][field] = val;
+        save();
+        // Don't re-render — user is still editing; stats update is enough
+        updateStats();
+    }
+
+    // ── Row actions ──
+    function toggleFav(i) { sources[i].favorite = !sources[i].favorite; save(); renderTable(); }
+    function toggleDead(i) { sources[i].dead = !sources[i].dead; save(); renderTable(); }
+    function openTab(i) { window.open(sources[i].url, '_blank'); }
+    function del(i) {
+        if (!confirm(`Delete "${sources[i].name || sources[i].url}"?`)) return;
+        sources.splice(i, 1);
+        selected.clear();
+        save();
+        renderTable();
+    }
+    function copyUrl(i) {
+        navigator.clipboard.writeText(sources[i].url).then(() => toast('URL copied'));
+    }
+
+    // ── Selection ──
+    function toggleSel(i, on) {
+        if (on) selected.add(i); else selected.delete(i);
+        updateBulkBar();
+        const tr = document.querySelector(`input[onchange="toggleSel(${i}, this.checked)"]`)?.closest('tr');
+        if (tr) tr.classList.toggle('is-selected', on);
+    }
+
+    function toggleSelectAll() {
+        const all = document.getElementById('selectAll').checked;
+        view.forEach(s => { if (all) selected.add(s._i); else selected.delete(s._i); });
+        renderTable();
+    }
+
+    function clearSel() {
+        selected.clear();
+        document.getElementById('selectAll').checked = false;
+        renderTable();
+    }
+
+    function updateBulkBar() {
+        const bar = document.getElementById('bulkBar');
+        document.getElementById('bulkCount').textContent = `${selected.size} selected`;
+        bar.classList.toggle('on', selected.size > 0);
+    }
+
+    // ── Bulk ops ──
+    function bulkFavorite() { selected.forEach(i => { sources[i].favorite = true; }); save(); clearSel(); }
+    function bulkLive()     { selected.forEach(i => { sources[i].dead = false; }); save(); clearSel(); }
+    function bulkDead()     { selected.forEach(i => { sources[i].dead = true;  }); save(); clearSel(); }
+    function bulkDelete() {
+        if (!confirm(`Delete ${selected.size} source(s)?`)) return;
+        [...selected].sort((a,b) => b-a).forEach(i => sources.splice(i, 1));
+        save();
+        selected.clear();
+        renderTable();
+    }
+
+    // ── Panels (add / batch) ──
+    function togglePanel(name) {
+        if (openPanel === name) {
+            closePanel();
+        } else {
+            if (openPanel) closePanel(true);
+            openPanel = name;
+            document.getElementById(name + 'Section').classList.add('open');
+            if (name === 'add') {
+                setTimeout(() => document.getElementById('addUrl').focus(), 50);
+            } else {
+                setTimeout(() => document.getElementById('batchInput').focus(), 50);
+            }
+        }
+    }
+
+    function closePanel(silent) {
+        if (!openPanel) return;
+        document.getElementById(openPanel + 'Section').classList.remove('open');
+        openPanel = null;
+    }
+
+    // ── Add single ──
+    function addSingleSource() {
+        const rawUrl = document.getElementById('addUrl').value.trim();
+        const name   = document.getElementById('addName').value.trim();
+        const region = document.getElementById('addRegion').value;
+
+        if (!rawUrl) { toast('URL is required', true); return; }
+        const url = normalizeUrl(rawUrl);
+        if (!url) { toast('Not a valid YouTube URL', true); return; }
+
+        sources.push({ name: name || videoId(url), region, url, favorite: false, dead: false });
+        save();
+        renderTable();
+
+        document.getElementById('addName').value = '';
+        document.getElementById('addUrl').value = '';
+        document.getElementById('addUrl').focus();
+        toast('Source added');
+    }
+
+    // ── Batch ──
+    function processBatch() {
+        const lines = document.getElementById('batchInput').value
+            .split('\n')
+            .map(l => l.trim())
+            .filter(Boolean);
+
+        batchItems = lines.map(l => {
+            const url = normalizeUrl(l);
+            return url ? { url, name: '' } : null;
+        }).filter(Boolean);
+
+        const count = batchItems.length;
+        document.getElementById('batchCount').textContent = count ? `${count} valid URL${count !== 1 ? 's' : ''} detected` : '';
+
+        const preview = document.getElementById('batchPreview');
+        if (!count) {
+            preview.innerHTML = '<div style="opacity:0.25; font-size:0.72rem; padding:0.5rem 0;">No valid YouTube URLs detected yet</div>';
+            return;
+        }
+
+        preview.innerHTML = batchItems.map((item, idx) => `
+            <div class="batch-item">
+                <input type="text" class="batch-item-name" id="bn-${idx}" placeholder="Name (or leave blank)"
+                    oninput="batchItems[${idx}].name = this.value">
+                <span class="batch-item-vid">${videoId(item.url)}</span>
+            </div>
+        `).join('');
+    }
+
+    function commitBatch() {
+        if (!batchItems.length) { toast('No valid URLs to add', true); return; }
+        const region = document.getElementById('batchRegion').value;
+        let added = 0;
+
+        batchItems.forEach((item, idx) => {
+            const nameEl = document.getElementById(`bn-${idx}`);
+            const name = nameEl ? nameEl.value.trim() : item.name;
+            sources.push({ name: name || videoId(item.url), region, url: item.url, favorite: false, dead: false });
+            added++;
+        });
+
+        save();
+        renderTable();
+        toast(`Added ${added} source${added !== 1 ? 's' : ''}`);
+
+        // Reset
+        batchItems = [];
+        document.getElementById('batchInput').value = '';
+        document.getElementById('batchPreview').innerHTML = '<div style="opacity:0.25; font-size:0.72rem; padding:0.5rem 0;">Paste URLs on the left</div>';
+        document.getElementById('batchCount').textContent = '';
+        closePanel();
+    }
+
+    // ── URL utils ──
+    function normalizeUrl(raw) {
+        try {
+            if (raw.includes('youtu.be/')) {
+                const id = raw.split('youtu.be/')[1].split('?')[0].split('&')[0];
+                if (validId(id)) return `https://www.youtube.com/watch?v=${id}`;
+            }
+            if (raw.includes('/live/')) {
+                const id = raw.split('/live/')[1].split('?')[0].split('&')[0];
+                if (validId(id)) return `https://www.youtube.com/watch?v=${id}`;
+            }
+            if (raw.includes('watch')) {
+                const u = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
+                const id = u.searchParams.get('v');
+                if (id && validId(id)) return `https://www.youtube.com/watch?v=${id}`;
+            }
+            if (validId(raw)) return `https://www.youtube.com/watch?v=${raw}`;
+        } catch(e) {}
+        return null;
+    }
+
+    function validId(id) { return id && /^[a-zA-Z0-9_-]{6,15}$/.test(id); }
+    function videoId(url) { const m = url.match(/[?&]v=([^&]+)/); return m ? m[1] : url; }
+
+    // ── Import / Export ──
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(sources, null, 2)], { type: 'application/json' });
+        const a = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'news-wall-sources.json'
+        });
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('Exported');
+    }
+
+    function triggerImport() { document.getElementById('fileInput').click(); }
+
+    function handleFileImport(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!Array.isArray(data)) { toast('Invalid format — expected a JSON array', true); return; }
+                applyImport(data);
+            } catch(err) { toast('Could not parse file', true); }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    function applyImport(data) {
+        if (sources.length > 0) {
+            const choice = confirm(
+                `You have ${sources.length} existing source(s).\n\n` +
+                `OK = Merge (adds new, skips duplicates)\n` +
+                `Cancel = Replace all`
+            );
+            if (choice) {
+                const existing = new Set(sources.map(s => s.url));
+                const added = data.filter(s => !existing.has(s.url));
+                sources = [...sources, ...added];
+                toast(`Merged: ${added.length} new source(s) added`);
+            } else {
+                sources = data;
+                toast(`Replaced: ${data.length} source(s) loaded`);
+            }
+        } else {
+            sources = data;
+            toast(`Imported ${data.length} source(s)`);
+        }
+        save();
+        renderTable();
+    }
+
+    // ── Drag & drop JSON onto page ──
+    let dragCounter = 0;
+    document.addEventListener('dragenter', e => {
+        if ([...e.dataTransfer.types].includes('Files')) {
+            dragCounter++;
+            document.getElementById('dropOverlay').classList.add('show');
+        }
+    });
+    document.addEventListener('dragleave', () => {
+        dragCounter--;
+        if (dragCounter <= 0) { dragCounter = 0; document.getElementById('dropOverlay').classList.remove('show'); }
+    });
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => {
+        e.preventDefault();
+        dragCounter = 0;
+        document.getElementById('dropOverlay').classList.remove('show');
+        const file = e.dataTransfer.files[0];
+        if (file?.name.endsWith('.json')) {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (Array.isArray(data)) applyImport(data);
+                    else toast('Invalid JSON format', true);
+                } catch(err) { toast('Could not parse file', true); }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // ── Toast ──
+    let toastTimer;
+    function toast(msg, err = false) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.style.background = err ? '#ff453a' : '#30d158';
+        el.style.color = '#000';
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    // ── Keyboard shortcuts ──
+    document.addEventListener('keydown', e => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+        if (e.key === 'Escape') { closePanel(); clearSel(); }
+        if (e.key === 'n' || e.key === 'N') { e.preventDefault(); togglePanel('add'); }
+        if (e.key === 'b' || e.key === 'B') { e.preventDefault(); togglePanel('batch'); }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'e') { e.preventDefault(); exportJSON(); }
+    });
+
+    // ── Init ──
+    load();
+</script>
+</body>
+</html>
