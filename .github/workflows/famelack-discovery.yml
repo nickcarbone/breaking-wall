@@ -1,0 +1,43 @@
+name: Discover New Streams (Famelack)
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # every Monday at 6am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    name: Pull candidate streams from Famelack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Famelack extractor (news category)
+        run: |
+          python scripts/famelack_youtube_extractor.py \
+            --category news \
+            --format json \
+            --output candidates.json
+
+      - name: Commit candidates file
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet candidates.json || (
+            git add candidates.json &&
+            git commit -m "chore: update stream candidates from Famelack [$(date -u +'%Y-%m-%dT%H:%MZ')]" &&
+            git push
+          )
