@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Review — Breaking Wall</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(0,0,0,0.97);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222;
+            padding: 1rem 1.5rem;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: #bf5af2;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            border: 1px solid #333;
+            padding: 0.3rem 0.75rem;
+            border-radius: 3px;
+        }
+
+        .nav-link:hover { opacity: 1; border-color: #00d9ff; color: #00d9ff; }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.7rem;
+        }
+
+        .stat { display: flex; gap: 0.5rem; align-items: baseline; }
+        .stat-num { font-weight: 600; font-size: 1rem; }
+        .stat-num.purple { color: #bf5af2; }
+        .stat-num.cyan { color: #00d9ff; }
+        .stat-num.yellow { color: #ffd60a; }
+        .stat-num.green { color: #30d158; }
+        .stat-label { opacity: 0.5; }
+
+        /* Controls */
+        .controls {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #111;
+            background: #050505;
+        }
+
+        .control-input {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            transition: border-color 0.2s;
+        }
+
+        .control-input:focus { outline: none; border-color: #00d9ff; }
+
+        #searchInput { width: 220px; }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .toggle-btn:hover { opacity: 1; border-color: #fff; }
+        .toggle-btn.active { background: #222; border-color: #bf5af2; color: #bf5af2; opacity: 1; }
+
+        .controls-right {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1px;
+            background: #111;
+            padding: 1px;
+        }
+
+        /* Card */
+        .card {
+            background: #0a0a0a;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .card:hover { background: #0f0f0f; }
+
+        .card.already-added {
+            opacity: 0.35;
+        }
+
+        .card.promoted {
+            border-left: 2px solid #30d158;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .card-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1.3;
+            flex: 1;
+        }
+
+        .card-country {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            title: attr(data-country);
+        }
+
+        .card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.7rem;
+        }
+
+        .meta-label { opacity: 0.4; min-width: 60px; }
+        .meta-value { opacity: 0.85; }
+
+        .badge {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 2px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-added { background: #1a3a1a; color: #30d158; border: 1px solid #30d158; }
+        .badge-promoted { background: #1a2a1a; color: #30d158; }
+
+        .region-select {
+            background: #111;
+            border: 1px solid #2a2a2a;
+            color: #fff;
+            padding: 0.35rem 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            border-radius: 3px;
+            width: 100%;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .region-select:focus { outline: none; border-color: #bf5af2; }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.45rem 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-preview {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+        }
+
+        .btn-preview:hover { border-color: #00d9ff; color: #00d9ff; }
+
+        .btn-promote {
+            background: transparent;
+            border: 1px solid #444;
+            color: #fff;
+        }
+
+        .btn-promote:hover { background: #bf5af2; border-color: #bf5af2; color: #fff; }
+
+        .btn-promote.active {
+            background: #30d158;
+            border-color: #30d158;
+            color: #000;
+        }
+
+        .btn-promote.active:hover { background: #25b049; border-color: #25b049; }
+
+        /* Preview modal */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .preview-modal.active { display: flex; }
+
+        .preview-inner {
+            width: 90vw;
+            max-width: 960px;
+            position: relative;
+        }
+
+        .preview-title {
+            font-size: 0.875rem;
+            opacity: 0.7;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-close {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .preview-close:hover { opacity: 1; }
+
+        .preview-frame-wrap {
+            position: relative;
+            padding-top: 56.25%;
+            background: #111;
+        }
+
+        .preview-frame-wrap iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+
+        /* Promoted drawer */
+        .promoted-drawer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(5,5,5,0.98);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid #30d158;
+            z-index: 500;
+            transition: transform 0.3s ease;
+            transform: translateY(100%);
+        }
+
+        .promoted-drawer.visible { transform: translateY(0); }
+
+        .drawer-header {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .drawer-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #30d158;
+            letter-spacing: 0.08em;
+        }
+
+        .drawer-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .drawer-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.4rem 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .drawer-btn:hover { border-color: #fff; }
+        .drawer-btn.primary { background: #30d158; border-color: #30d158; color: #000; font-weight: 600; }
+        .drawer-btn.primary:hover { background: #25b049; }
+        .drawer-btn.cyan { border-color: #00d9ff; color: #00d9ff; }
+        .drawer-btn.cyan:hover { background: #00d9ff; color: #000; }
+
+        .drawer-list {
+            max-height: 140px;
+            overflow-y: auto;
+            padding: 0.5rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .drawer-chip {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 3px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chip-remove {
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 0.75rem;
+            line-height: 1;
+        }
+
+        .chip-remove:hover { opacity: 1; color: #ff4444; }
+
+        /* Loading / empty states */
+        .state-msg {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.5;
+            font-size: 0.875rem;
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.2s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #111;
+            border: 1px solid #333;
+            padding: 0.6rem 1.25rem;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 3000;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success { border-color: #30d158; color: #30d158; }
+        .toast.info { border-color: #00d9ff; color: #00d9ff; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-top">
+        <div class="header-title">CANDIDATE REVIEW</div>
+        <div class="header-nav">
+            <a href="index.html" class="nav-link">← WALL</a>
+            <a href="manage.html" class="nav-link">MANAGE →</a>
+        </div>
+    </div>
+    <div class="stats-bar">
+        <div class="stat"><span class="stat-num purple" id="statTotal">—</span><span class="stat-label">candidates</span></div>
+        <div class="stat"><span class="stat-num" id="statAdded" style="color:#555">—</span><span class="stat-label">already added</span></div>
+        <div class="stat"><span class="stat-num cyan" id="statShowing">—</span><span class="stat-label">showing</span></div>
+        <div class="stat"><span class="stat-num green" id="statPromoted">0</span><span class="stat-label">promoted</span></div>
+    </div>
+</div>
+
+<div class="controls">
+    <input type="text" id="searchInput" class="control-input" placeholder="Search by name...">
+
+    <select id="regionFilter" class="control-input">
+        <option value="">All Regions</option>
+        <option value="us">United States</option>
+        <option value="europe">Europe</option>
+        <option value="mena">MENA</option>
+        <option value="latam">Latin America</option>
+        <option value="asia">Asia-Pacific</option>
+        <option value="africa">Africa</option>
+        <option value="other">Other</option>
+    </select>
+
+    <select id="langFilter" class="control-input">
+        <option value="">All Languages</option>
+    </select>
+
+    <button class="toggle-btn active" id="toggleAdded" onclick="toggleHideAdded()">HIDE ADDED</button>
+
+    <div class="controls-right" id="countLabel">showing all</div>
+</div>
+
+<div id="gridContainer"></div>
+
+<div id="promotedDrawer" class="promoted-drawer">
+    <div class="drawer-header" onclick="toggleDrawer()">
+        <div class="drawer-title" id="drawerTitle">▲ 0 PROMOTED</div>
+        <div class="drawer-actions" onclick="event.stopPropagation()">
+            <button class="drawer-btn" onclick="clearPromoted()">CLEAR</button>
+            <button class="drawer-btn cyan" onclick="addToWall()">ADD TO WALL</button>
+            <button class="drawer-btn primary" onclick="exportJSON()">EXPORT JSON</button>
+        </div>
+    </div>
+    <div class="drawer-list" id="drawerList"></div>
+</div>
+
+<div id="previewModal" class="preview-modal">
+    <div class="preview-inner">
+        <div class="preview-title">
+            <span id="previewName"></span>
+            <button class="preview-close" onclick="closePreview()">✕</button>
+        </div>
+        <div class="preview-frame-wrap">
+            <iframe id="previewFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ── Lookups ────────────────────────────────────────────────────────────────────
+
+const COUNTRY_REGION = {
+    us:'us', ca:'other',
+    gb:'europe',de:'europe',fr:'europe',es:'europe',it:'europe',nl:'europe',
+    be:'europe',ch:'europe',at:'europe',pl:'europe',cz:'europe',sk:'europe',
+    hu:'europe',ro:'europe',bg:'europe',hr:'europe',si:'europe',rs:'europe',
+    ba:'europe',me:'europe',mk:'europe',al:'europe',pt:'europe',gr:'europe',
+    fi:'europe',se:'europe',no:'europe',dk:'europe',is:'europe',ee:'europe',
+    lv:'europe',lt:'europe',ie:'europe',lu:'europe',cy:'europe',mt:'europe',
+    ua:'europe',by:'europe',md:'europe',ru:'europe',ge:'europe',am:'europe',
+    az:'europe',xk:'europe',
+    mx:'latam',br:'latam',ar:'latam',cl:'latam',co:'latam',pe:'latam',
+    ve:'latam',bo:'latam',ec:'latam',py:'latam',uy:'latam',cr:'latam',
+    pa:'latam',gt:'latam',hn:'latam',sv:'latam',ni:'latam',do:'latam',
+    cu:'latam',pr:'latam',ht:'latam',jm:'latam',tt:'latam',bz:'latam',
+    sa:'mena',ae:'mena',eg:'mena',iq:'mena',ir:'mena',jo:'mena',kw:'mena',
+    lb:'mena',ly:'mena',ma:'mena',om:'mena',ps:'mena',qa:'mena',sd:'mena',
+    sy:'mena',tn:'mena',ye:'mena',dz:'mena',bh:'mena',il:'mena',pk:'mena',
+    af:'mena',tr:'mena',
+    cn:'asia',jp:'asia',kr:'asia',in:'asia',id:'asia',th:'asia',vn:'asia',
+    ph:'asia',my:'asia',sg:'asia',bd:'asia',lk:'asia',np:'asia',mm:'asia',
+    kh:'asia',la:'asia',mn:'asia',tw:'asia',hk:'asia',mo:'asia',bt:'asia',
+    mv:'asia',bn:'asia',au:'asia',nz:'asia',pg:'asia',fj:'asia',kz:'asia',
+    uz:'asia',tm:'asia',tj:'asia',kg:'asia',
+    ng:'africa',za:'africa',ke:'africa',gh:'africa',et:'africa',tz:'africa',
+    ug:'africa',rw:'africa',sn:'africa',ci:'africa',cm:'africa',cd:'africa',
+    ao:'africa',mz:'africa',zm:'africa',zw:'africa',mw:'africa',bw:'africa',
+    na:'africa',sz:'africa',ls:'africa',sl:'africa',lr:'africa',gn:'africa',
+    gm:'africa',ne:'africa',ml:'africa',bf:'africa',td:'africa',er:'africa',
+    dj:'africa',so:'africa',mg:'africa',mu:'africa',sc:'africa',cv:'africa',
+    km:'africa',gw:'africa',gq:'africa',st:'africa',cf:'africa',ga:'africa',
+    cg:'africa',bi:'africa',ss:'africa',tg:'africa',bj:'africa',mr:'africa',
+};
+
+const COUNTRY_NAME = {
+    us:'United States',gb:'United Kingdom',de:'Germany',fr:'France',es:'Spain',
+    it:'Italy',nl:'Netherlands',be:'Belgium',ch:'Switzerland',at:'Austria',
+    pl:'Poland',cz:'Czech Republic',sk:'Slovakia',hu:'Hungary',ro:'Romania',
+    bg:'Bulgaria',hr:'Croatia',si:'Slovenia',rs:'Serbia',ba:'Bosnia',
+    me:'Montenegro',mk:'North Macedonia',al:'Albania',pt:'Portugal',gr:'Greece',
+    fi:'Finland',se:'Sweden',no:'Norway',dk:'Denmark',is:'Iceland',ee:'Estonia',
+    lv:'Latvia',lt:'Lithuania',ie:'Ireland',lu:'Luxembourg',cy:'Cyprus',
+    mt:'Malta',ua:'Ukraine',by:'Belarus',md:'Moldova',ru:'Russia',ge:'Georgia',
+    am:'Armenia',az:'Azerbaijan',xk:'Kosovo',ca:'Canada',mx:'Mexico',
+    br:'Brazil',ar:'Argentina',cl:'Chile',co:'Colombia',pe:'Peru',ve:'Venezuela',
+    bo:'Bolivia',ec:'Ecuador',py:'Paraguay',uy:'Uruguay',cr:'Costa Rica',
+    pa:'Panama',gt:'Guatemala',hn:'Honduras',sv:'El Salvador',ni:'Nicaragua',
+    do:'Dominican Republic',cu:'Cuba',pr:'Puerto Rico',ht:'Haiti',jm:'Jamaica',
+    tt:'Trinidad & Tobago',bz:'Belize',sa:'Saudi Arabia',ae:'UAE',eg:'Egypt',
+    iq:'Iraq',ir:'Iran',jo:'Jordan',kw:'Kuwait',lb:'Lebanon',ly:'Libya',
+    ma:'Morocco',om:'Oman',ps:'Palestine',qa:'Qatar',sd:'Sudan',sy:'Syria',
+    tn:'Tunisia',ye:'Yemen',dz:'Algeria',bh:'Bahrain',il:'Israel',pk:'Pakistan',
+    af:'Afghanistan',tr:'Turkey',cn:'China',jp:'Japan',kr:'South Korea',
+    in:'India',id:'Indonesia',th:'Thailand',vn:'Vietnam',ph:'Philippines',
+    my:'Malaysia',sg:'Singapore',bd:'Bangladesh',lk:'Sri Lanka',np:'Nepal',
+    mm:'Myanmar',kh:'Cambodia',la:'Laos',mn:'Mongolia',tw:'Taiwan',hk:'Hong Kong',
+    mo:'Macao',bt:'Bhutan',mv:'Maldives',bn:'Brunei',au:'Australia',nz:'New Zealand',
+    pg:'Papua New Guinea',fj:'Fiji',kz:'Kazakhstan',uz:'Uzbekistan',tm:'Turkmenistan',
+    tj:'Tajikistan',kg:'Kyrgyzstan',ng:'Nigeria',za:'South Africa',ke:'Kenya',
+    gh:'Ghana',et:'Ethiopia',tz:'Tanzania',ug:'Uganda',rw:'Rwanda',sn:'Senegal',
+    ci:"Côte d'Ivoire",cm:'Cameroon',cd:'DR Congo',ao:'Angola',mz:'Mozambique',
+    zm:'Zambia',zw:'Zimbabwe',mw:'Malawi',bw:'Botswana',na:'Namibia',sz:'Eswatini',
+    ls:'Lesotho',sl:'Sierra Leone',lr:'Liberia',gn:'Guinea',gm:'Gambia',ne:'Niger',
+    ml:'Mali',bf:'Burkina Faso',td:'Chad',er:'Eritrea',dj:'Djibouti',so:'Somalia',
+    mg:'Madagascar',mu:'Mauritius',sc:'Seychelles',cv:'Cape Verde',km:'Comoros',
+    gw:'Guinea-Bissau',gq:'Eq. Guinea',st:'São Tomé',cf:'C. African Rep.',
+    ga:'Gabon',cg:'Congo',bi:'Burundi',ss:'South Sudan',tg:'Togo',bj:'Benin',
+    mr:'Mauritania',
+};
+
+const LANG_NAME = {
+    eng:'English',spa:'Spanish',fra:'French',ara:'Arabic',por:'Portuguese',
+    rus:'Russian',deu:'German',zho:'Chinese',hin:'Hindi',urd:'Urdu',
+    tur:'Turkish',pol:'Polish',nld:'Dutch',ita:'Italian',ukr:'Ukrainian',
+    fas:'Persian',vie:'Vietnamese',kor:'Korean',jpn:'Japanese',ind:'Indonesian',
+    ben:'Bengali',tha:'Thai',tel:'Telugu',tam:'Tamil',mar:'Marathi',
+    guj:'Gujarati',kan:'Kannada',mal:'Malayalam',ron:'Romanian',ces:'Czech',
+    hun:'Hungarian',bul:'Bulgarian',srp:'Serbian',hrv:'Croatian',slk:'Slovak',
+    heb:'Hebrew',swa:'Swahili',amh:'Amharic',hau:'Hausa',yor:'Yoruba',
+    ibo:'Igbo',som:'Somali',cat:'Catalan',eus:'Basque',glg:'Galician',
+    aze:'Azerbaijani',kaz:'Kazakh',uzb:'Uzbek',mon:'Mongolian',
+    msa:'Malay',fil:'Filipino',sin:'Sinhala',nep:'Nepali',khm:'Khmer',
+    mya:'Burmese',lao:'Lao',ukr:'Ukrainian',bel:'Belarusian',
+};
+
+const REGION_LABEL = {
+    us:'United States', europe:'Europe', mena:'MENA',
+    latam:'Latin America', asia:'Asia-Pacific', africa:'Africa', other:'Other'
+};
+
+function countryFlag(code) {
+    if (!code || code.length !== 2) return '🌐';
+    try {
+        return code.toUpperCase().split('').map(c =>
+            String.fromCodePoint(0x1F1E6 - 65 + c.charCodeAt(0))
+        ).join('');
+    } catch { return '🌐'; }
+}
+
+function suggestRegion(countryCode) {
+    return COUNTRY_REGION[countryCode?.toLowerCase()] || 'other';
+}
+
+// ── State ──────────────────────────────────────────────────────────────────────
+
+let candidates = [];
+let existingUrls = new Set();
+let promoted = [];
+let hideAdded = true;
+let drawerOpen = false;
+
+// ── Load data ──────────────────────────────────────────────────────────────────
+
+async function loadData() {
+    const grid = document.getElementById('gridContainer');
+    grid.innerHTML = '<div class="state-msg"><span class="loading-dots">Loading</span></div>';
+
+    try {
+        const [candRes, srcRes] = await Promise.all([
+            fetch('./candidates.json?t=' + Date.now()),
+            fetch('./news_sources.json?t=' + Date.now()),
+        ]);
+
+        if (!candRes.ok) throw new Error('candidates.json not found');
+
+        candidates = await candRes.json();
+
+        if (srcRes.ok) {
+            const existing = await srcRes.json();
+            existingUrls = new Set(existing.map(s => s.url));
+        }
+
+        // Build language filter options
+        const langs = [...new Set(candidates.map(c => c.language).filter(Boolean))].sort();
+        const langSel = document.getElementById('langFilter');
+        langs.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l;
+            opt.textContent = LANG_NAME[l] ? `${LANG_NAME[l]} (${l})` : l;
+            langSel.appendChild(opt);
+        });
+
+        updateStats();
+        renderGrid();
+
+    } catch (err) {
+        grid.innerHTML = `<div class="state-msg">Error: ${err.message}<br><br>Make sure candidates.json exists in your repo root.</div>`;
+    }
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+
+function renderGrid() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const regionF = document.getElementById('regionFilter').value;
+    const langF = document.getElementById('langFilter').value;
+
+    let filtered = candidates.filter(c => {
+        const isAdded = existingUrls.has(c.url);
+        if (hideAdded && isAdded) return false;
+        if (search && !c.name.toLowerCase().includes(search)) return false;
+        const suggestedRegion = suggestRegion(c.country);
+        if (regionF && suggestedRegion !== regionF) return false;
+        if (langF && c.language !== langF) return false;
+        return true;
+    });
+
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('countLabel').textContent = `${filtered.length} of ${candidates.length}`;
+
+    const grid = document.getElementById('gridContainer');
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div class="state-msg">No candidates match your filters.</div>';
+        return;
+    }
+
+    grid.className = 'grid';
+    grid.innerHTML = '';
+
+    filtered.forEach(c => {
+        const isAdded = existingUrls.has(c.url);
+        const isPromoted = promoted.some(p => p.url === c.url);
+        const suggestedRegion = suggestRegion(c.country);
+        const countryName = COUNTRY_NAME[c.country] || c.country?.toUpperCase() || '—';
+        const langName = LANG_NAME[c.language] || c.language || '—';
+        const flag = countryFlag(c.country);
+
+        const card = document.createElement('div');
+        card.className = 'card' + (isAdded ? ' already-added' : '') + (isPromoted ? ' promoted' : '');
+        card.dataset.url = c.url;
+
+        card.innerHTML = `
+            <div class="card-header">
+                <div class="card-name">${esc(c.name)}</div>
+                <div class="card-country" title="${esc(countryName)}">${flag}</div>
+            </div>
+            <div class="card-meta">
+                <div class="meta-row">
+                    <span class="meta-label">country</span>
+                    <span class="meta-value">${esc(countryName)}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">language</span>
+                    <span class="meta-value">${esc(langName)}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">region</span>
+                    <span class="meta-value">${REGION_LABEL[suggestedRegion] || suggestedRegion}</span>
+                </div>
+            </div>
+            ${isAdded ? '<span class="badge badge-added">ALREADY ADDED</span>' : `
+            <select class="region-select" data-url="${esc(c.url)}">
+                ${Object.entries(REGION_LABEL).map(([v,l]) =>
+                    `<option value="${v}" ${v === suggestedRegion ? 'selected' : ''}>${l}</option>`
+                ).join('')}
+            </select>
+            <div class="card-actions">
+                <button class="btn btn-preview" onclick="openPreview('${esc(c.url)}', '${esc(c.name)}')">▶ PREVIEW</button>
+                <button class="btn btn-promote ${isPromoted ? 'active' : ''}" onclick="togglePromote('${esc(c.url)}', '${esc(c.name)}')">
+                    ${isPromoted ? '✓ PROMOTED' : '+ PROMOTE'}
+                </button>
+            </div>`}
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+function updateStats() {
+    const addedCount = candidates.filter(c => existingUrls.has(c.url)).length;
+    document.getElementById('statTotal').textContent = candidates.length;
+    document.getElementById('statAdded').textContent = addedCount;
+    document.getElementById('statShowing').textContent = candidates.length - (hideAdded ? addedCount : 0);
+    document.getElementById('statPromoted').textContent = promoted.length;
+}
+
+// ── Promote ────────────────────────────────────────────────────────────────────
+
+function togglePromote(url, name) {
+    const already = promoted.findIndex(p => p.url === url);
+    if (already > -1) {
+        promoted.splice(already, 1);
+        showToast('Removed from promoted', 'info');
+    } else {
+        const candidate = candidates.find(c => c.url === url);
+        const regionSelect = document.querySelector(`.region-select[data-url="${url}"]`);
+        const region = regionSelect ? regionSelect.value : suggestRegion(candidate?.country);
+
+        promoted.push({
+            name: candidate?.name || name,
+            url: candidate?.url || url,
+            country: candidate?.country || '',
+            language: candidate?.language || '',
+            region: region,
+            favorite: false,
+            dead: false,
+        });
+        showToast(`Promoted: ${name}`, 'success');
+    }
+
+    updateDrawer();
+    updateStats();
+    renderGrid();
+}
+
+function updateDrawer() {
+    const drawer = document.getElementById('promotedDrawer');
+    const title = document.getElementById('drawerTitle');
+    const list = document.getElementById('drawerList');
+
+    title.textContent = `▲ ${promoted.length} PROMOTED`;
+
+    if (promoted.length > 0) {
+        drawer.classList.add('visible');
+    } else {
+        drawer.classList.remove('visible');
+        drawerOpen = false;
+    }
+
+    list.innerHTML = '';
+    promoted.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'drawer-chip';
+        chip.innerHTML = `
+            ${countryFlag(p.country)} ${esc(p.name)}
+            <span style="opacity:0.4;font-size:0.6rem">${p.region}</span>
+            <button class="chip-remove" onclick="togglePromote('${esc(p.url)}', '${esc(p.name)}')" title="Remove">×</button>
+        `;
+        list.appendChild(chip);
+    });
+}
+
+function toggleDrawer() {
+    drawerOpen = !drawerOpen;
+    const list = document.getElementById('drawerList');
+    const title = document.getElementById('drawerTitle');
+    list.style.display = drawerOpen ? 'flex' : 'none';
+    title.textContent = `${drawerOpen ? '▼' : '▲'} ${promoted.length} PROMOTED`;
+}
+
+function clearPromoted() {
+    if (!promoted.length) return;
+    if (!confirm('Clear all promoted entries?')) return;
+    promoted = [];
+    updateDrawer();
+    updateStats();
+    renderGrid();
+}
+
+// ── Export / Add to Wall ───────────────────────────────────────────────────────
+
+function exportJSON() {
+    if (!promoted.length) return;
+
+    // Re-read region selects in case user changed them
+    const enriched = promoted.map(p => {
+        const sel = document.querySelector(`.region-select[data-url="${p.url}"]`);
+        if (sel) p.region = sel.value;
+        return p;
+    });
+
+    const json = JSON.stringify(enriched, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `promoted-candidates-${new Date().toISOString().slice(0,10)}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    showToast(`Exported ${promoted.length} entries`, 'success');
+}
+
+function addToWall() {
+    if (!promoted.length) return;
+
+    const enriched = promoted.map(p => {
+        const sel = document.querySelector(`.region-select[data-url="${p.url}"]`);
+        if (sel) p.region = sel.value;
+        return p;
+    });
+
+    const existing = JSON.parse(localStorage.getItem('newsWallSources') || '[]');
+    const existingWallUrls = new Set(existing.map(s => s.url));
+    const toAdd = enriched.filter(p => !existingWallUrls.has(p.url));
+
+    if (!toAdd.length) {
+        showToast('All already on the wall', 'info');
+        return;
+    }
+
+    const merged = [...existing, ...toAdd];
+    localStorage.setItem('newsWallSources', JSON.stringify(merged));
+
+    toAdd.forEach(p => existingUrls.add(p.url));
+
+    showToast(`Added ${toAdd.length} to wall (localStorage)`, 'success');
+    promoted = [];
+    updateDrawer();
+    updateStats();
+    renderGrid();
+}
+
+// ── Preview ────────────────────────────────────────────────────────────────────
+
+function openPreview(url, name) {
+    const videoId = url.match(/[?&]v=([A-Za-z0-9_-]+)/)?.[1];
+    if (!videoId) { showToast('Could not parse video ID', 'info'); return; }
+
+    document.getElementById('previewName').textContent = name;
+    document.getElementById('previewFrame').src =
+        `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1`;
+    document.getElementById('previewModal').classList.add('active');
+}
+
+function closePreview() {
+    document.getElementById('previewModal').classList.remove('active');
+    document.getElementById('previewFrame').src = '';
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────────
+
+function toggleHideAdded() {
+    hideAdded = !hideAdded;
+    document.getElementById('toggleAdded').classList.toggle('active', hideAdded);
+    renderGrid();
+    updateStats();
+}
+
+function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.className = 'toast', 2500);
+}
+
+function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Events ─────────────────────────────────────────────────────────────────────
+
+document.getElementById('searchInput').addEventListener('input', renderGrid);
+document.getElementById('regionFilter').addEventListener('change', renderGrid);
+document.getElementById('langFilter').addEventListener('change', renderGrid);
+
+document.getElementById('previewModal').addEventListener('click', e => {
+    if (e.target.id === 'previewModal') closePreview();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePreview();
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+
+loadData();
+</script>
+</body>
+</html>
