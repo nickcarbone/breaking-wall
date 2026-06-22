@@ -9,15 +9,6 @@
     "dead": false
   },
   {
-    "name": "7 Info",
-    "url": "https://www.youtube.com/watch?v=kQY9mkmOYs8",
-    "country": "ci",
-    "language": "fra",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
     "name": "10TV News Telugu",
     "url": "https://www.youtube.com/watch?v=iz5Dz6aqnfQ",
     "country": "in",
@@ -28,7 +19,7 @@
   },
   {
     "name": "24 Horas",
-    "url": "https://www.youtube.com/watch?v=CGJZYtM7T7s",
+    "url": "https://www.youtube.com/watch?v=O74Rm1reZOg",
     "country": "cl",
     "language": "spa",
     "region": "",
@@ -46,7 +37,7 @@
   },
   {
     "name": "24 News HD",
-    "url": "https://www.youtube.com/watch?v=kvR-txKWce0",
+    "url": "https://www.youtube.com/watch?v=j7IANbo8DX4",
     "country": "pk",
     "language": "urd",
     "region": "",
@@ -100,7 +91,7 @@
   },
   {
     "name": "A Haber",
-    "url": "https://www.youtube.com/watch?v=30AYCW5hFB0",
+    "url": "https://www.youtube.com/watch?v=v1Eww2tZwb4",
     "country": "tr",
     "language": "tur",
     "region": "",
@@ -225,6 +216,15 @@
     "dead": false
   },
   {
+    "name": "ABN Digital Exclusives",
+    "url": "https://www.youtube.com/watch?v=kwRvS-PAHWo",
+    "country": "in",
+    "language": "tel",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
     "name": "ABN Telugu",
     "url": "https://www.youtube.com/watch?v=HoYsWagMFfE",
     "country": "in",
@@ -343,7 +343,7 @@
   },
   {
     "name": "Al Mashhad",
-    "url": "https://www.youtube.com/watch?v=eEd2q-JO2k8",
+    "url": "https://www.youtube.com/watch?v=d2y24sjLESc",
     "country": "ae",
     "language": "ara",
     "region": "",
@@ -397,7 +397,7 @@
   },
   {
     "name": "AnewZ",
-    "url": "https://www.youtube.com/watch?v=_-X92n2i05w",
+    "url": "https://www.youtube.com/watch?v=cZCCW4BBIg4",
     "country": "za",
     "language": "eng",
     "region": "",
@@ -406,7 +406,7 @@
   },
   {
     "name": "ANI News",
-    "url": "https://www.youtube.com/watch?v=7cF9hKUW3bo",
+    "url": "https://www.youtube.com/watch?v=HuR2u56xV3E",
     "country": "in",
     "language": "eng",
     "region": "",
@@ -424,7 +424,7 @@
   },
   {
     "name": "ANN News",
-    "url": "https://www.youtube.com/watch?v=ye6NLfC5YQ0",
+    "url": "https://www.youtube.com/watch?v=ndjoGsGMvOk",
     "country": "jp",
     "language": "jpn",
     "region": "",
@@ -442,7 +442,7 @@
   },
   {
     "name": "Arise News",
-    "url": "https://www.youtube.com/watch?v=TJ5V8KRSu9Y",
+    "url": "https://www.youtube.com/watch?v=Fy_03Aorpq8",
     "country": "ng",
     "language": "eng",
     "region": "",
@@ -451,7 +451,7 @@
   },
   {
     "name": "ARY News Pakistan",
-    "url": "https://www.youtube.com/watch?v=RaFBqLlBCoc",
+    "url": "https://www.youtube.com/watch?v=Q3qcGauqiuQ",
     "country": "pk",
     "language": "urd",
     "region": "",
@@ -495,8 +495,17 @@
     "dead": false
   },
   {
+    "name": "B SMART",
+    "url": "https://www.youtube.com/watch?v=E1mr_d3sKwQ",
+    "country": "fr",
+    "language": "fra",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
     "name": "Baku.TV",
-    "url": "https://www.youtube.com/watch?v=vhLZ6RbomOU",
+    "url": "https://www.youtube.com/watch?v=pmvIfOnepg4",
     "country": "az",
     "language": "aze",
     "region": "",
@@ -559,7 +568,7 @@
   },
   {
     "name": "Calcutta News",
-    "url": "https://www.youtube.com/watch?v=p3IiBi_VDeU",
+    "url": "https://www.youtube.com/watch?v=ly2pVmAGQOs",
     "country": "in",
     "language": "ben",
     "region": "",
@@ -567,17 +576,8 @@
     "dead": false
   },
   {
-    "name": "Canal 6 ERTV",
-    "url": "https://www.youtube.com/watch?v=BVAHr9bXjnU",
-    "country": "ar",
-    "language": "spa",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
     "name": "Canal 8 San Juan",
-    "url": "https://www.youtube.com/watch?v=UwPDsaEUQv0",
+    "url": "https://www.youtube.com/watch?v=w4S_K4SQlbc",
     "country": "ar",
     "language": "spa",
     "region": "",
@@ -586,7 +586,7 @@
   },
   {
     "name": "Canal 13 San Juan",
-    "url": "https://www.youtube.com/watch?v=2zJM5s53fpE",
+    "url": "https://www.youtube.com/watch?v=12ofOao8zAw",
     "country": "ar",
     "language": "spa",
     "region": "",
@@ -631,7 +631,7 @@
   },
   {
     "name": "Česko-Slovenská regionálna televízia",
-    "url": "https://www.youtube.com/watch?v=nQMcJzYR1NQ",
+    "url": "https://www.youtube.com/watch?v=XU2lZzVQPR4",
     "country": "sk",
     "language": "slk",
     "region": "",
@@ -667,7 +667,7 @@
   },
   {
     "name": "Channel One",
-    "url": "https://www.youtube.com/watch?v=0nMNU5bzpXI",
+    "url": "https://www.youtube.com/watch?v=rK_rfhXLiAo",
     "country": "us",
     "language": "fas",
     "region": "",
@@ -676,7 +676,7 @@
   },
   {
     "name": "Channel8",
-    "url": "https://www.youtube.com/watch?v=IbOR-TPXExw",
+    "url": "https://www.youtube.com/watch?v=BZz0SME8fvc",
     "country": "iq",
     "language": "ara",
     "region": "",
@@ -694,7 +694,7 @@
   },
   {
     "name": "CHV Noticias",
-    "url": "https://www.youtube.com/watch?v=iqydWaf_c_Q",
+    "url": "https://www.youtube.com/watch?v=PJh9ewQZw5s",
     "country": "cl",
     "language": "spa",
     "region": "",
@@ -703,7 +703,7 @@
   },
   {
     "name": "Citizen TV Kenya",
-    "url": "https://www.youtube.com/watch?v=Kb638nMYjcw",
+    "url": "https://www.youtube.com/watch?v=1YzlFiqmHDY",
     "country": "ke",
     "language": "eng",
     "region": "",
@@ -712,7 +712,7 @@
   },
   {
     "name": "City 21 News",
-    "url": "https://www.youtube.com/watch?v=Vhgfj2q6Eik",
+    "url": "https://www.youtube.com/watch?v=SvpQN_gXnp4",
     "country": "pk",
     "language": "urd",
     "region": "",
@@ -721,7 +721,7 @@
   },
   {
     "name": "City 41",
-    "url": "https://www.youtube.com/watch?v=Q7e3hb3wHeQ",
+    "url": "https://www.youtube.com/watch?v=BweC3TAsclk",
     "country": "pk",
     "language": "eng",
     "region": "",
@@ -730,7 +730,7 @@
   },
   {
     "name": "City 42",
-    "url": "https://www.youtube.com/watch?v=mjFPUNhtgBM",
+    "url": "https://www.youtube.com/watch?v=nDlYHfcC5Gs",
     "country": "pk",
     "language": "urd",
     "region": "",
@@ -739,9 +739,18 @@
   },
   {
     "name": "CityTv",
-    "url": "https://www.youtube.com/watch?v=UVOq4W2AHIE",
+    "url": "https://www.youtube.com/watch?v=Hkm5q1-XPK4",
     "country": "co",
     "language": "spa",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
+    "name": "CLRCUT",
+    "url": "https://www.youtube.com/watch?v=Q4AMIQRkpL8",
+    "country": "us",
+    "language": "eng",
     "region": "",
     "favorite": false,
     "dead": false
@@ -757,7 +766,7 @@
   },
   {
     "name": "CNBC Africa",
-    "url": "https://www.youtube.com/watch?v=VaCzI2DmUVw",
+    "url": "https://www.youtube.com/watch?v=6MSjCxGc8vo",
     "country": "za",
     "language": "eng",
     "region": "",
@@ -775,9 +784,18 @@
   },
   {
     "name": "CNN Brasil",
-    "url": "https://www.youtube.com/watch?v=4ACeF9GOTcs",
+    "url": "https://www.youtube.com/watch?v=1L8g9NQNdzw",
     "country": "br",
     "language": "por",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
+    "name": "CNN TÜRK",
+    "url": "https://www.youtube.com/watch?v=6N8_r2uwLEc",
+    "country": "tr",
+    "language": "tur",
     "region": "",
     "favorite": false,
     "dead": false
@@ -802,7 +820,7 @@
   },
   {
     "name": "CTITV News 中天新聞",
-    "url": "https://www.youtube.com/watch?v=7P54NkJyPeo",
+    "url": "https://www.youtube.com/watch?v=s2o97thtdOc",
     "country": "tw",
     "language": "zho",
     "region": "",
@@ -865,7 +883,7 @@
   },
   {
     "name": "DBC News",
-    "url": "https://www.youtube.com/watch?v=yxclepWU02Y",
+    "url": "https://www.youtube.com/watch?v=W5ANJGgnjxg",
     "country": "bd",
     "language": "ben",
     "region": "",
@@ -883,7 +901,7 @@
   },
   {
     "name": "Desh TV",
-    "url": "https://www.youtube.com/watch?v=hIf39ZNF67Y",
+    "url": "https://www.youtube.com/watch?v=dcpLMufuOw8",
     "country": "bd",
     "language": "ben",
     "region": "",
@@ -892,7 +910,7 @@
   },
   {
     "name": "DGV",
-    "url": "https://www.youtube.com/watch?v=NKYjPTOK704",
+    "url": "https://www.youtube.com/watch?v=1w2u5EPymgk",
     "country": "vn",
     "language": "vie",
     "region": "",
@@ -973,7 +991,7 @@
   },
   {
     "name": "Ekattor TV",
-    "url": "https://www.youtube.com/watch?v=tAidYvp9xLk",
+    "url": "https://www.youtube.com/watch?v=9L9ymmaPIS0",
     "country": "bd",
     "language": "ben",
     "region": "",
@@ -1001,15 +1019,6 @@
   {
     "name": "El Once Radio",
     "url": "https://www.youtube.com/watch?v=WARNLHOnhqY",
-    "country": "ar",
-    "language": "spa",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
-    "name": "El Once TV",
-    "url": "https://www.youtube.com/watch?v=qRFjCogNp6Y",
     "country": "ar",
     "language": "spa",
     "region": "",
@@ -1135,7 +1144,7 @@
   },
   {
     "name": "eXtra news",
-    "url": "https://www.youtube.com/watch?v=qLaYaKihPHk",
+    "url": "https://www.youtube.com/watch?v=QKN1lo92CzU",
     "country": "eg",
     "language": "ara",
     "region": "",
@@ -1260,19 +1269,19 @@
     "dead": false
   },
   {
-    "name": "Halk TV",
-    "url": "https://www.youtube.com/watch?v=jHMsvYrf-UA",
-    "country": "tr",
-    "language": "tur",
+    "name": "Halab Today TV",
+    "url": "https://www.youtube.com/watch?v=9p39m7Crm_Q",
+    "country": "sy",
+    "language": "ara",
     "region": "",
     "favorite": false,
     "dead": false
   },
   {
-    "name": "HBC Hokkaido News 24",
-    "url": "https://www.youtube.com/watch?v=0gBNRUiiNq0",
-    "country": "jp",
-    "language": "jpn",
+    "name": "Halk TV",
+    "url": "https://www.youtube.com/watch?v=jHMsvYrf-UA",
+    "country": "tr",
+    "language": "tur",
     "region": "",
     "favorite": false,
     "dead": false
@@ -1332,15 +1341,6 @@
     "dead": false
   },
   {
-    "name": "Independent Television",
-    "url": "https://www.youtube.com/watch?v=jwNnkEa6Ip8",
-    "country": "bd",
-    "language": "ben",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
     "name": "India News Haryana",
     "url": "https://www.youtube.com/watch?v=4tcs9xv11cs",
     "country": "in",
@@ -1378,7 +1378,7 @@
   },
   {
     "name": "Jai Maharashtra News",
-    "url": "https://www.youtube.com/watch?v=MrT2MQBC5EM",
+    "url": "https://www.youtube.com/watch?v=c-xDUltQ_xs",
     "country": "in",
     "language": "mar",
     "region": "",
@@ -1387,7 +1387,7 @@
   },
   {
     "name": "Jamuna TV",
-    "url": "https://www.youtube.com/watch?v=sZQDGdHAOyQ",
+    "url": "https://www.youtube.com/watch?v=0mWPK8U8jo0",
     "country": "bd",
     "language": "ben",
     "region": "",
@@ -1414,7 +1414,7 @@
   },
   {
     "name": "JapaNews24",
-    "url": "https://www.youtube.com/watch?v=coYw-eVU0Ks",
+    "url": "https://www.youtube.com/watch?v=wxhexoYaQ6s",
     "country": "jp",
     "language": "jpn",
     "region": "",
@@ -1423,7 +1423,7 @@
   },
   {
     "name": "JoyNews",
-    "url": "https://www.youtube.com/watch?v=gHoS84wPsss",
+    "url": "https://www.youtube.com/watch?v=ADE5ySGKpYE",
     "country": "gh",
     "language": "eng",
     "region": "",
@@ -1432,7 +1432,7 @@
   },
   {
     "name": "JTBC News",
-    "url": "https://www.youtube.com/watch?v=nw2wVdfUVWI",
+    "url": "https://www.youtube.com/watch?v=YEowVmNL5SQ",
     "country": "kr",
     "language": "kor",
     "region": "",
@@ -1441,7 +1441,7 @@
   },
   {
     "name": "K24TV",
-    "url": "https://www.youtube.com/watch?v=L6_NKsxYPPc",
+    "url": "https://www.youtube.com/watch?v=YNzGxJu8B1I",
     "country": "ke",
     "language": "eng",
     "region": "",
@@ -1468,7 +1468,7 @@
   },
   {
     "name": "Kalinga TV",
-    "url": "https://www.youtube.com/watch?v=4QMxDWOZb9M",
+    "url": "https://www.youtube.com/watch?v=ictVcGPK5io",
     "country": "in",
     "language": "ori",
     "region": "",
@@ -1477,7 +1477,7 @@
   },
   {
     "name": "Kanak News",
-    "url": "https://www.youtube.com/watch?v=8ZZcN5-zuN8",
+    "url": "https://www.youtube.com/watch?v=otUqTQ6HIqI",
     "country": "in",
     "language": "ori",
     "region": "",
@@ -1495,7 +1495,7 @@
   },
   {
     "name": "KBS News",
-    "url": "https://www.youtube.com/watch?v=PoPiqi-Y2qI",
+    "url": "https://www.youtube.com/watch?v=HYneY1iswa8",
     "country": "kr",
     "language": "kor",
     "region": "",
@@ -1539,24 +1539,6 @@
     "dead": false
   },
   {
-    "name": "KOMPASTV JAWA TIMUR",
-    "url": "https://www.youtube.com/watch?v=giWAe8q2B04",
-    "country": "id",
-    "language": "ind",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
-    "name": "KompasTV Jember",
-    "url": "https://www.youtube.com/watch?v=9ABU6fyO54Y",
-    "country": "id",
-    "language": "ind",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
     "name": "Kronen Zeitung",
     "url": "https://www.youtube.com/watch?v=JS67CK1OVMU",
     "country": "at",
@@ -1567,7 +1549,7 @@
   },
   {
     "name": "KRT TV",
-    "url": "https://www.youtube.com/watch?v=LBffKHlCx8U",
+    "url": "https://www.youtube.com/watch?v=R8sVr1z_Cug",
     "country": "tr",
     "language": "tur",
     "region": "",
@@ -1576,7 +1558,7 @@
   },
   {
     "name": "KTN News Kenya",
-    "url": "https://www.youtube.com/watch?v=fBhu4FIxhkQ",
+    "url": "https://www.youtube.com/watch?v=2I0Rldi2zQM",
     "country": "ke",
     "language": "swa",
     "region": "",
@@ -1603,7 +1585,7 @@
   },
   {
     "name": "KumudamNews",
-    "url": "https://www.youtube.com/watch?v=egbIyP5XwNI",
+    "url": "https://www.youtube.com/watch?v=tVrqNptm3wE",
     "country": "in",
     "language": "tam",
     "region": "",
@@ -1630,7 +1612,7 @@
   },
   {
     "name": "Lider Haber",
-    "url": "https://www.youtube.com/watch?v=uel_LrHbQCw",
+    "url": "https://www.youtube.com/watch?v=AFZ1LS288is",
     "country": "tr",
     "language": "tur",
     "region": "",
@@ -1720,7 +1702,7 @@
   },
   {
     "name": "Mirror Now",
-    "url": "https://www.youtube.com/watch?v=t0axYJy5BAA",
+    "url": "https://www.youtube.com/watch?v=BOQUPjlS6ro",
     "country": "in",
     "language": "eng",
     "region": "",
@@ -1729,7 +1711,7 @@
   },
   {
     "name": "Mosaïk Cristal",
-    "url": "https://www.youtube.com/watch?v=V4EEM4gTMvI",
+    "url": "https://www.youtube.com/watch?v=mB6R8I706YQ",
     "country": "fr",
     "language": "fra",
     "region": "",
@@ -1738,7 +1720,7 @@
   },
   {
     "name": "Multimedios Costa Rica",
-    "url": "https://www.youtube.com/watch?v=yKHm_zQgY_8",
+    "url": "https://www.youtube.com/watch?v=UAjiJWJy_rk",
     "country": "cr",
     "language": "spa",
     "region": "",
@@ -1756,7 +1738,7 @@
   },
   {
     "name": "NBC News NOW",
-    "url": "https://www.youtube.com/watch?v=KPVvNNDycW4",
+    "url": "https://www.youtube.com/watch?v=GQJvPmd5vWE",
     "country": "us",
     "language": "eng",
     "region": "",
@@ -1765,7 +1747,7 @@
   },
   {
     "name": "NDTV",
-    "url": "https://www.youtube.com/watch?v=sdH_E6R7lUg",
+    "url": "https://www.youtube.com/watch?v=czi6i37-Hkk",
     "country": "in",
     "language": "eng",
     "region": "",
@@ -1846,7 +1828,7 @@
   },
   {
     "name": "News One",
-    "url": "https://www.youtube.com/watch?v=acK81feBlYc",
+    "url": "https://www.youtube.com/watch?v=bmbK2iJquDg",
     "country": "pk",
     "language": "urd",
     "region": "",
@@ -1855,7 +1837,7 @@
   },
   {
     "name": "News State",
-    "url": "https://www.youtube.com/watch?v=dSebTZqzLjg",
+    "url": "https://www.youtube.com/watch?v=fNNpJKat3I8",
     "country": "in",
     "language": "hin",
     "region": "",
@@ -1876,15 +1858,6 @@
     "url": "https://www.youtube.com/watch?v=jJr3KAGyxR4",
     "country": "in",
     "language": "kan",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
-    "name": "Newsfirst Sri Lanka",
-    "url": "https://www.youtube.com/watch?v=5JyJ0OuIQb4",
-    "country": "lk",
-    "language": "sin",
     "region": "",
     "favorite": false,
     "dead": false
@@ -1954,7 +1927,7 @@
   },
   {
     "name": "oe24 TV",
-    "url": "https://www.youtube.com/watch?v=Bp2GMBvthnA",
+    "url": "https://www.youtube.com/watch?v=m-3axpNN8z4",
     "country": "at",
     "language": "deu",
     "region": "",
@@ -1963,7 +1936,7 @@
   },
   {
     "name": "Official iNews",
-    "url": "https://www.youtube.com/watch?v=5IGEHUxFhiU",
+    "url": "https://www.youtube.com/watch?v=eAt_MfRJtEc",
     "country": "id",
     "language": "ind",
     "region": "",
@@ -1981,7 +1954,7 @@
   },
   {
     "name": "Polimer News",
-    "url": "https://www.youtube.com/watch?v=MfAT1XBvMTM",
+    "url": "https://www.youtube.com/watch?v=tZSCwlHYnb4",
     "country": "in",
     "language": "tam",
     "region": "",
@@ -1999,7 +1972,7 @@
   },
   {
     "name": "PTC News",
-    "url": "https://www.youtube.com/watch?v=li0xSjMyvDk",
+    "url": "https://www.youtube.com/watch?v=TO1FccIbUns",
     "country": "in",
     "language": "pan",
     "region": "",
@@ -2017,7 +1990,7 @@
   },
   {
     "name": "PTV News",
-    "url": "https://www.youtube.com/watch?v=CGb02nb7Ni4",
+    "url": "https://www.youtube.com/watch?v=8Fj5QIumKWM",
     "country": "pk",
     "language": "urd",
     "region": "",
@@ -2044,7 +2017,7 @@
   },
   {
     "name": "Pudhari News",
-    "url": "https://www.youtube.com/watch?v=aBBb5fZLA3w",
+    "url": "https://www.youtube.com/watch?v=zKQF2wvCQaI",
     "country": "in",
     "language": "mar",
     "region": "",
@@ -2056,15 +2029,6 @@
     "url": "https://www.youtube.com/watch?v=1a8mVYWZQRs",
     "country": "fr",
     "language": "fra",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
-    "name": "Puranoticia TV",
-    "url": "https://www.youtube.com/watch?v=W8rXl1qbA5w",
-    "country": "cl",
-    "language": "spa",
     "region": "",
     "favorite": false,
     "dead": false
@@ -2107,7 +2071,7 @@
   },
   {
     "name": "Record News",
-    "url": "https://www.youtube.com/watch?v=nnBnDnI7jTQ",
+    "url": "https://www.youtube.com/watch?v=LQJR99kiwh4",
     "country": "br",
     "language": "por",
     "region": "",
@@ -2188,7 +2152,7 @@
   },
   {
     "name": "Sandesh News",
-    "url": "https://www.youtube.com/watch?v=ZxEY-EysZ4w",
+    "url": "https://www.youtube.com/watch?v=4l8oVtyG-ZA",
     "country": "in",
     "language": "guj",
     "region": "",
@@ -2197,7 +2161,7 @@
   },
   {
     "name": "Sathiyam News",
-    "url": "https://www.youtube.com/watch?v=iLyfBtPp5wY",
+    "url": "https://www.youtube.com/watch?v=Wo5ZKMdQHAI",
     "country": "in",
     "language": "tam",
     "region": "",
@@ -2206,7 +2170,7 @@
   },
   {
     "name": "SBS",
-    "url": "https://www.youtube.com/watch?v=fPKCYfMUBxs",
+    "url": "https://www.youtube.com/watch?v=kn_T4kghmtM",
     "country": "kr",
     "language": "kor",
     "region": "",
@@ -2223,8 +2187,17 @@
     "dead": false
   },
   {
+    "name": "Serambinews",
+    "url": "https://www.youtube.com/watch?v=37SOSQ9ksYo",
+    "country": "id",
+    "language": "ind",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
     "name": "Sindh TV News",
-    "url": "https://www.youtube.com/watch?v=zasu0i2ihYc",
+    "url": "https://www.youtube.com/watch?v=LB1MhwYojlk",
     "country": "pk",
     "language": "eng",
     "region": "",
@@ -2305,7 +2278,7 @@
   },
   {
     "name": "Swatantra TV",
-    "url": "https://www.youtube.com/watch?v=PBMjocq7D2s",
+    "url": "https://www.youtube.com/watch?v=smGPBBm-9ws",
     "country": "in",
     "language": "tel",
     "region": "",
@@ -2421,15 +2394,6 @@
     "dead": false
   },
   {
-    "name": "Teleradyo Serbisyo",
-    "url": "https://www.youtube.com/watch?v=vZgpt1CbmXE",
-    "country": "ph",
-    "language": "tgl",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
     "name": "Telewizja Republika",
     "url": "https://www.youtube.com/watch?v=dzntyCTgJMQ",
     "country": "pl",
@@ -2449,7 +2413,7 @@
   },
   {
     "name": "Telewizja wPolsce",
-    "url": "https://www.youtube.com/watch?v=CINoVvpEAyk",
+    "url": "https://www.youtube.com/watch?v=KXec9diBdrs",
     "country": "pl",
     "language": "pol",
     "region": "",
@@ -2458,7 +2422,7 @@
   },
   {
     "name": "Telewizja Żary",
-    "url": "https://www.youtube.com/watch?v=BAv75CO7abA",
+    "url": "https://www.youtube.com/watch?v=XeRbBe2CWSc",
     "country": "pl",
     "language": "pol",
     "region": "",
@@ -2476,7 +2440,7 @@
   },
   {
     "name": "TGRT Haber",
-    "url": "https://www.youtube.com/watch?v=0SAUIyvNA5s",
+    "url": "https://www.youtube.com/watch?v=WX29nlgdqho",
     "country": "tr",
     "language": "tur",
     "region": "",
@@ -2503,7 +2467,7 @@
   },
   {
     "name": "Times Now Marathi",
-    "url": "https://www.youtube.com/watch?v=F2ZMbMVsc18",
+    "url": "https://www.youtube.com/watch?v=EVDQR7gpmro",
     "country": "in",
     "language": "mar",
     "region": "",
@@ -2521,7 +2485,7 @@
   },
   {
     "name": "Times Now World",
-    "url": "https://www.youtube.com/watch?v=ophxsL6PxQI",
+    "url": "https://www.youtube.com/watch?v=gQCc9EB3bjI",
     "country": "us",
     "language": "eng",
     "region": "",
@@ -2557,7 +2521,7 @@
   },
   {
     "name": "TRT Haber",
-    "url": "https://www.youtube.com/watch?v=a9aEQhgQJ4Q",
+    "url": "https://www.youtube.com/watch?v=yzs_ciihCWQ",
     "country": "tr",
     "language": "tur",
     "region": "",
@@ -2566,7 +2530,7 @@
   },
   {
     "name": "TRT World",
-    "url": "https://www.youtube.com/watch?v=oNUi_iXNPeo",
+    "url": "https://www.youtube.com/watch?v=Xg2JAE5hwI0",
     "country": "tr",
     "language": "eng",
     "region": "",
@@ -2575,7 +2539,7 @@
   },
   {
     "name": "TRT عربي",
-    "url": "https://www.youtube.com/watch?v=rlqFPRHHSWA",
+    "url": "https://www.youtube.com/watch?v=tJpkiKbLb8U",
     "country": "tr",
     "language": "ara",
     "region": "",
@@ -2584,7 +2548,7 @@
   },
   {
     "name": "TrustTV News",
-    "url": "https://www.youtube.com/watch?v=U1jLHspr09U",
+    "url": "https://www.youtube.com/watch?v=Spc58TgV280",
     "country": "ng",
     "language": "eng",
     "region": "",
@@ -2647,7 +2611,7 @@
   },
   {
     "name": "TV9 Marathi",
-    "url": "https://www.youtube.com/watch?v=TO578cVRmpM",
+    "url": "https://www.youtube.com/watch?v=hfwPLazLbd4",
     "country": "in",
     "language": "mar",
     "region": "",
@@ -2700,15 +2664,6 @@
     "dead": false
   },
   {
-    "name": "TVLibertad",
-    "url": "https://www.youtube.com/watch?v=eSbkQxgSxQ8",
-    "country": "pe",
-    "language": "spa",
-    "region": "",
-    "favorite": false,
-    "dead": false
-  },
-  {
     "name": "tvOneNews",
     "url": "https://www.youtube.com/watch?v=yNKvkPJl-tg",
     "country": "id",
@@ -2755,7 +2710,7 @@
   },
   {
     "name": "V6 News Telugu",
-    "url": "https://www.youtube.com/watch?v=U58aDf-zfmY",
+    "url": "https://www.youtube.com/watch?v=28IZl9iM-EE",
     "country": "in",
     "language": "tel",
     "region": "",
@@ -2763,8 +2718,17 @@
     "dead": false
   },
   {
+    "name": "Vistara News",
+    "url": "https://www.youtube.com/watch?v=EDC4Xb2S7v8",
+    "country": "in",
+    "language": "kan",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
     "name": "VSH News",
-    "url": "https://www.youtube.com/watch?v=ZpJ3Q9X5VU8",
+    "url": "https://www.youtube.com/watch?v=3g-CCwkevE4",
     "country": "pk",
     "language": "eng",
     "region": "",
@@ -2782,7 +2746,7 @@
   },
   {
     "name": "WPLG Local 10",
-    "url": "https://www.youtube.com/watch?v=ZrkjsqAGHgw",
+    "url": "https://www.youtube.com/watch?v=B1FsWgr9TeA",
     "country": "us",
     "language": "eng",
     "region": "",
@@ -2839,6 +2803,15 @@
     "url": "https://www.youtube.com/watch?v=6GSssh0yy_k",
     "country": "ro",
     "language": "ron",
+    "region": "",
+    "favorite": false,
+    "dead": false
+  },
+  {
+    "name": "ZTV live",
+    "url": "https://www.youtube.com/watch?v=WjKHoQR3VLA",
+    "country": "pl",
+    "language": "pol",
     "region": "",
     "favorite": false,
     "dead": false
@@ -3052,7 +3025,7 @@
   },
   {
     "name": "鳳凰資訊 PhoenixTVNews",
-    "url": "https://www.youtube.com/watch?v=fN9uYWCjQaw",
+    "url": "https://www.youtube.com/watch?v=Ry--eMIjYLQ",
     "country": "hk",
     "language": "zho",
     "region": "",
