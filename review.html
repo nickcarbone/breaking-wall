@@ -18,7 +18,6 @@
 
         a { color: inherit; text-decoration: none; }
 
-        /* Header */
         .header {
             position: sticky;
             top: 0;
@@ -47,26 +46,30 @@
 
         .header-nav {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             align-items: center;
         }
 
-        .nav-link {
+        .nav-link, .icon-btn {
             font-size: 0.75rem;
             opacity: 0.6;
             transition: opacity 0.2s;
             border: 1px solid #333;
             padding: 0.3rem 0.75rem;
             border-radius: 3px;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .nav-link:hover { opacity: 1; border-color: #00d9ff; color: #00d9ff; }
+        .nav-link:hover, .icon-btn:hover { opacity: 1; border-color: #00d9ff; color: #00d9ff; }
 
-        /* Stats bar */
         .stats-bar {
             display: flex;
-            gap: 2rem;
+            gap: 1.75rem;
             font-size: 0.7rem;
+            flex-wrap: wrap;
         }
 
         .stat { display: flex; gap: 0.5rem; align-items: baseline; }
@@ -75,13 +78,88 @@
         .stat-num.cyan { color: #00d9ff; }
         .stat-num.yellow { color: #ffd60a; }
         .stat-num.green { color: #30d158; }
+        .stat-num.red { color: #ff4444; }
         .stat-label { opacity: 0.5; }
+
+        /* Coverage panel */
+        .coverage-panel {
+            border-bottom: 1px solid #111;
+            background: #030303;
+        }
+
+        .coverage-toggle {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s;
+        }
+
+        .coverage-toggle:hover { opacity: 1; }
+
+        .coverage-body {
+            display: none;
+            padding: 0 1.5rem 1.25rem;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .coverage-body.open { display: flex; }
+
+        .coverage-col {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .coverage-col-title {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.68rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .bar-label { width: 90px; opacity: 0.7; flex-shrink: 0; }
+        .bar-track {
+            flex: 1;
+            height: 12px;
+            background: #111;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+        .bar-fill.normal { background: #3a3a5a; }
+        .bar-fill.saturated { background: #99433a; }
+        .bar-fill.gap { background: #2a2a2a; border: 1px dashed #555; }
+        .bar-count { width: 26px; text-align: right; opacity: 0.6; flex-shrink: 0; }
+
+        .coverage-note {
+            font-size: 0.65rem;
+            opacity: 0.4;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
 
         /* Controls */
         .controls {
             padding: 0.75rem 1.5rem;
             display: flex;
-            gap: 0.75rem;
+            gap: 0.6rem;
             align-items: center;
             flex-wrap: wrap;
             border-bottom: 1px solid #111;
@@ -101,7 +179,7 @@
 
         .control-input:focus { outline: none; border-color: #00d9ff; }
 
-        #searchInput { width: 220px; }
+        #searchInput { width: 200px; }
 
         .toggle-btn {
             background: transparent;
@@ -114,9 +192,10 @@
             border-radius: 3px;
             transition: all 0.2s;
             opacity: 0.7;
+            white-space: nowrap;
         }
 
-        .toggle-btn:hover { opacity: 1; border-color: #fff; }
+        .toggle-btn:hover { opacity: 1; }
         .toggle-btn.active { background: #222; border-color: #bf5af2; color: #bf5af2; opacity: 1; }
 
         .controls-right {
@@ -131,13 +210,12 @@
         /* Grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
             gap: 1px;
             background: #111;
             padding: 1px;
         }
 
-        /* Card */
         .card {
             background: #0a0a0a;
             padding: 1rem;
@@ -149,14 +227,8 @@
         }
 
         .card:hover { background: #0f0f0f; }
-
-        .card.already-added {
-            opacity: 0.35;
-        }
-
-        .card.promoted {
-            border-left: 2px solid #30d158;
-        }
+        .card.already-added { opacity: 0.35; }
+        .card.promoted { border-left: 2px solid #30d158; }
 
         .card-header {
             display: flex;
@@ -165,45 +237,36 @@
             gap: 0.5rem;
         }
 
-        .card-name {
-            font-size: 0.875rem;
-            font-weight: 600;
-            line-height: 1.3;
-            flex: 1;
-        }
+        .card-name { font-size: 0.875rem; font-weight: 600; line-height: 1.3; flex: 1; }
+        .card-country { font-size: 1.1rem; flex-shrink: 0; }
 
-        .card-country {
-            font-size: 1.1rem;
-            flex-shrink: 0;
-            title: attr(data-country);
-        }
-
-        .card-meta {
+        .badge-row {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             gap: 0.3rem;
         }
 
-        .meta-row {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            font-size: 0.7rem;
-        }
-
-        .meta-label { opacity: 0.4; min-width: 60px; }
-        .meta-value { opacity: 0.85; }
-
         .badge {
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             padding: 0.15rem 0.4rem;
             border-radius: 2px;
             font-weight: 600;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
         }
 
         .badge-added { background: #1a3a1a; color: #30d158; border: 1px solid #30d158; }
-        .badge-promoted { background: #1a2a1a; color: #30d158; }
+        .badge-geoblocked { background: #3a1a1a; color: #ff6b6b; border: 1px solid #6b2020; }
+        .badge-dupe { background: #2a2a10; color: #ffd60a; border: 1px solid #665510; }
+        .badge-flagship-nat { background: #1a2a3a; color: #5ab4ff; border: 1px solid #2a4a66; }
+        .badge-flagship-global { background: #251a3a; color: #bf5af2; border: 1px solid #4a2a66; }
+
+        .card-meta { display: flex; flex-direction: column; gap: 0.3rem; }
+        .meta-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.7rem; }
+        .meta-label { opacity: 0.4; min-width: 60px; }
+        .meta-value { opacity: 0.85; }
+        .meta-value.stat-loaded { color: #00d9ff; }
+        .meta-value.stat-empty { opacity: 0.3; font-style: italic; }
 
         .region-select {
             background: #111;
@@ -220,11 +283,30 @@
 
         .region-select:focus { outline: none; border-color: #bf5af2; }
 
-        .card-actions {
+        .tag-row {
             display: flex;
-            gap: 0.5rem;
-            margin-top: 0.25rem;
+            gap: 0.4rem;
         }
+
+        .tag-toggle {
+            flex: 1;
+            font-size: 0.6rem;
+            padding: 0.35rem 0.3rem;
+            border-radius: 3px;
+            border: 1px solid #2a2a2a;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tag-toggle:hover { border-color: #555; color: #ccc; }
+        .tag-toggle.tag-national.active { background: #1a2a3a; border-color: #5ab4ff; color: #5ab4ff; }
+        .tag-toggle.tag-global.active { background: #251a3a; border-color: #bf5af2; color: #bf5af2; }
+
+        .card-actions { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
 
         .btn {
             flex: 1;
@@ -238,28 +320,12 @@
             letter-spacing: 0.05em;
         }
 
-        .btn-preview {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-        }
-
+        .btn-preview { background: transparent; border: 1px solid #333; color: #fff; }
         .btn-preview:hover { border-color: #00d9ff; color: #00d9ff; }
 
-        .btn-promote {
-            background: transparent;
-            border: 1px solid #444;
-            color: #fff;
-        }
-
+        .btn-promote { background: transparent; border: 1px solid #444; color: #fff; }
         .btn-promote:hover { background: #bf5af2; border-color: #bf5af2; color: #fff; }
-
-        .btn-promote.active {
-            background: #30d158;
-            border-color: #30d158;
-            color: #000;
-        }
-
+        .btn-promote.active { background: #30d158; border-color: #30d158; color: #000; }
         .btn-promote.active:hover { background: #25b049; border-color: #25b049; }
 
         /* Preview modal */
@@ -275,46 +341,50 @@
         }
 
         .preview-modal.active { display: flex; }
-
-        .preview-inner {
-            width: 90vw;
-            max-width: 960px;
-            position: relative;
-        }
-
-        .preview-title {
-            font-size: 0.875rem;
-            opacity: 0.7;
-            margin-bottom: 0.75rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .preview-close {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-
+        .preview-inner { width: 90vw; max-width: 960px; position: relative; }
+        .preview-title { font-size: 0.875rem; opacity: 0.7; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+        .preview-close { background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
         .preview-close:hover { opacity: 1; }
+        .preview-frame-wrap { position: relative; padding-top: 56.25%; background: #111; }
+        .preview-frame-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        .preview-frame-wrap {
-            position: relative;
-            padding-top: 56.25%;
+        /* API key modal */
+        .api-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2500;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .api-modal.active { display: flex; }
+        .api-modal-content {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            max-width: 480px;
+            width: 100%;
+            padding: 1.75rem;
+        }
+        .api-modal-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .api-modal-desc { font-size: 0.75rem; opacity: 0.6; line-height: 1.6; margin-bottom: 1.25rem; }
+        .api-modal-input {
+            width: 100%;
             background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
         }
-
-        .preview-frame-wrap iframe {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            border: none;
-        }
+        .api-modal-input:focus { outline: none; border-color: #00d9ff; }
+        .api-modal-actions { display: flex; gap: 0.75rem; }
+        .api-btn-save { flex: 1; background: #00d9ff; color: #000; border: none; padding: 0.65rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; cursor: pointer; border-radius: 4px; }
+        .api-btn-cancel { flex: 1; background: transparent; border: 1px solid #333; color: #fff; padding: 0.65rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; cursor: pointer; border-radius: 4px; }
 
         /* Promoted drawer */
         .promoted-drawer {
@@ -327,102 +397,25 @@
             transition: transform 0.3s ease;
             transform: translateY(100%);
         }
-
         .promoted-drawer.visible { transform: translateY(0); }
-
-        .drawer-header {
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border-bottom: 1px solid #1a1a1a;
-        }
-
-        .drawer-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #30d158;
-            letter-spacing: 0.08em;
-        }
-
-        .drawer-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .drawer-btn {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.4rem 0.875rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            cursor: pointer;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-
+        .drawer-header { padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid #1a1a1a; }
+        .drawer-title { font-size: 0.75rem; font-weight: 600; color: #30d158; letter-spacing: 0.08em; }
+        .drawer-actions { display: flex; gap: 0.5rem; }
+        .drawer-btn { background: transparent; border: 1px solid #333; color: #fff; padding: 0.4rem 0.875rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; cursor: pointer; border-radius: 3px; transition: all 0.2s; }
         .drawer-btn:hover { border-color: #fff; }
         .drawer-btn.primary { background: #30d158; border-color: #30d158; color: #000; font-weight: 600; }
         .drawer-btn.primary:hover { background: #25b049; }
         .drawer-btn.cyan { border-color: #00d9ff; color: #00d9ff; }
         .drawer-btn.cyan:hover { background: #00d9ff; color: #000; }
-
-        .drawer-list {
-            max-height: 140px;
-            overflow-y: auto;
-            padding: 0.5rem 1.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-        }
-
-        .drawer-chip {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 3px;
-            padding: 0.3rem 0.6rem;
-            font-size: 0.65rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .chip-remove {
-            cursor: pointer;
-            opacity: 0.4;
-            transition: opacity 0.2s;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 0.75rem;
-            line-height: 1;
-        }
-
+        .drawer-list { max-height: 140px; overflow-y: auto; padding: 0.5rem 1.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .drawer-chip { background: #111; border: 1px solid #333; border-radius: 3px; padding: 0.3rem 0.6rem; font-size: 0.65rem; display: flex; align-items: center; gap: 0.5rem; }
+        .chip-remove { cursor: pointer; opacity: 0.4; transition: opacity 0.2s; background: transparent; border: none; color: #fff; font-size: 0.75rem; line-height: 1; }
         .chip-remove:hover { opacity: 1; color: #ff4444; }
 
-        /* Loading / empty states */
-        .state-msg {
-            text-align: center;
-            padding: 4rem 2rem;
-            opacity: 0.5;
-            font-size: 0.875rem;
-        }
+        .state-msg { text-align: center; padding: 4rem 2rem; opacity: 0.5; font-size: 0.875rem; }
+        .loading-dots::after { content: '...'; animation: dots 1.2s steps(4, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
 
-        .loading-dots::after {
-            content: '...';
-            animation: dots 1.2s steps(4, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: ''; }
-            40% { content: '.'; }
-            60% { content: '..'; }
-            80%, 100% { content: '...'; }
-        }
-
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 80px;
@@ -439,14 +432,10 @@
             pointer-events: none;
             white-space: nowrap;
         }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.success { border-color: #30d158; color: #30d158; }
         .toast.info { border-color: #00d9ff; color: #00d9ff; }
+        .toast.error { border-color: #ff4444; color: #ff4444; }
     </style>
 </head>
 <body>
@@ -455,6 +444,7 @@
     <div class="header-top">
         <div class="header-title">CANDIDATE REVIEW</div>
         <div class="header-nav">
+            <button class="icon-btn" onclick="openApiModal()">⚙ API KEY</button>
             <a href="index.html" class="nav-link">← WALL</a>
             <a href="manage.html" class="nav-link">MANAGE →</a>
         </div>
@@ -463,7 +453,25 @@
         <div class="stat"><span class="stat-num purple" id="statTotal">—</span><span class="stat-label">candidates</span></div>
         <div class="stat"><span class="stat-num" id="statAdded" style="color:#555">—</span><span class="stat-label">already added</span></div>
         <div class="stat"><span class="stat-num cyan" id="statShowing">—</span><span class="stat-label">showing</span></div>
+        <div class="stat"><span class="stat-num red" id="statGeoblocked">—</span><span class="stat-label">geo-blocked</span></div>
+        <div class="stat"><span class="stat-num yellow" id="statDupes">—</span><span class="stat-label">possible dupes</span></div>
         <div class="stat"><span class="stat-num green" id="statPromoted">0</span><span class="stat-label">promoted</span></div>
+    </div>
+</div>
+
+<div class="coverage-panel">
+    <div class="coverage-toggle" onclick="toggleCoverage()" id="coverageToggle">▸ COVERAGE &amp; BALANCE (of your current news_sources.json)</div>
+    <div class="coverage-body" id="coverageBody">
+        <div class="coverage-col">
+            <div class="coverage-col-title">By region</div>
+            <div id="regionBars"></div>
+            <div class="coverage-note">Red = over 30% of your sources. Dashed = zero sources (blind spot).</div>
+        </div>
+        <div class="coverage-col">
+            <div class="coverage-col-title">By script / alphabet</div>
+            <div id="scriptBars"></div>
+            <div class="coverage-note">Groups languages by writing system, independent of region — catches cases like "MENA coverage" quietly meaning Arabic-only.</div>
+        </div>
     </div>
 </div>
 
@@ -485,7 +493,21 @@
         <option value="">All Languages</option>
     </select>
 
-    <button class="toggle-btn active" id="toggleAdded" onclick="toggleHideAdded()">HIDE ADDED</button>
+    <select id="sortMode" class="control-input">
+        <option value="default">Sort: default order</option>
+        <option value="name">Sort: name (A–Z)</option>
+        <option value="subs">Sort: subscribers (high→low)</option>
+        <option value="viewers">Sort: live viewers (high→low)</option>
+        <option value="flagship">Sort: suggested flagship first</option>
+        <option value="underrepresented">Sort: underrepresented region first</option>
+    </select>
+
+    <button class="toggle-btn active" id="toggleAdded" onclick="toggleFlag('hideAdded')">HIDE ADDED</button>
+    <button class="toggle-btn" id="toggleGeoblocked" onclick="toggleFlag('hideGeoblocked')">HIDE GEO-BLOCKED</button>
+    <button class="toggle-btn" id="toggleFlagshipOnly" onclick="toggleFlag('flagshipOnly')">FLAGSHIP ONLY</button>
+    <button class="toggle-btn" id="toggleDupesOnly" onclick="toggleFlag('dupesOnly')">DUPES ONLY</button>
+
+    <button class="toggle-btn" onclick="fetchStatsForVisible()" id="fetchStatsBtn">⟳ FETCH STATS FOR VISIBLE</button>
 
     <div class="controls-right" id="countLabel">showing all</div>
 </div>
@@ -512,6 +534,26 @@
         </div>
         <div class="preview-frame-wrap">
             <iframe id="previewFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id="apiModal" class="api-modal">
+    <div class="api-modal-content">
+        <div class="api-modal-title">YouTube Data API Key</div>
+        <div class="api-modal-desc">
+            Used to fetch subscriber counts and live viewer counts for candidates.
+            This is the same kind of key your validate_streams.py workflow uses.
+            <br><br>
+            <strong style="color:#ffd60a">Honest caveat:</strong> this key is stored only in this browser's localStorage
+            and sent directly to Google's API from your browser. Don't use a key with
+            broader Google Cloud permissions than "YouTube Data API v3" — restrict it
+            to that API and, ideally, to your own HTTP referrer in Google Cloud Console.
+        </div>
+        <input type="text" id="apiKeyInput" class="api-modal-input" placeholder="AIza...">
+        <div class="api-modal-actions">
+            <button class="api-btn-cancel" onclick="closeApiModal()">Cancel</button>
+            <button class="api-btn-save" onclick="saveApiKey()">Save</button>
         </div>
     </div>
 </div>
@@ -602,12 +644,69 @@ const LANG_NAME = {
     ibo:'Igbo',som:'Somali',cat:'Catalan',eus:'Basque',glg:'Galician',
     aze:'Azerbaijani',kaz:'Kazakh',uzb:'Uzbek',mon:'Mongolian',
     msa:'Malay',fil:'Filipino',sin:'Sinhala',nep:'Nepali',khm:'Khmer',
-    mya:'Burmese',lao:'Lao',ukr:'Ukrainian',bel:'Belarusian',
+    mya:'Burmese',lao:'Lao',bel:'Belarusian',
+};
+
+const LANG_SCRIPT = {
+    eng:'Latin',spa:'Latin',fra:'Latin',por:'Latin',deu:'Latin',nld:'Latin',
+    ita:'Latin',ron:'Latin',ces:'Latin',hun:'Latin',slk:'Latin',pol:'Latin',
+    hrv:'Latin',tur:'Latin',ind:'Latin',msa:'Latin',fil:'Latin',vie:'Latin',
+    swa:'Latin',hau:'Latin',yor:'Latin',ibo:'Latin',som:'Latin',cat:'Latin',
+    eus:'Latin',glg:'Latin',aze:'Latin',uzb:'Latin',
+    rus:'Cyrillic',ukr:'Cyrillic',bul:'Cyrillic',bel:'Cyrillic',mon:'Cyrillic',
+    srp:'Cyrillic',kaz:'Cyrillic',
+    ara:'Arabic',urd:'Arabic',fas:'Arabic',
+    hin:'Devanagari/Brahmic',mar:'Devanagari/Brahmic',nep:'Devanagari/Brahmic',
+    ben:'Devanagari/Brahmic',tel:'Devanagari/Brahmic',tam:'Devanagari/Brahmic',
+    guj:'Devanagari/Brahmic',kan:'Devanagari/Brahmic',mal:'Devanagari/Brahmic',
+    sin:'Devanagari/Brahmic',khm:'Devanagari/Brahmic',mya:'Devanagari/Brahmic',
+    lao:'Devanagari/Brahmic',tha:'Devanagari/Brahmic',
+    zho:'CJK',jpn:'CJK',kor:'CJK',
+    heb:'Hebrew',
+    amh:'Other',
 };
 
 const REGION_LABEL = {
     us:'United States', europe:'Europe', mena:'MENA',
     latam:'Latin America', asia:'Asia-Pacific', africa:'Africa', other:'Other'
+};
+
+// Heuristic, non-exhaustive "likely source of record" name fragments.
+// Editorial judgment always overrides this — it's a starting suggestion,
+// not an authority, and is not a claim about editorial independence.
+const GLOBAL_FLAGSHIP_HINTS = [
+    'bbc','cnn','al jazeera','france 24','dw','deutsche welle','nhk world',
+    'cgtn','rt ','reuters','associated press',' ap ','euronews','trt world',
+    'sky news','bloomberg','cnbc',
+];
+
+const NATIONAL_FLAGSHIP_HINTS = {
+    us: ['pbs','abc news','cbs news','nbc news','npr'],
+    gb: ['bbc','itv','sky news'],
+    fr: ['france 24','france info','tf1','france 2'],
+    de: ['ard','zdf','tagesschau','dw'],
+    es: ['rtve','antena 3','la sexta'],
+    it: ['rai','mediaset'],
+    ru: ['russia 24','channel one','первый'],
+    ua: ['suspilne','1+1','ictv'],
+    cn: ['cctv','cgtn'],
+    jp: ['nhk'],
+    kr: ['kbs','ytn','mbc'],
+    in: ['ndtv','doordarshan','dd news'],
+    pk: ['geo news','ary','dunya'],
+    sa: ['al arabiya','al ekhbariya'],
+    qa: ['al jazeera'],
+    eg: ['al ahram','nile tv'],
+    tr: ['trt'],
+    il: ['kan','channel 12'],
+    br: ['globo','record news'],
+    mx: ['televisa','milenio'],
+    ar: ['todo noticias','c5n'],
+    za: ['sabc','enca'],
+    ng: ['channels tv','nta'],
+    ke: ['ntv kenya','citizen tv'],
+    au: ['abc news','sky news australia'],
+    ca: ['cbc','ctv news'],
 };
 
 function countryFlag(code) {
@@ -623,17 +722,57 @@ function suggestRegion(countryCode) {
     return COUNTRY_REGION[countryCode?.toLowerCase()] || 'other';
 }
 
+function suggestFlagship(name, countryCode) {
+    const n = (name || '').toLowerCase();
+    const isGlobal = GLOBAL_FLAGSHIP_HINTS.some(h => n.includes(h));
+    const nationalHints = NATIONAL_FLAGSHIP_HINTS[countryCode?.toLowerCase()] || [];
+    const isNational = nationalHints.some(h => n.includes(h));
+    return { global: isGlobal, national: isNational };
+}
+
+function normalizeNameForDupeCheck(name) {
+    return (name || '')
+        .toLowerCase()
+        .replace(/[0-9]+$/g, '')
+        .replace(/[^a-z\u00c0-\u024f\u0400-\u04ff\u0600-\u06ff\u4e00-\u9fff]/g, '')
+        .trim();
+}
+
 // ── State ──────────────────────────────────────────────────────────────────────
 
 let candidates = [];
 let existingUrls = new Set();
+let existingSources = [];
 let promoted = [];
-let hideAdded = true;
+let flags = { hideAdded: true, hideGeoblocked: false, flagshipOnly: false, dupesOnly: false };
 let drawerOpen = false;
+let coverageOpen = false;
+let dupeGroups = {};      // normalizedName -> [urls]
+let editorialTags = {};   // url -> { national: bool, global: bool }
+let statsCache = {};      // videoId -> { subs, viewers, fetchedAt, channelId, channelAge }
+let apiKey = '';
+
+// ── Persistence ────────────────────────────────────────────────────────────────
+
+function loadPersisted() {
+    try { editorialTags = JSON.parse(localStorage.getItem('newsWallEditorialTags') || '{}'); } catch { editorialTags = {}; }
+    try { statsCache = JSON.parse(localStorage.getItem('newsWallCandidateStats') || '{}'); } catch { statsCache = {}; }
+    apiKey = localStorage.getItem('newsWallYoutubeApiKey') || '';
+}
+
+function saveTags() {
+    localStorage.setItem('newsWallEditorialTags', JSON.stringify(editorialTags));
+}
+
+function saveStatsCache() {
+    localStorage.setItem('newsWallCandidateStats', JSON.stringify(statsCache));
+}
 
 // ── Load data ──────────────────────────────────────────────────────────────────
 
 async function loadData() {
+    loadPersisted();
+
     const grid = document.getElementById('gridContainer');
     grid.innerHTML = '<div class="state-msg"><span class="loading-dots">Loading</span></div>';
 
@@ -648,11 +787,12 @@ async function loadData() {
         candidates = await candRes.json();
 
         if (srcRes.ok) {
-            const existing = await srcRes.json();
-            existingUrls = new Set(existing.map(s => s.url));
+            existingSources = await srcRes.json();
+            existingUrls = new Set(existingSources.map(s => s.url));
         }
 
-        // Build language filter options
+        buildDupeGroups();
+
         const langs = [...new Set(candidates.map(c => c.language).filter(Boolean))].sort();
         const langSel = document.getElementById('langFilter');
         langs.forEach(l => {
@@ -663,6 +803,7 @@ async function loadData() {
         });
 
         updateStats();
+        renderCoveragePanel();
         renderGrid();
 
     } catch (err) {
@@ -670,22 +811,147 @@ async function loadData() {
     }
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────────
+function buildDupeGroups() {
+    dupeGroups = {};
+    candidates.forEach(c => {
+        const key = normalizeNameForDupeCheck(c.name) + '|' + (c.country || '');
+        if (!dupeGroups[key]) dupeGroups[key] = [];
+        dupeGroups[key].push(c.url);
+    });
+}
+
+function isDupe(candidate) {
+    const key = normalizeNameForDupeCheck(candidate.name) + '|' + (candidate.country || '');
+    return (dupeGroups[key] || []).length > 1;
+}
+
+function dupeSiblings(candidate) {
+    const key = normalizeNameForDupeCheck(candidate.name) + '|' + (candidate.country || '');
+    return (dupeGroups[key] || []).filter(u => u !== candidate.url);
+}
+
+// ── Coverage panel ─────────────────────────────────────────────────────────────
+
+function toggleCoverage() {
+    coverageOpen = !coverageOpen;
+    document.getElementById('coverageBody').classList.toggle('open', coverageOpen);
+    document.getElementById('coverageToggle').textContent =
+        (coverageOpen ? '▾' : '▸') + ' COVERAGE & BALANCE (of your current news_sources.json)';
+}
+
+function renderCoveragePanel() {
+    const total = existingSources.length || 1;
+
+    // Region distribution
+    const regionCounts = {};
+    Object.keys(REGION_LABEL).forEach(r => regionCounts[r] = 0);
+    existingSources.forEach(s => {
+        const r = s.region || 'other';
+        regionCounts[r] = (regionCounts[r] || 0) + 1;
+    });
+
+    const regionBarsEl = document.getElementById('regionBars');
+    regionBarsEl.innerHTML = '';
+    Object.entries(regionCounts).forEach(([region, count]) => {
+        const pct = (count / total) * 100;
+        const isGap = count === 0;
+        const isSaturated = pct > 30;
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+            <div class="bar-label">${REGION_LABEL[region]}</div>
+            <div class="bar-track"><div class="bar-fill ${isGap ? 'gap' : (isSaturated ? 'saturated' : 'normal')}" style="width:${isGap ? 100 : Math.max(pct, 3)}%"></div></div>
+            <div class="bar-count">${count}</div>
+        `;
+        regionBarsEl.appendChild(row);
+    });
+
+    // Script distribution
+    const scriptCounts = {};
+    existingSources.forEach(s => {
+        const script = LANG_SCRIPT[s.language] || 'Unknown';
+        scriptCounts[script] = (scriptCounts[script] || 0) + 1;
+    });
+    // ensure all known scripts show, even at zero
+    ['Latin','Cyrillic','Arabic','Devanagari/Brahmic','CJK','Hebrew','Other'].forEach(s => {
+        if (!(s in scriptCounts)) scriptCounts[s] = 0;
+    });
+
+    const scriptBarsEl = document.getElementById('scriptBars');
+    scriptBarsEl.innerHTML = '';
+    Object.entries(scriptCounts).sort((a,b) => b[1]-a[1]).forEach(([script, count]) => {
+        const pct = (count / total) * 100;
+        const isGap = count === 0;
+        const isSaturated = pct > 40;
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+            <div class="bar-label">${script}</div>
+            <div class="bar-track"><div class="bar-fill ${isGap ? 'gap' : (isSaturated ? 'saturated' : 'normal')}" style="width:${isGap ? 100 : Math.max(pct, 3)}%"></div></div>
+            <div class="bar-count">${count}</div>
+        `;
+        scriptBarsEl.appendChild(row);
+    });
+}
+
+function regionCountsFromExisting() {
+    const counts = {};
+    Object.keys(REGION_LABEL).forEach(r => counts[r] = 0);
+    existingSources.forEach(s => {
+        const r = s.region || 'other';
+        counts[r] = (counts[r] || 0) + 1;
+    });
+    return counts;
+}
+
+// ── Render grid ────────────────────────────────────────────────────────────────
 
 function renderGrid() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     const regionF = document.getElementById('regionFilter').value;
     const langF = document.getElementById('langFilter').value;
+    const sortMode = document.getElementById('sortMode').value;
 
     let filtered = candidates.filter(c => {
         const isAdded = existingUrls.has(c.url);
-        if (hideAdded && isAdded) return false;
+        if (flags.hideAdded && isAdded) return false;
+        if (flags.hideGeoblocked && c.geo_blocked) return false;
         if (search && !c.name.toLowerCase().includes(search)) return false;
+
         const suggestedRegion = suggestRegion(c.country);
         if (regionF && suggestedRegion !== regionF) return false;
         if (langF && c.language !== langF) return false;
+
+        if (flags.flagshipOnly) {
+            const tag = editorialTags[c.url] || {};
+            const heuristic = suggestFlagship(c.name, c.country);
+            const flagged = tag.national || tag.global || heuristic.national || heuristic.global;
+            if (!flagged) return false;
+        }
+
+        if (flags.dupesOnly && !isDupe(c)) return false;
+
         return true;
     });
+
+    // Sorting
+    const regionCounts = regionCountsFromExisting();
+
+    if (sortMode === 'name') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortMode === 'subs') {
+        filtered.sort((a, b) => (getStats(b)?.subs || -1) - (getStats(a)?.subs || -1));
+    } else if (sortMode === 'viewers') {
+        filtered.sort((a, b) => (getStats(b)?.viewers || -1) - (getStats(a)?.viewers || -1));
+    } else if (sortMode === 'flagship') {
+        filtered.sort((a, b) => flagshipScore(b) - flagshipScore(a));
+    } else if (sortMode === 'underrepresented') {
+        filtered.sort((a, b) => {
+            const ra = regionCounts[suggestRegion(a.country)] ?? 999;
+            const rb = regionCounts[suggestRegion(b.country)] ?? 999;
+            return ra - rb;
+        });
+    }
 
     document.getElementById('statShowing').textContent = filtered.length;
     document.getElementById('countLabel').textContent = `${filtered.length} of ${candidates.length}`;
@@ -701,59 +967,111 @@ function renderGrid() {
     grid.innerHTML = '';
 
     filtered.forEach(c => {
-        const isAdded = existingUrls.has(c.url);
-        const isPromoted = promoted.some(p => p.url === c.url);
-        const suggestedRegion = suggestRegion(c.country);
-        const countryName = COUNTRY_NAME[c.country] || c.country?.toUpperCase() || '—';
-        const langName = LANG_NAME[c.language] || c.language || '—';
-        const flag = countryFlag(c.country);
-
-        const card = document.createElement('div');
-        card.className = 'card' + (isAdded ? ' already-added' : '') + (isPromoted ? ' promoted' : '');
-        card.dataset.url = c.url;
-
-        card.innerHTML = `
-            <div class="card-header">
-                <div class="card-name">${esc(c.name)}</div>
-                <div class="card-country" title="${esc(countryName)}">${flag}</div>
-            </div>
-            <div class="card-meta">
-                <div class="meta-row">
-                    <span class="meta-label">country</span>
-                    <span class="meta-value">${esc(countryName)}</span>
-                </div>
-                <div class="meta-row">
-                    <span class="meta-label">language</span>
-                    <span class="meta-value">${esc(langName)}</span>
-                </div>
-                <div class="meta-row">
-                    <span class="meta-label">region</span>
-                    <span class="meta-value">${REGION_LABEL[suggestedRegion] || suggestedRegion}</span>
-                </div>
-            </div>
-            ${isAdded ? '<span class="badge badge-added">ALREADY ADDED</span>' : `
-            <select class="region-select" data-url="${esc(c.url)}">
-                ${Object.entries(REGION_LABEL).map(([v,l]) =>
-                    `<option value="${v}" ${v === suggestedRegion ? 'selected' : ''}>${l}</option>`
-                ).join('')}
-            </select>
-            <div class="card-actions">
-                <button class="btn btn-preview" onclick="openPreview('${esc(c.url)}', '${esc(c.name)}')">▶ PREVIEW</button>
-                <button class="btn btn-promote ${isPromoted ? 'active' : ''}" onclick="togglePromote('${esc(c.url)}', '${esc(c.name)}')">
-                    ${isPromoted ? '✓ PROMOTED' : '+ PROMOTE'}
-                </button>
-            </div>`}
-        `;
-
-        grid.appendChild(card);
+        grid.appendChild(buildCard(c));
     });
+}
+
+function flagshipScore(c) {
+    const tag = editorialTags[c.url] || {};
+    const heuristic = suggestFlagship(c.name, c.country);
+    let score = 0;
+    if (tag.global || heuristic.global) score += 2;
+    if (tag.national || heuristic.national) score += 1;
+    return score;
+}
+
+function getStats(c) {
+    const videoId = extractVideoId(c.url);
+    return videoId ? statsCache[videoId] : null;
+}
+
+function extractVideoId(url) {
+    return url.match(/[?&]v=([A-Za-z0-9_-]+)/)?.[1] || null;
+}
+
+function buildCard(c) {
+    const isAdded = existingUrls.has(c.url);
+    const isPromoted = promoted.some(p => p.url === c.url);
+    const suggestedRegion = suggestRegion(c.country);
+    const countryName = COUNTRY_NAME[c.country] || c.country?.toUpperCase() || '—';
+    const langName = LANG_NAME[c.language] || c.language || '—';
+    const flag = countryFlag(c.country);
+    const tag = editorialTags[c.url] || {};
+    const heuristic = suggestFlagship(c.name, c.country);
+    const dupe = isDupe(c);
+    const stats = getStats(c);
+
+    const card = document.createElement('div');
+    card.className = 'card' + (isAdded ? ' already-added' : '') + (isPromoted ? ' promoted' : '');
+    card.dataset.url = c.url;
+
+    let badges = '';
+    if (c.geo_blocked) badges += '<span class="badge badge-geoblocked">GEO-BLOCKED</span>';
+    if (dupe) badges += '<span class="badge badge-dupe">POSSIBLE DUPE</span>';
+    if (tag.national || heuristic.national) badges += '<span class="badge badge-flagship-nat">NATIONAL FLAGSHIP</span>';
+    if (tag.global || heuristic.global) badges += '<span class="badge badge-flagship-global">GLOBAL FLAGSHIP</span>';
+
+    const statsHtml = stats
+        ? `<div class="meta-row"><span class="meta-label">subs</span><span class="meta-value stat-loaded">${formatCount(stats.subs)}</span></div>
+           <div class="meta-row"><span class="meta-label">live viewers</span><span class="meta-value stat-loaded">${stats.viewers != null ? formatCount(stats.viewers) : 'not live'}</span></div>`
+        : `<div class="meta-row"><span class="meta-label">subs</span><span class="meta-value stat-empty">not fetched</span></div>`;
+
+    card.innerHTML = `
+        <div class="card-header">
+            <div class="card-name">${esc(c.name)}</div>
+            <div class="card-country" title="${esc(countryName)}">${flag}</div>
+        </div>
+        ${badges ? `<div class="badge-row">${badges}</div>` : ''}
+        <div class="card-meta">
+            <div class="meta-row"><span class="meta-label">country</span><span class="meta-value">${esc(countryName)}</span></div>
+            <div class="meta-row"><span class="meta-label">language</span><span class="meta-value">${esc(langName)}</span></div>
+            <div class="meta-row"><span class="meta-label">region</span><span class="meta-value">${REGION_LABEL[suggestedRegion] || suggestedRegion}</span></div>
+            ${statsHtml}
+        </div>
+        ${isAdded ? '<span class="badge badge-added">ALREADY ADDED</span>' : `
+        <select class="region-select" data-url="${esc(c.url)}">
+            ${Object.entries(REGION_LABEL).map(([v,l]) =>
+                `<option value="${v}" ${v === suggestedRegion ? 'selected' : ''}>${l}</option>`
+            ).join('')}
+        </select>
+        <div class="tag-row">
+            <button class="tag-toggle tag-national ${tag.national ? 'active' : ''}" onclick="toggleTag('${esc(c.url)}','national')">🏳 National</button>
+            <button class="tag-toggle tag-global ${tag.global ? 'active' : ''}" onclick="toggleTag('${esc(c.url)}','global')">🌍 Global</button>
+        </div>
+        <div class="card-actions">
+            <button class="btn btn-preview" onclick="openPreview('${esc(c.url)}', '${esc(c.name)}')">▶ PREVIEW</button>
+            <button class="btn btn-promote ${isPromoted ? 'active' : ''}" onclick="togglePromote('${esc(c.url)}', '${esc(c.name)}')">
+                ${isPromoted ? '✓ PROMOTED' : '+ PROMOTE'}
+            </button>
+        </div>`}
+    `;
+
+    return card;
+}
+
+function formatCount(n) {
+    if (n == null) return '—';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(n);
+}
+
+function toggleTag(url, kind) {
+    if (!editorialTags[url]) editorialTags[url] = {};
+    editorialTags[url][kind] = !editorialTags[url][kind];
+    saveTags();
+    renderGrid();
 }
 
 function updateStats() {
     const addedCount = candidates.filter(c => existingUrls.has(c.url)).length;
+    const geoblockedCount = candidates.filter(c => c.geo_blocked).length;
+    const dupeCount = candidates.filter(c => isDupe(c)).length;
     document.getElementById('statTotal').textContent = candidates.length;
     document.getElementById('statAdded').textContent = addedCount;
-    document.getElementById('statShowing').textContent = candidates.length - (hideAdded ? addedCount : 0);
+    document.getElementById('statShowing').textContent = candidates.length - (flags.hideAdded ? addedCount : 0);
+    document.getElementById('statGeoblocked').textContent = geoblockedCount;
+    document.getElementById('statDupes').textContent = dupeCount;
     document.getElementById('statPromoted').textContent = promoted.length;
 }
 
@@ -834,14 +1152,11 @@ function clearPromoted() {
 
 function exportJSON() {
     if (!promoted.length) return;
-
-    // Re-read region selects in case user changed them
     const enriched = promoted.map(p => {
         const sel = document.querySelector(`.region-select[data-url="${p.url}"]`);
         if (sel) p.region = sel.value;
         return p;
     });
-
     const json = JSON.stringify(enriched, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const link = document.createElement('a');
@@ -854,13 +1169,11 @@ function exportJSON() {
 
 function addToWall() {
     if (!promoted.length) return;
-
     const enriched = promoted.map(p => {
         const sel = document.querySelector(`.region-select[data-url="${p.url}"]`);
         if (sel) p.region = sel.value;
         return p;
     });
-
     const existing = JSON.parse(localStorage.getItem('newsWallSources') || '[]');
     const existingWallUrls = new Set(existing.map(s => s.url));
     const toAdd = enriched.filter(p => !existingWallUrls.has(p.url));
@@ -872,7 +1185,6 @@ function addToWall() {
 
     const merged = [...existing, ...toAdd];
     localStorage.setItem('newsWallSources', JSON.stringify(merged));
-
     toAdd.forEach(p => existingUrls.add(p.url));
 
     showToast(`Added ${toAdd.length} to wall (localStorage)`, 'success');
@@ -885,9 +1197,8 @@ function addToWall() {
 // ── Preview ────────────────────────────────────────────────────────────────────
 
 function openPreview(url, name) {
-    const videoId = url.match(/[?&]v=([A-Za-z0-9_-]+)/)?.[1];
+    const videoId = extractVideoId(url);
     if (!videoId) { showToast('Could not parse video ID', 'info'); return; }
-
     document.getElementById('previewName').textContent = name;
     document.getElementById('previewFrame').src =
         `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1`;
@@ -899,11 +1210,144 @@ function closePreview() {
     document.getElementById('previewFrame').src = '';
 }
 
+// ── API key modal ──────────────────────────────────────────────────────────────
+
+function openApiModal() {
+    document.getElementById('apiKeyInput').value = apiKey;
+    document.getElementById('apiModal').classList.add('active');
+}
+
+function closeApiModal() {
+    document.getElementById('apiModal').classList.remove('active');
+}
+
+function saveApiKey() {
+    apiKey = document.getElementById('apiKeyInput').value.trim();
+    localStorage.setItem('newsWallYoutubeApiKey', apiKey);
+    closeApiModal();
+    showToast(apiKey ? 'API key saved' : 'API key cleared', 'success');
+}
+
+// ── YouTube stats fetching ─────────────────────────────────────────────────────
+
+const STATS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+function chunk(arr, size) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+}
+
+async function fetchStatsForVisible() {
+    if (!apiKey) {
+        showToast('Set your YouTube API key first (⚙ API KEY)', 'error');
+        openApiModal();
+        return;
+    }
+
+    const visibleUrls = Array.from(document.querySelectorAll('.card[data-url]')).map(el => el.dataset.url);
+    if (!visibleUrls.length) {
+        showToast('Nothing visible to fetch', 'info');
+        return;
+    }
+
+    const now = Date.now();
+    const videoIds = [...new Set(visibleUrls.map(extractVideoId).filter(Boolean))]
+        .filter(vid => {
+            const cached = statsCache[vid];
+            return !cached || (now - cached.fetchedAt) > STATS_CACHE_TTL_MS;
+        });
+
+    if (!videoIds.length) {
+        showToast('All visible cards already have fresh stats', 'info');
+        return;
+    }
+
+    const btn = document.getElementById('fetchStatsBtn');
+    btn.textContent = '⟳ FETCHING...';
+    btn.disabled = true;
+
+    try {
+        const videoChunks = chunk(videoIds, 50);
+        const videoData = {}; // videoId -> { channelId, viewers }
+
+        for (const idsChunk of videoChunks) {
+            const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${idsChunk.join(',')}&key=${apiKey}`;
+            const res = await fetch(url);
+            const json = await res.json();
+
+            if (json.error) {
+                throw new Error(json.error.message || 'YouTube API error');
+            }
+
+            (json.items || []).forEach(item => {
+                videoData[item.id] = {
+                    channelId: item.snippet?.channelId || null,
+                    viewers: item.liveStreamingDetails?.concurrentViewers
+                        ? parseInt(item.liveStreamingDetails.concurrentViewers, 10)
+                        : null,
+                };
+            });
+        }
+
+        const channelIds = [...new Set(Object.values(videoData).map(v => v.channelId).filter(Boolean))];
+        const channelData = {}; // channelId -> { subs, publishedAt }
+
+        for (const idsChunk of chunk(channelIds, 50)) {
+            const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${idsChunk.join(',')}&key=${apiKey}`;
+            const res = await fetch(url);
+            const json = await res.json();
+
+            if (json.error) {
+                throw new Error(json.error.message || 'YouTube API error');
+            }
+
+            (json.items || []).forEach(item => {
+                channelData[item.id] = {
+                    subs: item.statistics?.hiddenSubscriberCount
+                        ? null
+                        : parseInt(item.statistics?.subscriberCount || '0', 10),
+                    publishedAt: item.snippet?.publishedAt || null,
+                };
+            });
+        }
+
+        videoIds.forEach(vid => {
+            const vdata = videoData[vid];
+            if (!vdata) return;
+            const cdata = vdata.channelId ? channelData[vdata.channelId] : null;
+            statsCache[vid] = {
+                subs: cdata?.subs ?? null,
+                viewers: vdata.viewers,
+                channelId: vdata.channelId,
+                channelAge: cdata?.publishedAt || null,
+                fetchedAt: now,
+            };
+        });
+
+        saveStatsCache();
+        showToast(`Fetched stats for ${videoIds.length} channels`, 'success');
+        renderGrid();
+
+    } catch (err) {
+        showToast(`API error: ${err.message}`, 'error');
+    } finally {
+        btn.textContent = '⟳ FETCH STATS FOR VISIBLE';
+        btn.disabled = false;
+    }
+}
+
 // ── UI helpers ─────────────────────────────────────────────────────────────────
 
-function toggleHideAdded() {
-    hideAdded = !hideAdded;
-    document.getElementById('toggleAdded').classList.toggle('active', hideAdded);
+function toggleFlag(name) {
+    flags[name] = !flags[name];
+    const idMap = {
+        hideAdded: 'toggleAdded',
+        hideGeoblocked: 'toggleGeoblocked',
+        flagshipOnly: 'toggleFlagshipOnly',
+        dupesOnly: 'toggleDupesOnly',
+    };
+    document.getElementById(idMap[name]).classList.toggle('active', flags[name]);
     renderGrid();
     updateStats();
 }
@@ -913,7 +1357,7 @@ function showToast(msg, type = 'info') {
     t.textContent = msg;
     t.className = `toast show ${type}`;
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.className = 'toast', 2500);
+    t._timer = setTimeout(() => t.className = 'toast', 2800);
 }
 
 function esc(str) {
@@ -925,13 +1369,17 @@ function esc(str) {
 document.getElementById('searchInput').addEventListener('input', renderGrid);
 document.getElementById('regionFilter').addEventListener('change', renderGrid);
 document.getElementById('langFilter').addEventListener('change', renderGrid);
+document.getElementById('sortMode').addEventListener('change', renderGrid);
 
 document.getElementById('previewModal').addEventListener('click', e => {
     if (e.target.id === 'previewModal') closePreview();
 });
+document.getElementById('apiModal').addEventListener('click', e => {
+    if (e.target.id === 'apiModal') closeApiModal();
+});
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closePreview();
+    if (e.key === 'Escape') { closePreview(); closeApiModal(); }
 });
 
 // ── Init ───────────────────────────────────────────────────────────────────────
