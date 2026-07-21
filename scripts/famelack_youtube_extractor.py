@@ -131,13 +131,14 @@ def extract_youtube_entries(data):
         language = languages[0] if languages else ""
 
         entries.append({
-            "name":     item.get("name", "Unknown"),
-            "url":      normalized_url,
-            "country":  item.get("country", ""),
-            "language": language,
-            "region":   "",   # not in Famelack schema; fill in manually or via mapping
-            "favorite": False,
-            "dead":     False,
+            "name":        item.get("name", "Unknown"),
+            "url":         normalized_url,
+            "country":     item.get("country", ""),
+            "language":    language,
+            "region":      "",   # not in Famelack schema; fill in manually or via mapping
+            "geo_blocked": bool(item.get("isGeoBlocked", False)),
+            "favorite":    False,
+            "dead":        False,
         })
 
     return entries
