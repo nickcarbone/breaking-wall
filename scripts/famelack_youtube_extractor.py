@@ -68,24 +68,58 @@ def normalize_youtube_url(url):
         return f"https://www.youtube.com/watch?v={match.group(1)}"
     return url
 
+def get_youtube_urls(item):
+    """
+    Famelack has changed their schema at least twice. Handle all known shapes:
+
+      Shape A (original):       item["youtube_urls"] = [...]
+      Shape B (as of July 2026): item["sources"]["youtube"] = [...]
+
+    Falls back gracefully across shapes so the script survives future
+    schema tweaks without silently returning zero results.
+    """
+    sources = item.get("sources")
+    if isinstance(sources, dict):
+        yt = sources.get("youtube")
+        if yt:
+            return yt
+
+    yt = item.get("youtube_urls")
+    if yt:
+        return yt
+
+    return []
+
+
 def extract_youtube_entries(data):
     """
-    Famelack schema (as of May 2026):
-      - name:         string
-      - youtube_urls: list of youtube-nocookie.com/embed/VIDEO_ID strings
-      - stream_urls:  list of direct IPTV m3u8 URLs (we ignore these)
-      - languages:    list of ISO 639-3 language codes
-      - country:      ISO 3166-1 alpha-2 country code
+    Current Famelack schema (as of July 2026):
+      - name:      string
+      - sources:   { "youtube": [...], "streams": [...] }
+      - languages: list of ISO 639-3 language codes
+      - country:   ISO 3166-1 alpha-2 country code
       - isGeoBlocked: bool
-      - nanoid:       internal ID
+      - nanoid:    internal ID
+
+    See get_youtube_urls() for backward compatibility with the older
+    top-level "youtube_urls" shape.
     """
     if not isinstance(data, list):
         print("  WARNING: Unexpected data format (not a list)", file=sys.stderr)
         return []
 
+    # Diagnostic: warn early if the schema looks unrecognized, rather than
+    # silently returning 0 and forcing a manual repo-diff to debug later.
+    if data and isinstance(data[0], dict):
+        sample_keys = set(data[0].keys())
+        known_top_level = {"youtube_urls"}
+        known_nested = {"sources"}
+        if not (known_top_level & sample_keys) and not (known_nested & sample_keys):
+            print(f"  WARNING: Unrecognized schema. Sample entry keys: {sample_keys}", file=sys.stderr)
+
     entries = []
     for item in data:
-        youtube_urls = item.get("youtube_urls") or []
+        youtube_urls = get_youtube_urls(item)
         if not youtube_urls:
             continue
 
