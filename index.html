@@ -6,7 +6,11 @@
     <title>News Wall</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             background: #000;
@@ -15,25 +19,48 @@
             overflow-x: hidden;
         }
 
-        /* ── Grid ── */
+        /* Grid */
         .grid {
             display: grid;
             gap: 2px;
             min-height: 100vh;
             padding: 2px;
         }
-        .grid.compact { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-        .grid.medium  { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
-        .grid.large   { grid-template-columns: repeat(auto-fit, minmax(550px, 1fr)); }
 
-        @media (max-width: 1400px) { .grid.medium { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); } }
-        @media (max-width: 1000px) {
-            .grid.compact { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-            .grid.medium  { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid.compact {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr !important; } }
 
-        /* ── Panel ── */
+        .grid.medium {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+
+        .grid.large {
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+        }
+
+        @media (max-width: 1400px) {
+            .grid.medium {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .grid.compact {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            .grid.medium {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Panel */
         .panel {
             position: relative;
             background: #0a0a0a;
@@ -42,766 +69,1968 @@
             cursor: grab;
             transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
-        .panel.dragging   { opacity: 0.4; cursor: grabbing; transform: scale(0.96); }
-        .panel.drag-over  { box-shadow: 0 0 0 3px #ffd60a; }
-        .panel.favorite   { box-shadow: 0 0 0 2px rgba(255,255,255,0.2); }
-        .panel.favorite.active { box-shadow: 0 0 0 2px rgba(255,255,255,0.2), 0 0 0 4px #bf5af2, 0 0 20px rgba(191,90,242,0.4); }
-        .panel.active     { box-shadow: 0 0 0 2px #bf5af2, 0 0 20px rgba(191,90,242,0.4); }
+
+        .panel.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .panel.drag-over {
+            box-shadow: 0 0 0 3px #ffd60a;
+        }
+
+        .panel.favorite {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .panel.favorite.active {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 0 4px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4);
+        }
+
+        .panel.active {
+            box-shadow: 0 0 0 2px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4);
+        }
 
         .panel iframe {
-            width: 100%; height: 100%;
-            border: none; display: block;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
             pointer-events: none;
         }
-        .panel.active iframe { pointer-events: auto; }
 
-        /* Transparent click-capture overlay */
         .panel-overlay {
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             z-index: 1;
             cursor: grab;
         }
-        .panel.active   .panel-overlay { cursor: pointer; }
-        .panel.dragging .panel-overlay { cursor: grabbing; }
 
-        /* ── Hover name label ── */
+        .panel.active .panel-overlay {
+            cursor: pointer;
+        }
+
+        .panel.dragging .panel-overlay {
+            cursor: grabbing;
+        }
+
+        /* Source name label on hover */
         .source-label {
             position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-            padding: 2rem 0.875rem 0.6rem;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            padding: 1.5rem 0.75rem 0.5rem;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
             z-index: 2;
             opacity: 0;
-            transition: opacity 0.18s ease;
+            transition: opacity 0.2s ease;
             pointer-events: none;
         }
-        .source-label-name {
-            display: block;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: #fff;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .source-label-region {
-            display: block;
-            font-size: 0.62rem;
-            color: rgba(255,255,255,0.45);
-            margin-top: 0.1rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-        .panel:hover .source-label { opacity: 1; }
 
-        /* ── Dead panel ── */
-        .panel.dead { opacity: 0.4; pointer-events: none; }
+        .panel:hover .source-label {
+            opacity: 1;
+        }
+
+        /* Dead source indicator */
+        .panel.dead {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
         .panel.dead::after {
             content: '💀 DEAD LINK';
-            position: absolute; top: 50%; left: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            padding: 1rem 2rem; border-radius: 8px;
-            font-size: 0.875rem; font-weight: 600; color: #ff4444;
-            z-index: 10; pointer-events: none;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ff4444;
+            z-index: 10;
+            pointer-events: none;
         }
-        .panel.dead .panel-overlay { pointer-events: auto; }
 
-        /* ── Bulk selection ── */
-        .panel.selecting { cursor: pointer; }
-        .panel.selected  { box-shadow: 0 0 0 3px #ffd60a, 0 0 20px rgba(255,214,10,0.4); }
+        .panel.dead .panel-overlay {
+            pointer-events: auto;
+        }
+
+        /* Bulk selection */
+        .panel.selecting {
+            cursor: pointer;
+        }
+
+        .panel.selected {
+            box-shadow: 0 0 0 3px #ffd60a, 0 0 20px rgba(255, 214, 10, 0.4);
+        }
 
         .selection-checkbox {
-            position: absolute; top: 0.5rem; left: 50%; transform: translateX(-50%);
-            width: 24px; height: 24px;
-            background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 4px;
-            display: none; align-items: center; justify-content: center;
-            z-index: 3; color: #ffd60a; font-size: 1rem; font-weight: bold;
+            position: absolute;
+            top: 0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #fff;
+            border-radius: 4px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            color: #ffd60a;
+            font-size: 1rem;
+            font-weight: bold;
         }
-        .selecting .selection-checkbox { display: flex; }
-        .panel.selected .selection-checkbox { background: #ffd60a; color: #000; }
 
-        /* ── Bulk actions bar ── */
+        .selecting .selection-checkbox {
+            display: flex;
+        }
+
+        .panel.selected .selection-checkbox {
+            background: #ffd60a;
+            color: #000;
+        }
+
+        /* Bulk actions bar */
         .bulk-actions {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
             border-top: 2px solid #ffd60a;
             padding: 1rem 2rem;
-            display: none; justify-content: space-between; align-items: center;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
             z-index: 1500;
         }
-        .bulk-actions.active { display: flex; }
-        .bulk-actions-left  { font-size: 0.875rem; color: #ffd60a; font-weight: 600; }
-        .bulk-actions-right { display: flex; gap: 1rem; }
 
-        /* ── Lightbox ── */
+        .bulk-actions.active {
+            display: flex;
+        }
+
+        .bulk-actions-left {
+            font-size: 0.875rem;
+            color: #ffd60a;
+            font-weight: 600;
+        }
+
+        .bulk-actions-right {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Lightbox */
         .lightbox {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.95); z-index: 3000;
-            align-items: center; justify-content: center; padding: 2rem;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
         }
-        .lightbox.active { display: flex; }
+
+        .lightbox.active {
+            display: flex;
+        }
+
         .lightbox-content {
-            width: 90vw; height: 90vh;
-            max-width: 1920px; max-height: 1080px;
-            position: relative; background: #000;
+            width: 90vw;
+            height: 90vh;
+            max-width: 1920px;
+            max-height: 1080px;
+            position: relative;
+            background: #000;
         }
-        .lightbox-content iframe { width: 100%; height: 100%; border: none; }
+
+        .lightbox-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         .lightbox-close {
-            position: absolute; top: -3rem; right: 0;
-            background: transparent; border: none; color: #fff;
-            font-size: 2rem; cursor: pointer; padding: 0.5rem;
-            opacity: 0.8; transition: opacity 0.2s;
+            position: absolute;
+            top: -3rem;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
         }
-        .lightbox-close:hover { opacity: 1; }
-        .lightbox-title { position: absolute; top: -3rem; left: 0; font-size: 1rem; opacity: 0.8; }
 
-        /* ── Keyboard shortcuts overlay ── */
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .lightbox-title {
+            position: absolute;
+            top: -3rem;
+            left: 0;
+            color: #fff;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Keyboard shortcuts help */
         .shortcuts-help {
-            position: fixed; bottom: 1rem; left: 1rem;
-            background: rgba(0,0,0,0.9); border: 1px solid #333; border-radius: 8px;
-            padding: 1rem; font-size: 0.7rem;
-            opacity: 0; transition: opacity 0.3s; z-index: 2500; pointer-events: none;
-            line-height: 1.8;
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2500;
+            pointer-events: none;
         }
-        .shortcuts-help.visible { opacity: 1; }
+
+        .shortcuts-help.visible {
+            opacity: 1;
+        }
+
         .shortcuts-help kbd {
-            background: #222; padding: 0.15rem 0.4rem;
-            border-radius: 3px; border: 1px solid #444;
-            font-family: 'JetBrains Mono', monospace; margin: 0 0.25rem;
+            background: #222;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            border: 1px solid #444;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0 0.25rem;
         }
-        .shortcuts-help-title { font-weight: 600; margin-bottom: 0.5rem; color: #bf5af2; }
 
-        /* ── Favorite star ── */
+        .shortcuts-help-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #bf5af2;
+        }
+
         .favorite-star {
-            position: absolute; top: 0.5rem; left: 0.5rem;
-            width: 24px; height: 24px;
-            background: rgba(0,0,0,0.7); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.875rem; z-index: 2;
-            opacity: 0; transition: opacity 0.2s; pointer-events: none;
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
         }
-        .panel:hover .favorite-star, .panel.favorite .favorite-star { opacity: 1; }
-        .panel.favorite .favorite-star { color: #ffd60a; }
 
-        /* ── Panel action buttons (top-right) ── */
+        .panel:hover .favorite-star,
+        .panel.favorite .favorite-star {
+            opacity: 1;
+        }
+
+        .panel.favorite .favorite-star {
+            color: #ffd60a;
+        }
+
         .panel-actions {
-            position: absolute; top: 0.5rem; right: 0.5rem;
-            display: flex; gap: 0.25rem; z-index: 2;
-            opacity: 0; transition: opacity 0.2s;
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
-        .panel:hover .panel-actions { opacity: 1; }
+
+        .panel:hover .panel-actions {
+            opacity: 1;
+        }
+
         .panel-action-btn {
-            width: 24px; height: 24px;
-            background: rgba(0,0,0,0.7); border: none; border-radius: 50%;
-            color: #fff; font-size: 0.75rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
-        .panel-action-btn:hover { background: rgba(0,0,0,0.9); transform: scale(1.1); }
 
-        /* ── Empty state ── */
+        .panel-action-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .panel.active iframe {
+            pointer-events: auto;
+        }
+
+        /* Empty state */
         .empty-state {
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; flex-direction: column; gap: 2rem;
-            padding: 2rem; text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem;
+            text-align: center;
         }
-        .empty-title    { font-size: 3rem; font-weight: 600; letter-spacing: -0.02em; }
-        .empty-subtitle { font-size: 1rem; opacity: 0.6; }
-        .empty-btn {
-            background: #00d9ff; color: #000; border: none;
-            padding: 1rem 2rem; font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem; font-weight: 600; cursor: pointer; border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .empty-btn:hover { background: #00b8e6; transform: translateY(-2px); }
 
-        /* ── Footer ── */
+        .empty-title {
+            font-size: 3rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .empty-subtitle {
+            font-size: 1rem;
+            opacity: 0.6;
+        }
+
+        .empty-btn {
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .empty-btn:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
         .footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
             border-top: 1px solid #333;
             padding: 1rem 2rem;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             z-index: 1000;
-            transform: translateY(100%); transition: transform 0.3s;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
         }
-        .footer.visible { transform: translateY(0); }
-        .footer-left  { font-size: 0.875rem; opacity: 0.8; }
-        .footer-right { display: flex; gap: 0.75rem; align-items: center; }
 
-        .grid-size-controls {
-            display: flex; gap: 0.25rem;
-            border: 1px solid #333; border-radius: 4px; overflow: hidden;
+        .footer.visible {
+            transform: translateY(0);
         }
-        .grid-size-btn {
-            background: transparent; border: none; color: #fff;
-            padding: 0.5rem 0.75rem; font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem; cursor: pointer; transition: all 0.2s; opacity: 0.5;
-        }
-        .grid-size-btn.active { background: #bf5af2; opacity: 1; }
-        .grid-size-btn:hover  { opacity: 1; }
 
-        .footer-btn {
-            background: transparent; border: 1px solid #333; color: #fff;
-            padding: 0.5rem 1rem; font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem; cursor: pointer; border-radius: 4px;
-            transition: all 0.2s; text-decoration: none; display: inline-flex;
+        .footer-left {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 1rem;
             align-items: center;
         }
-        .footer-btn:hover { border-color: #00d9ff; color: #00d9ff; }
-        .footer-btn.fs-active { border-color: #bf5af2; color: #bf5af2; }
+
+        .grid-size-controls {
+            display: flex;
+            gap: 0.25rem;
+            border: 1px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .grid-size-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+        }
+
+        .grid-size-btn.active {
+            background: #bf5af2;
+            opacity: 1;
+        }
+
+        .grid-size-btn:hover {
+            opacity: 1;
+        }
+
+        .footer-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .footer-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
 
         .footer-toggle {
-            position: fixed; bottom: 1rem; right: 1rem;
-            background: rgba(0,0,0,0.8); border: 1px solid #333; color: #fff;
-            width: 40px; height: 40px; font-size: 1.25rem; cursor: pointer;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            z-index: 999; transition: all 0.2s;
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.2s ease;
         }
-        .footer-toggle:hover { background: #00d9ff; color: #000; border-color: #00d9ff; }
 
-        /* ── Modals ── */
+        .footer-toggle:hover {
+            background: #00d9ff;
+            color: #000;
+            border-color: #00d9ff;
+        }
+
+        /* Modal */
         .modal {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.9); z-index: 2000;
-            align-items: center; justify-content: center; padding: 2rem;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
         }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
-            max-width: 1000px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem;
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #333;
-        }
-        .modal-title { font-size: 1.5rem; font-weight: 600; }
-        .close-btn {
-            background: transparent; border: none; color: #fff;
-            font-size: 2rem; cursor: pointer; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; transition: opacity 0.2s;
-        }
-        .close-btn:hover { opacity: 1; }
 
-        /* Source edit modal form */
-        .form-group   { margin-bottom: 1.5rem; }
-        .form-label   { display: block; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; }
-        .form-input   { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; border-radius: 4px; transition: border-color 0.2s; }
-        .form-input:focus { outline: none; border-color: #00d9ff; }
-        .form-actions { display: flex; gap: 1rem; margin-top: 2rem; }
-        .btn-primary  { background: #00d9ff; color: #000; border: none; padding: 0.75rem 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; font-weight: 600; cursor: pointer; border-radius: 4px; flex: 1; transition: all 0.2s; }
-        .btn-primary:hover { background: #00b8e6; }
-        .btn-secondary { background: transparent; border: 1px solid #333; color: #fff; padding: 0.75rem 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; cursor: pointer; border-radius: 4px; flex: 1; transition: all 0.2s; }
-        .btn-secondary:hover { border-color: #fff; }
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .sources-list {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .source-item {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-info {
+            flex: 1;
+        }
+
+        .source-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .source-meta {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .source-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .fav-btn, .edit-btn, .delete-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .fav-btn:hover {
+            border-color: #ffd60a;
+            color: #ffd60a;
+        }
+
+        .fav-btn.active {
+            background: #ffd60a;
+            color: #000;
+            border-color: #ffd60a;
+        }
+
+        .edit-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        .delete-btn:hover {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .add-btn {
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #00b8e6;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00d9ff;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            flex: 1;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.75rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: 4px;
+            flex: 1;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: #fff;
+        }
+
+        /* Gist Sync */
+        .form-hint {
+            font-size: 0.7rem;
+            opacity: 0.5;
+            margin-top: 0.4rem;
+            line-height: 1.5;
+        }
+
+        .sync-status {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: #00d9ff;
+            word-break: break-word;
+        }
+
+        .sync-status.error {
+            color: #ff4444;
+            border-color: #ff4444;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-row input {
+            accent-color: #bf5af2;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #bf5af2;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            z-index: 4000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.visible {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
+    <!-- Grid -->
+    <div id="gridContainer"></div>
 
-<!-- Grid -->
-<div id="gridContainer"></div>
-
-<!-- Empty State -->
-<div id="emptyState" class="empty-state">
-    <div class="empty-title">NEWS WALL</div>
-    <div class="empty-subtitle">Open the source manager to add your first feed</div>
-    <a href="manage.html" class="empty-btn">OPEN MANAGER →</a>
-</div>
-
-<!-- Footer -->
-<div id="footer" class="footer">
-    <div class="footer-left">NEWS WALL</div>
-    <div class="footer-right">
-        <select id="regionFilter" class="footer-btn" onchange="filterByRegion(this.value)" style="padding: 0.4rem 0.8rem;">
-            <option value="all">All Regions</option>
-            <option value="us">United States</option>
-            <option value="europe">Europe</option>
-            <option value="latam">Latin America</option>
-            <option value="mena">MENA</option>
-            <option value="asia">Asia-Pacific</option>
-            <option value="africa">Africa</option>
-            <option value="other">Other</option>
-        </select>
-        <button class="footer-btn" onclick="enterBulkSelectMode()">BULK SELECT</button>
-        <button class="footer-btn" onclick="muteAll()">MUTE ALL</button>
-        <div class="grid-size-controls">
-            <button class="grid-size-btn" onclick="setGridSize('compact')" title="Compact">◾◾◾</button>
-            <button class="grid-size-btn active" onclick="setGridSize('medium')" title="Medium">◾◾</button>
-            <button class="grid-size-btn" onclick="setGridSize('large')" title="Large">◾</button>
-        </div>
-        <button class="footer-btn" id="fullscreenBtn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
-        <button class="footer-btn" onclick="exportSources()">EXPORT</button>
-        <button class="footer-btn" onclick="importSources()">IMPORT</button>
-        <a href="manage.html" class="footer-btn" style="color:#bf5af2; border-color:rgba(191,90,242,0.4);">MANAGE →</a>
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state">
+        <div class="empty-title">NEWS WALL</div>
+        <div class="empty-subtitle">Click below to add your first news source</div>
+        <button class="empty-btn" onclick="openAddSource()">+ ADD SOURCE</button>
     </div>
-</div>
 
-<!-- Footer Toggle -->
-<button id="footerToggle" class="footer-toggle" onclick="toggleFooter()">⚙</button>
-
-<!-- Edit Source Modal (for quick inline edits from panel ✎ button) -->
-<div id="sourceModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title" id="sourceModalTitle">Edit Source</div>
-            <button class="close-btn" onclick="closeSourceModal()">&times;</button>
+    <!-- Footer -->
+    <div id="footer" class="footer">
+        <div class="footer-left">NEWS WALL</div>
+        <div class="footer-right">
+            <select id="regionFilter" class="footer-btn" onchange="filterByRegion(this.value)" style="padding: 0.4rem 0.8rem;">
+                <option value="all">All Regions</option>
+                <option value="us">United States</option>
+                <option value="europe">Europe</option>
+                <option value="latam">Latin America</option>
+                <option value="mena">MENA</option>
+                <option value="asia">Asia-Pacific</option>
+                <option value="africa">Africa</option>
+                <option value="other">Other</option>
+            </select>
+            <button class="footer-btn" onclick="enterBulkSelectMode()">BULK SELECT</button>
+            <button class="footer-btn" onclick="muteAll()">MUTE ALL</button>
+            <div class="grid-size-controls">
+                <button class="grid-size-btn" onclick="setGridSize('compact')" title="Compact">◾◾◾</button>
+                <button class="grid-size-btn active" onclick="setGridSize('medium')" title="Medium">◾◾</button>
+                <button class="grid-size-btn" onclick="setGridSize('large')" title="Large">◾</button>
+            </div>
+            <button class="footer-btn" onclick="openManageSources()">MANAGE SOURCES</button>
+            <button class="footer-btn" onclick="openSyncModal()">SYNC</button>
+            <button class="footer-btn" onclick="exportSources()">EXPORT</button>
+            <button class="footer-btn" onclick="importSources()">IMPORT</button>
         </div>
-        <form id="sourceForm">
+    </div>
+
+    <!-- Footer Toggle -->
+    <button id="footerToggle" class="footer-toggle" onclick="toggleFooter()">⚙</button>
+
+    <!-- Manage Sources Modal -->
+    <div id="manageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Manage Sources</div>
+                <button class="close-btn" onclick="closeManageModal()">&times;</button>
+            </div>
+            <div id="sourcesList" class="sources-list"></div>
+            <button class="add-btn" onclick="openAddSource()">+ ADD NEW SOURCE</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Source Modal -->
+    <div id="sourceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="sourceModalTitle">Add Source</div>
+                <button class="close-btn" onclick="closeSourceModal()">&times;</button>
+            </div>
+            <form id="sourceForm">
+                <div class="form-group">
+                    <label class="form-label">Name *</label>
+                    <input type="text" id="sourceName" class="form-input" placeholder="e.g., BBC News" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Region *</label>
+                    <select id="sourceRegion" class="form-input" required>
+                        <option value="us">United States</option>
+                        <option value="europe">Europe</option>
+                        <option value="latam">Latin America</option>
+                        <option value="mena">MENA</option>
+                        <option value="asia">Asia-Pacific</option>
+                        <option value="africa">Africa</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">YouTube Video URL *</label>
+                    <input type="text" id="sourceUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeSourceModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importInput" accept=".json" style="display: none;" onchange="handleImport(event)">
+
+    <!-- Gist Sync Modal -->
+    <div id="syncModal" class="modal">
+        <div class="modal-content" style="max-width: 640px;">
+            <div class="modal-header">
+                <div class="modal-title">Cloud Sync</div>
+                <button class="close-btn" onclick="closeSyncModal()">&times;</button>
+            </div>
+            <div id="syncStatus" class="sync-status">Not configured</div>
             <div class="form-group">
-                <label class="form-label">Name *</label>
-                <input type="text" id="sourceName" class="form-input" placeholder="e.g., Al Jazeera Arabic" required>
+                <label class="form-label">GitHub Token</label>
+                <input type="password" id="gistTokenInput" class="form-input" placeholder="github_pat_… or ghp_…" autocomplete="off">
+                <div class="form-hint">
+                    Create at github.com → Settings → Developer settings → Personal access tokens.
+                    Fine-grained token: grant only "Gists" (read &amp; write) under Account permissions.
+                    Classic token: check only the "gist" scope. The token is stored in this browser's
+                    localStorage only — it never leaves your device except to talk to api.github.com.
+                </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Region *</label>
-                <select id="sourceRegion" class="form-input" required>
-                    <option value="us">United States</option>
-                    <option value="europe">Europe</option>
-                    <option value="latam">Latin America</option>
-                    <option value="mena">MENA</option>
-                    <option value="asia">Asia-Pacific</option>
-                    <option value="africa">Africa</option>
-                    <option value="other">Other</option>
-                </select>
+                <label class="form-label">Gist ID</label>
+                <input type="text" id="gistIdInput" class="form-input" placeholder="Blank on first device — click CREATE GIST below" autocomplete="off">
+                <div class="form-hint">
+                    On your first device: paste your token, then click CREATE GIST. On every other
+                    device: paste the same token and this Gist ID, then click PULL FROM GIST.
+                </div>
             </div>
             <div class="form-group">
-                <label class="form-label">YouTube Video URL *</label>
-                <input type="text" id="sourceUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
+                <label class="checkbox-row">
+                    <input type="checkbox" id="gistAutoSyncInput">
+                    Auto-push changes to Gist (3s after any edit)
+                </label>
             </div>
             <div class="form-actions">
-                <button type="button" class="btn-secondary" onclick="closeSourceModal()">Cancel</button>
-                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" class="btn-secondary" onclick="saveSyncSettings()">Save Settings</button>
+                <button type="button" class="btn-secondary" onclick="createSyncGist()">Create Gist</button>
             </div>
-        </form>
+            <div class="form-actions">
+                <button type="button" class="btn-primary" onclick="pushToGist()">⬆ Push to Gist</button>
+                <button type="button" class="btn-primary" onclick="pullFromGist()">⬇ Pull from Gist</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<!-- Hidden file input for import -->
-<input type="file" id="importInput" accept=".json" style="display:none;" onchange="handleImport(event)">
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
 
-<!-- Lightbox -->
-<div id="lightbox" class="lightbox">
-    <div class="lightbox-content">
-        <div class="lightbox-title" id="lightboxTitle"></div>
-        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-        <iframe id="lightboxFrame"></iframe>
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <div class="lightbox-title" id="lightboxTitle"></div>
+            <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+            <iframe id="lightboxFrame"></iframe>
+        </div>
     </div>
-</div>
 
-<!-- Bulk Actions Bar -->
-<div id="bulkActions" class="bulk-actions">
-    <div class="bulk-actions-left"><span id="selectedCount">0</span> selected</div>
-    <div class="bulk-actions-right">
-        <button class="footer-btn" onclick="bulkFavorite()">★ Favorite</button>
-        <button class="footer-btn" onclick="bulkMarkDead()">💀 Mark Dead</button>
-        <button class="footer-btn" onclick="bulkDelete()">Delete</button>
-        <button class="footer-btn" onclick="cancelBulkSelect()">Cancel</button>
+    <!-- Bulk Actions Bar -->
+    <div id="bulkActions" class="bulk-actions">
+        <div class="bulk-actions-left">
+            <span id="selectedCount">0</span> selected
+        </div>
+        <div class="bulk-actions-right">
+            <button class="footer-btn" onclick="bulkFavorite()">★ Favorite</button>
+            <button class="footer-btn" onclick="bulkMarkDead()">💀 Mark Dead</button>
+            <button class="footer-btn" onclick="bulkDelete()">Delete</button>
+            <button class="footer-btn" onclick="cancelBulkSelect()">Cancel</button>
+        </div>
     </div>
-</div>
 
-<!-- Keyboard Shortcuts Help -->
-<div id="shortcutsHelp" class="shortcuts-help">
-    <div class="shortcuts-help-title">KEYBOARD SHORTCUTS</div>
-    <div><kbd>1–9</kbd> Switch to panel 1–9</div>
-    <div><kbd>Space</kbd> Pause active panel</div>
-    <div><kbd>F</kbd> Lightbox active panel</div>
-    <div><kbd>G</kbd> Grid fullscreen</div>
-    <div><kbd>M</kbd> Mute all</div>
-    <div><kbd>B</kbd> Bulk select mode</div>
-    <div><kbd>Esc</kbd> Close / cancel / mute</div>
-    <div><kbd>?</kbd> Toggle this help</div>
-    <div><kbd>Ctrl+S</kbd> Toggle footer</div>
-</div>
+    <!-- Keyboard Shortcuts Help -->
+    <div id="shortcutsHelp" class="shortcuts-help">
+        <div class="shortcuts-help-title">KEYBOARD SHORTCUTS</div>
+        <div><kbd>1-9</kbd> Switch to panel 1-9</div>
+        <div><kbd>Space</kbd> Toggle active panel audio</div>
+        <div><kbd>F</kbd> Fullscreen active panel</div>
+        <div><kbd>M</kbd> Mute all</div>
+        <div><kbd>B</kbd> Bulk select mode</div>
+        <div><kbd>Esc</kbd> Close lightbox / Cancel bulk / Mute all</div>
+        <div><kbd>?</kbd> Toggle this help</div>
+        <div><kbd>Ctrl+S</kbd> Toggle footer</div>
+    </div>
 
-<script>
-    // ── State ──
-    let sources       = JSON.parse(localStorage.getItem('newsWallSources')) || [];
-    let gridSize      = localStorage.getItem('newsWallGridSize') || 'medium';
-    let currentRegion = 'all';
-    let activePanel   = null;   // originalIndex of the currently-unmuted panel
-    let editingIndex  = null;
-    let draggedIndex  = null;
-    let bulkMode      = false;
-    let selected      = new Set();
+    <script>
+        // ============================================================
+        // DATA MODEL
+        // ============================================================
+        // Every source has a stable `id` (UUID) that never changes, and
+        // an `order` (float) that determines its position in the grid.
+        // Rendering, drag-and-drop, sync, and keyboard nav all key off
+        // `id` — never off array position — so deleting or reordering
+        // one source can't silently reassign another source's identity.
 
-    function saveSources() { localStorage.setItem('newsWallSources', JSON.stringify(sources)); }
-    function saveGridSize() { localStorage.setItem('newsWallGridSize', gridSize); }
-
-    // ── Render ──
-    function renderGrid() {
-        const container  = document.getElementById('gridContainer');
-        const emptyState = document.getElementById('emptyState');
-
-        // Region filter
-        let display = currentRegion === 'all'
-            ? sources
-            : sources.filter(s => s.region === currentRegion);
-
-        if (display.length === 0) {
-            container.innerHTML = '';
-            container.style.display = 'none';
-            emptyState.style.display = sources.length === 0 ? 'flex' : 'none';
-            if (sources.length > 0) {
-                container.innerHTML = '<div style="text-align:center;padding:4rem;opacity:0.6;">No sources in this region</div>';
-                container.style.display = 'block';
-            }
-            return;
+        function makeId() {
+            if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+            // Fallback for non-secure contexts / older browsers
+            return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
         }
 
-        emptyState.style.display = 'none';
-        container.style.display  = 'grid';
-        container.className      = `grid ${gridSize}`;
-        container.innerHTML      = '';
+        // Backfills id/order on any source missing them (legacy data,
+        // imports, or a Gist written by an older version of the wall).
+        // Order is assigned by appending after the current maximum so
+        // existing relative order is preserved.
+        function migrateSources(list) {
+            if (!Array.isArray(list)) return [];
+            let maxOrder = list.reduce((m, s) => typeof s.order === 'number' ? Math.max(m, s.order) : m, -10);
+            return list.map(s => {
+                const copy = { ...s };
+                if (!copy.id) copy.id = makeId();
+                if (typeof copy.order !== 'number') {
+                    maxOrder += 10;
+                    copy.order = maxOrder;
+                }
+                if (typeof copy.favorite !== 'boolean') copy.favorite = false;
+                if (typeof copy.dead !== 'boolean') copy.dead = false;
+                return copy;
+            });
+        }
 
-        // Sort: dead sources always sink to the bottom; everything else keeps
-        // its array order so drag-and-drop reordering is respected.
-        const sorted = [...display].sort((a, b) => {
-            if (a.dead && !b.dead) return 1;
-            if (!a.dead && b.dead) return -1;
-            return 0;
-        });
+        // Load sources from localStorage
+        let sources = migrateSources(JSON.parse(localStorage.getItem('newsWallSources')) || []);
+        let gridSize = localStorage.getItem('newsWallGridSize') || 'medium';
+        let currentRegionFilter = 'all';
+        let activeId = null;
+        let editingId = null;
+        let draggedId = null;
+        let bulkSelectMode = false;
+        let selectedIds = new Set();
 
-        sorted.forEach(source => {
-            const idx = sources.indexOf(source);   // original index in sources[]
+        // id -> panel DOM element. Panels are created once per id and
+        // then only ever updated in place — never rebuilt — so an
+        // iframe keeps streaming through favorite toggles, region
+        // filtering, drag reorders, and sync pulls. It is only
+        // recreated if its own source is deleted, or its own URL changes.
+        const panelEls = new Map();
 
+        function saveSources(options = {}) {
+            localStorage.setItem('newsWallSources', JSON.stringify(sources));
+            if (!options.skipSync) scheduleAutoPush();
+        }
+
+        // Escape user-provided strings before injecting into innerHTML
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        // Convert any common YouTube URL form to an embed URL.
+        // Handles: watch?v=ID, youtu.be/ID, /live/ID, /embed/ID
+        function toEmbedUrl(url) {
+            try {
+                const u = new URL(url);
+                let id = null;
+                if (u.hostname.includes('youtu.be')) {
+                    id = u.pathname.split('/')[1];
+                } else if (u.pathname.startsWith('/live/')) {
+                    id = u.pathname.split('/')[2];
+                } else if (u.pathname.startsWith('/embed/')) {
+                    return `https://www.youtube.com/embed/${u.pathname.split('/')[2]}`;
+                } else if (u.searchParams.get('v')) {
+                    id = u.searchParams.get('v');
+                }
+                if (id) return `https://www.youtube.com/embed/${id}`;
+            } catch (err) { /* fall through to legacy behavior */ }
+            return url.replace('watch?v=', 'embed/');
+        }
+
+        function saveGridSize() {
+            localStorage.setItem('newsWallGridSize', gridSize);
+        }
+
+        function findSource(id) {
+            return sources.find(s => s.id === id);
+        }
+
+        // ============================================================
+        // RENDERING — incremental, no reloads
+        // ============================================================
+        // Visual order comes entirely from the CSS `order` property on
+        // each panel, never from DOM position. That's the key trick:
+        // moving a node in the DOM (insertBefore/appendChild) forces
+        // browsers to reload its iframe, but changing a CSS property
+        // does not. So panels are appended once and never moved again —
+        // reordering, favoriting, and region filtering are all just
+        // style/class updates on existing nodes.
+
+        function createPanelElement(source) {
             const panel = document.createElement('div');
-            panel.className   = 'panel';
-            panel.dataset.index = idx;
-            panel.draggable   = !bulkMode;
-            if (source.favorite) panel.classList.add('favorite');
-            if (source.dead)     panel.classList.add('dead');
-            if (bulkMode)        panel.classList.add('selecting');
-            if (selected.has(idx)) panel.classList.add('selected');
-            if (idx === activePanel) panel.classList.add('active');
+            panel.className = 'panel';
+            panel.dataset.id = source.id;
 
-            const embedUrl = source.url.replace('watch?v=', 'embed/');
-
+            const embedUrl = toEmbedUrl(source.url);
             panel.innerHTML = `
-                <iframe id="player-${idx}"
+                <iframe
+                    id="player-${source.id}"
                     src="${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
-                <div class="source-label">
-                    <span class="source-label-name">${esc(source.name)}</span>
-                    ${source.region ? `<span class="source-label-region">${source.region}</span>` : ''}
-                </div>
+                    allowfullscreen>
+                </iframe>
+                <div class="source-label"></div>
                 <div class="selection-checkbox">✓</div>
-                <div class="favorite-star">${source.favorite ? '★' : '☆'}</div>
+                <div class="favorite-star"></div>
                 <div class="panel-actions">
-                    <button class="panel-action-btn" title="Fullscreen (F)">⛶</button>
-                    <button class="panel-action-btn" title="${source.dead ? 'Mark Alive' : 'Mark Dead'}">${source.dead ? '🔄' : '💀'}</button>
+                    <button class="panel-action-btn" title="Fullscreen">⛶</button>
+                    <button class="panel-action-btn">💀</button>
                     <button class="panel-action-btn" title="Edit">✎</button>
                 </div>
                 <div class="panel-overlay"></div>
             `;
+            panel.querySelector('iframe').dataset.embedBase = embedUrl;
 
-            // Drag handlers
-            if (!bulkMode) {
-                panel.addEventListener('dragstart', onDragStart);
-                panel.addEventListener('dragend',   onDragEnd);
-                panel.addEventListener('dragover',  onDragOver);
-                panel.addEventListener('dragleave', onDragLeave);
-                panel.addEventListener('drop',      onDrop);
-            }
+            panel.addEventListener('dragstart', handleDragStart);
+            panel.addEventListener('dragend', handleDragEnd);
+            panel.addEventListener('dragover', handleDragOver);
+            panel.addEventListener('drop', handleDrop);
+            panel.addEventListener('dragleave', handleDragLeave);
 
-            // Overlay click → unmute / select
-            panel.querySelector('.panel-overlay').addEventListener('click', e => {
+            // All click handlers read the id from the panel's own
+            // dataset at click-time, not from a closed-over source
+            // object, so they stay correct even after `sources` is
+            // replaced wholesale (import, Gist pull).
+            const overlay = panel.querySelector('.panel-overlay');
+            overlay.addEventListener('click', (e) => {
                 e.stopPropagation();
-                bulkMode ? toggleSelect(idx) : toggleAudio(idx);
+                const id = panel.dataset.id;
+                if (bulkSelectMode) togglePanelSelection(id); else toggleAudio(id);
             });
 
-            // Favorite star
             const star = panel.querySelector('.favorite-star');
             star.style.pointerEvents = 'auto';
-            star.style.cursor        = 'pointer';
-            star.addEventListener('click', e => { e.stopPropagation(); toggleFavorite(idx); });
+            star.style.cursor = 'pointer';
+            star.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFavorite(panel.dataset.id);
+            });
 
-            // Action buttons
-            const btns = panel.querySelectorAll('.panel-action-btn');
-            btns[0].style.pointerEvents = 'auto';
-            btns[1].style.pointerEvents = 'auto';
-            btns[2].style.pointerEvents = 'auto';
-            btns[0].addEventListener('click', e => { e.stopPropagation(); openLightbox(idx); });
-            btns[1].addEventListener('click', e => { e.stopPropagation(); toggleDead(idx); });
-            btns[2].addEventListener('click', e => { e.stopPropagation(); editSource(idx); });
+            const actionBtns = panel.querySelectorAll('.panel-action-btn');
+            actionBtns[0].style.pointerEvents = 'auto';
+            actionBtns[0].addEventListener('click', (e) => {
+                e.stopPropagation();
+                openLightbox(panel.dataset.id);
+            });
+            actionBtns[1].style.pointerEvents = 'auto';
+            actionBtns[1].addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDead(panel.dataset.id);
+            });
+            actionBtns[2].style.pointerEvents = 'auto';
+            actionBtns[2].addEventListener('click', (e) => {
+                e.stopPropagation();
+                editSource(panel.dataset.id);
+            });
 
-            container.appendChild(panel);
-        });
-
-        // Sync grid-size button highlight
-        document.querySelectorAll('.grid-size-btn').forEach((btn, i) => {
-            btn.classList.toggle('active', ['compact','medium','large'][i] === gridSize);
-        });
-
-        updateBulkBar();
-    }
-
-    function esc(s) {
-        return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ── Drag-and-drop ──
-    function onDragStart(e) {
-        draggedIndex = parseInt(this.dataset.index);
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-    }
-
-    function onDragEnd() {
-        draggedIndex = null;
-        this.classList.remove('dragging');
-        document.querySelectorAll('.panel.drag-over').forEach(p => p.classList.remove('drag-over'));
-    }
-
-    function onDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        this.classList.add('drag-over');
-    }
-
-    function onDragLeave() { this.classList.remove('drag-over'); }
-
-    function onDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('drag-over');
-
-        const dropIndex = parseInt(this.dataset.index);
-        if (draggedIndex === null || draggedIndex === dropIndex) return;
-
-        // Remove the dragged item, then insert at the correct position.
-        // After splice(draggedIndex,1), every index > draggedIndex shifts down by 1.
-        const [item] = sources.splice(draggedIndex, 1);
-        const insertAt = dropIndex > draggedIndex ? dropIndex - 1 : dropIndex;
-        sources.splice(insertAt, 0, item);
-
-        // If the active panel was one of the moved items, update activePanel
-        // to track the item, not the index.
-        // Simple: just clear it — user can click again.
-        activePanel = null;
-
-        saveSources();
-        renderGrid();
-    }
-
-    // ── Audio ──
-    function toggleAudio(idx) {
-        // De-activate previous panel
-        if (activePanel !== null && activePanel !== idx) {
-            const prevEl = document.querySelector(`.panel[data-index="${activePanel}"]`);
-            if (prevEl) prevEl.classList.remove('active');
-            const prevFrame = document.getElementById(`player-${activePanel}`);
-            if (prevFrame) prevFrame.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+            return panel;
         }
 
-        if (activePanel === idx) return;   // clicking same panel: leave active, do nothing
+        // Updates a panel to match its current source data. Never
+        // touches the iframe unless the underlying URL actually
+        // changed (e.g. after an edit or an auto dead-link swap).
+        function updatePanelState(panel, source, orderIndex) {
+            panel.style.order = orderIndex;
+            panel.classList.toggle('favorite', !!source.favorite);
+            panel.classList.toggle('dead', !!source.dead);
+            panel.classList.toggle('selecting', bulkSelectMode);
+            panel.classList.toggle('selected', selectedIds.has(source.id));
+            panel.classList.toggle('active', activeId === source.id);
+            panel.draggable = !bulkSelectMode;
 
-        activePanel = idx;
-        const el = document.querySelector(`.panel[data-index="${idx}"]`);
-        if (el) el.classList.add('active');
-        const frame = document.getElementById(`player-${idx}`);
-        if (frame) frame.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-    }
+            const regionMatch = (currentRegionFilter === 'all' || source.region === currentRegionFilter);
+            panel.style.display = regionMatch ? '' : 'none';
 
-    function muteAll() {
-        if (activePanel !== null) {
-            const el = document.querySelector(`.panel[data-index="${activePanel}"]`);
-            if (el) el.classList.remove('active');
-            const frame = document.getElementById(`player-${activePanel}`);
-            if (frame) frame.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-            activePanel = null;
-        }
-    }
+            panel.querySelector('.source-label').innerHTML =
+                `${escapeHtml(source.name)}${source.region ? ' • ' + escapeHtml(source.region).toUpperCase() : ''}`;
+            panel.querySelector('.favorite-star').textContent = source.favorite ? '★' : '☆';
 
-    // ── Fullscreen ──
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => alert('Fullscreen unavailable: ' + err.message));
-        } else {
-            document.exitFullscreen();
-        }
-    }
-    document.addEventListener('fullscreenchange', () => {
-        const btn = document.getElementById('fullscreenBtn');
-        if (btn) {
-            btn.textContent = document.fullscreenElement ? '✕ EXIT FULL' : '⛶ FULLSCREEN';
-            btn.classList.toggle('fs-active', !!document.fullscreenElement);
-        }
-    });
+            const actionBtns = panel.querySelectorAll('.panel-action-btn');
+            actionBtns[1].textContent = source.dead ? '🔄' : '💀';
+            actionBtns[1].title = source.dead ? 'Mark Alive' : 'Mark Dead';
 
-    // ── Footer ──
-    function toggleFooter() { document.getElementById('footer').classList.toggle('visible'); }
-
-    // ── Grid size ──
-    function setGridSize(size) { gridSize = size; saveGridSize(); renderGrid(); }
-
-    // ── Region filter ──
-    function filterByRegion(region) { currentRegion = region; renderGrid(); }
-
-    // ── Favorite / Dead ──
-    function toggleFavorite(idx) { sources[idx].favorite = !sources[idx].favorite; saveSources(); renderGrid(); }
-    function toggleDead(idx)     { sources[idx].dead = !sources[idx].dead; saveSources(); renderGrid(); }
-
-    // ── Lightbox ──
-    function openLightbox(idx) {
-        const src = sources[idx];
-        const url = src.url.replace('watch?v=', 'embed/');
-        document.getElementById('lightboxTitle').textContent = src.name;
-        document.getElementById('lightboxFrame').src = url + '?autoplay=1&controls=1&modestbranding=1';
-        document.getElementById('lightbox').classList.add('active');
-    }
-    function closeLightbox() {
-        document.getElementById('lightbox').classList.remove('active');
-        document.getElementById('lightboxFrame').src = '';
-    }
-    document.getElementById('lightbox').addEventListener('click', e => {
-        if (e.target.id === 'lightbox') closeLightbox();
-    });
-
-    // ── Bulk select ──
-    function enterBulkSelectMode() { bulkMode = true; selected.clear(); renderGrid(); }
-    function cancelBulkSelect()    { bulkMode = false; selected.clear(); document.getElementById('bulkActions').classList.remove('active'); renderGrid(); }
-
-    function toggleSelect(idx) {
-        selected.has(idx) ? selected.delete(idx) : selected.add(idx);
-        const panel = document.querySelector(`.panel[data-index="${idx}"]`);
-        if (panel) panel.classList.toggle('selected', selected.has(idx));
-        updateBulkBar();
-    }
-
-    function updateBulkBar() {
-        const bar = document.getElementById('bulkActions');
-        document.getElementById('selectedCount').textContent = selected.size;
-        bar.classList.toggle('active', bulkMode && selected.size > 0);
-    }
-
-    function bulkFavorite() { selected.forEach(i => { sources[i].favorite = true; }); saveSources(); cancelBulkSelect(); }
-    function bulkMarkDead() { selected.forEach(i => { sources[i].dead = true; }); saveSources(); cancelBulkSelect(); }
-    function bulkDelete() {
-        if (!confirm(`Delete ${selected.size} source(s)?`)) return;
-        [...selected].sort((a,b) => b-a).forEach(i => sources.splice(i,1));
-        saveSources(); cancelBulkSelect();
-    }
-
-    // ── Edit source (inline panel ✎) ──
-    function editSource(idx) {
-        editingIndex = idx;
-        const s = sources[idx];
-        document.getElementById('sourceModalTitle').textContent = 'Edit Source';
-        document.getElementById('sourceName').value   = s.name;
-        document.getElementById('sourceRegion').value = s.region || 'other';
-        document.getElementById('sourceUrl').value    = s.url;
-        document.getElementById('sourceModal').classList.add('active');
-    }
-    function closeSourceModal() { document.getElementById('sourceModal').classList.remove('active'); }
-
-    document.getElementById('sourceForm').addEventListener('submit', e => {
-        e.preventDefault();
-        const name   = document.getElementById('sourceName').value.trim();
-        const region = document.getElementById('sourceRegion').value;
-        const url    = document.getElementById('sourceUrl').value.trim();
-        if (!name || !url || !region) { alert('All fields required'); return; }
-        if (editingIndex !== null) {
-            sources[editingIndex].name   = name;
-            sources[editingIndex].region = region;
-            sources[editingIndex].url    = url;
-        }
-        saveSources(); closeSourceModal(); renderGrid();
-    });
-
-    // ── Export / Import ──
-    function exportSources() {
-        const blob = new Blob([JSON.stringify(sources, null, 2)], { type: 'application/json' });
-        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'news-wall-sources.json' });
-        a.click(); URL.revokeObjectURL(a.href);
-    }
-    function importSources() { document.getElementById('importInput').click(); }
-    function handleImport(e) {
-        const file = e.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            try {
-                const data = JSON.parse(ev.target.result);
-                if (Array.isArray(data)) { sources = data; saveSources(); renderGrid(); alert('Imported successfully'); }
-                else alert('Invalid format');
-            } catch(err) { alert('Error reading file'); }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-    }
-
-    // ── Init ──
-    renderGrid();
-    if (sources.length > 0 && activePanel === null) {
-        setTimeout(() => toggleAudio(0), 1000);
-    }
-    if (!localStorage.getItem('newsWallSeenShortcuts')) {
-        setTimeout(() => {
-            document.getElementById('shortcutsHelp').classList.add('visible');
-            setTimeout(() => {
-                document.getElementById('shortcutsHelp').classList.remove('visible');
-                localStorage.setItem('newsWallSeenShortcuts', 'true');
-            }, 5000);
-        }, 2000);
-    }
-
-    // ── Keyboard shortcuts ──
-    document.addEventListener('keydown', e => {
-        if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
-        const key = e.key.toLowerCase();
-
-        if (key === 'escape') {
-            if (document.getElementById('lightbox').classList.contains('active')) closeLightbox();
-            else if (bulkMode) cancelBulkSelect();
-            else muteAll();
-            return;
-        }
-        if (key === '?') { document.getElementById('shortcutsHelp').classList.toggle('visible'); return; }
-        if (key === 's' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); toggleFooter(); return; }
-        if (key === 'b') { bulkMode ? cancelBulkSelect() : enterBulkSelectMode(); return; }
-        if (key === 'm') { muteAll(); return; }
-        if (key === 'g') { toggleFullscreen(); return; }
-
-        if (key === ' ' && activePanel !== null) {
-            e.preventDefault();
-            const frame = document.getElementById(`player-${activePanel}`);
-            if (frame) frame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-            return;
-        }
-        if (key === 'f' && activePanel !== null) { openLightbox(activePanel); return; }
-
-        if (key >= '1' && key <= '9') {
-            const panelIndex = parseInt(key) - 1;
-            const visible = document.querySelectorAll('.panel:not(.dead)');
-            if (visible[panelIndex]) toggleAudio(parseInt(visible[panelIndex].dataset.index));
-            return;
-        }
-
-        if (['arrowup','arrowdown','arrowleft','arrowright'].includes(key)) {
-            e.preventDefault();
-            if (activePanel === null) { toggleAudio(0); return; }
-
-            const visible  = Array.from(document.querySelectorAll('.panel:not(.dead)'));
-            const curEl    = visible.find(p => parseInt(p.dataset.index) === activePanel);
-            const curI     = visible.indexOf(curEl);
-            if (curI === -1) return;
-
-            const cols = getComputedStyle(document.getElementById('gridContainer')).gridTemplateColumns.split(' ').length;
-            let next = curI;
-            if (key === 'arrowleft')  next = curI - 1;
-            if (key === 'arrowright') next = curI + 1;
-            if (key === 'arrowup')    next = curI - cols;
-            if (key === 'arrowdown')  next = curI + cols;
-
-            if (next >= 0 && next < visible.length) {
-                const el = visible[next];
-                toggleAudio(parseInt(el.dataset.index));
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const iframe = panel.querySelector('iframe');
+            const embedUrl = toEmbedUrl(source.url);
+            if (iframe.dataset.embedBase !== embedUrl) {
+                iframe.src = `${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1`;
+                iframe.dataset.embedBase = embedUrl;
             }
         }
-    });
-</script>
+
+        function renderGrid() {
+            const container = document.getElementById('gridContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (sources.length === 0) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                panelEls.clear();
+                emptyState.style.display = 'flex';
+                updateBulkActionsBar();
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            const visibleCount = currentRegionFilter === 'all'
+                ? sources.length
+                : sources.filter(s => s.region === currentRegionFilter).length;
+
+            if (visibleCount === 0) {
+                container.style.display = 'block';
+                container.innerHTML = '<div style="text-align: center; padding: 4rem; opacity: 0.6;">No sources in this region</div>';
+                panelEls.clear();
+                updateBulkActionsBar();
+                return;
+            }
+
+            container.style.display = 'grid';
+            container.className = `grid ${gridSize}`;
+            // Clear the placeholder text node if we just came from an
+            // empty-region state — but never wipe real panel children.
+            if (!container.querySelector('.panel') && container.children.length && !panelEls.size) {
+                container.innerHTML = '';
+            }
+
+            const sortedAll = [...sources].sort((a, b) => a.order - b.order);
+            const currentIds = new Set(sortedAll.map(s => s.id));
+
+            // Remove panels for deleted sources
+            for (const [id, el] of panelEls) {
+                if (!currentIds.has(id)) {
+                    el.remove();
+                    panelEls.delete(id);
+                }
+            }
+
+            // Create-or-update every remaining panel, in place
+            sortedAll.forEach((source, i) => {
+                let panel = panelEls.get(source.id);
+                if (!panel) {
+                    panel = createPanelElement(source);
+                    panelEls.set(source.id, panel);
+                    container.appendChild(panel);
+                }
+                updatePanelState(panel, source, i);
+            });
+
+            // Update grid size buttons
+            document.querySelectorAll('.grid-size-btn').forEach(btn => btn.classList.remove('active'));
+            const sizes = ['compact', 'medium', 'large'];
+            const activeBtn = document.querySelectorAll('.grid-size-btn')[sizes.indexOf(gridSize)];
+            if (activeBtn) activeBtn.classList.add('active');
+
+            updateBulkActionsBar();
+        }
+
+        // Panels currently visible on screen (not region-filtered out,
+        // not dead), sorted by their CSS `order` — i.e. actual visual
+        // order, which no longer matches DOM insertion order.
+        function getVisiblePanelsInVisualOrder() {
+            return Array.from(document.querySelectorAll('#gridContainer .panel'))
+                .filter(p => p.style.display !== 'none' && !p.classList.contains('dead'))
+                .sort((a, b) => parseFloat(a.style.order) - parseFloat(b.style.order));
+        }
+
+        // ============================================================
+        // DRAG AND DROP — explicit `order` field, favorites are
+        // visual-only and no longer affect position
+        // ============================================================
+        function handleDragStart(e) {
+            draggedId = this.dataset.id;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('drag-over'));
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            const targetId = this.dataset.id;
+            if (!draggedId || draggedId === targetId) return;
+
+            const dragged = findSource(draggedId);
+            if (!dragged) return;
+
+            // Insert dragged immediately before target, within the
+            // currently-visible sorted order (drag/drop is a visual
+            // operation, so it should follow what's on screen).
+            const visible = [...sources]
+                .filter(s => currentRegionFilter === 'all' || s.region === currentRegionFilter)
+                .sort((a, b) => a.order - b.order)
+                .filter(s => s.id !== draggedId);
+            const targetIdx = visible.findIndex(s => s.id === targetId);
+            if (targetIdx === -1) return;
+
+            const prevOrder = targetIdx > 0 ? visible[targetIdx - 1].order : null;
+            const nextOrder = visible[targetIdx].order;
+            dragged.order = (prevOrder !== null) ? (prevOrder + nextOrder) / 2 : nextOrder - 10;
+
+            // Periodically renumber to clean integers so repeated
+            // drops at the same spot never run into float precision
+            // limits.
+            renumberOrders();
+
+            saveSources();
+            renderGrid();
+            draggedId = null;
+        }
+
+        function renumberOrders() {
+            const sorted = [...sources].sort((a, b) => a.order - b.order);
+            sorted.forEach((s, i) => { s.order = i * 10; });
+        }
+
+        // ============================================================
+        // PLAYBACK
+        // ============================================================
+        function toggleAudio(id) {
+            if (activeId !== null && activeId !== id) {
+                const prevPanel = panelEls.get(activeId);
+                if (prevPanel) prevPanel.classList.remove('active');
+                const prevIframe = document.getElementById(`player-${activeId}`);
+                if (prevIframe) {
+                    prevIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                }
+            }
+
+            if (activeId === id) return; // clicking the same panel keeps it active
+
+            activeId = id;
+            const panel = panelEls.get(id);
+            if (panel) panel.classList.add('active');
+            const iframe = document.getElementById(`player-${id}`);
+            if (iframe) {
+                iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            }
+        }
+
+        function toggleFooter() {
+            document.getElementById('footer').classList.toggle('visible');
+        }
+
+        function setGridSize(size) {
+            gridSize = size;
+            saveGridSize();
+            renderGrid();
+        }
+
+        function toggleFavorite(id) {
+            const source = findSource(id);
+            if (!source) return;
+            source.favorite = !source.favorite;
+            saveSources();
+            renderGrid();
+        }
+
+        function toggleDead(id) {
+            const source = findSource(id);
+            if (!source) return;
+            source.dead = !source.dead;
+            saveSources();
+            renderGrid();
+        }
+
+        function filterByRegion(region) {
+            currentRegionFilter = region;
+            renderGrid();
+        }
+
+        function muteAll() {
+            if (activeId !== null) {
+                const panel = panelEls.get(activeId);
+                if (panel) panel.classList.remove('active');
+                const iframe = document.getElementById(`player-${activeId}`);
+                if (iframe) {
+                    iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                }
+                activeId = null;
+            }
+        }
+
+        function openLightbox(id) {
+            const source = findSource(id);
+            if (!source) return;
+            const embedUrl = toEmbedUrl(source.url);
+
+            document.getElementById('lightboxTitle').textContent = source.name;
+            document.getElementById('lightboxFrame').src = embedUrl + '?autoplay=1&controls=1&modestbranding=1';
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightboxFrame').src = '';
+        }
+
+        // ============================================================
+        // BULK SELECTION
+        // ============================================================
+        function enterBulkSelectMode() {
+            bulkSelectMode = true;
+            selectedIds.clear();
+            renderGrid();
+        }
+
+        function exitBulkSelectMode() {
+            bulkSelectMode = false;
+            selectedIds.clear();
+            document.getElementById('bulkActions').classList.remove('active');
+            renderGrid();
+        }
+
+        function togglePanelSelection(id) {
+            if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+            const panel = panelEls.get(id);
+            if (panel) panel.classList.toggle('selected');
+            updateBulkActionsBar();
+        }
+
+        function updateBulkActionsBar() {
+            const bar = document.getElementById('bulkActions');
+            const count = document.getElementById('selectedCount');
+            if (bulkSelectMode && selectedIds.size > 0) {
+                bar.classList.add('active');
+                count.textContent = selectedIds.size;
+            } else if (!bulkSelectMode) {
+                bar.classList.remove('active');
+            }
+        }
+
+        function bulkFavorite() {
+            selectedIds.forEach(id => {
+                const s = findSource(id);
+                if (s) s.favorite = true;
+            });
+            saveSources();
+            exitBulkSelectMode();
+        }
+
+        function bulkMarkDead() {
+            selectedIds.forEach(id => {
+                const s = findSource(id);
+                if (s) s.dead = true;
+            });
+            saveSources();
+            exitBulkSelectMode();
+        }
+
+        function bulkDelete() {
+            if (confirm(`Delete ${selectedIds.size} sources?`)) {
+                sources = sources.filter(s => !selectedIds.has(s.id));
+                if (selectedIds.has(activeId)) activeId = null;
+                saveSources();
+                exitBulkSelectMode();
+            }
+        }
+
+        function cancelBulkSelect() {
+            exitBulkSelectMode();
+        }
+
+        // ============================================================
+        // MANAGE SOURCES MODAL
+        // ============================================================
+        function openManageSources() {
+            const list = document.getElementById('sourcesList');
+            list.innerHTML = '';
+
+            if (sources.length === 0) {
+                list.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 2rem;">No sources yet</div>';
+            } else {
+                [...sources].sort((a, b) => a.order - b.order).forEach((source) => {
+                    const item = document.createElement('div');
+                    item.className = 'source-item';
+                    const deadIndicator = source.dead ? '💀 ' : '';
+                    const favoriteIndicator = source.favorite ? '★ ' : '';
+
+                    item.innerHTML = `
+                        <div class="source-info">
+                            <div class="source-name">${deadIndicator}${favoriteIndicator}${escapeHtml(source.name)}</div>
+                            <div class="source-meta">${source.region ? escapeHtml(source.region).toUpperCase() : 'OTHER'} • ${escapeHtml(source.url)}</div>
+                        </div>
+                        <div class="source-actions">
+                            <button class="fav-btn ${source.favorite ? 'active' : ''}" onclick="toggleFavoriteFromModal('${source.id}')">${source.favorite ? '★' : '☆'}</button>
+                            <button class="edit-btn" onclick="editSource('${source.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteSource('${source.id}')">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            document.getElementById('manageModal').classList.add('active');
+        }
+
+        function toggleFavoriteFromModal(id) {
+            toggleFavorite(id);
+            openManageSources(); // Refresh the modal
+        }
+
+        function closeManageModal() {
+            document.getElementById('manageModal').classList.remove('active');
+        }
+
+        function openAddSource() {
+            editingId = null;
+            document.getElementById('sourceModalTitle').textContent = 'Add Source';
+            document.getElementById('sourceName').value = '';
+            document.getElementById('sourceRegion').value = 'us';
+            document.getElementById('sourceUrl').value = '';
+            closeManageModal();
+            document.getElementById('sourceModal').classList.add('active');
+        }
+
+        function editSource(id) {
+            const source = findSource(id);
+            if (!source) return;
+            editingId = id;
+            document.getElementById('sourceModalTitle').textContent = 'Edit Source';
+            document.getElementById('sourceName').value = source.name;
+            document.getElementById('sourceRegion').value = source.region || 'other';
+            document.getElementById('sourceUrl').value = source.url;
+            closeManageModal();
+            document.getElementById('sourceModal').classList.add('active');
+        }
+
+        function deleteSource(id) {
+            const source = findSource(id);
+            if (!source) return;
+            if (confirm(`Delete ${source.name}?`)) {
+                sources = sources.filter(s => s.id !== id);
+                if (activeId === id) activeId = null;
+                saveSources();
+                renderGrid();
+                openManageSources();
+            }
+        }
+
+        function closeSourceModal() {
+            document.getElementById('sourceModal').classList.remove('active');
+        }
+
+        document.getElementById('sourceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('sourceName').value.trim();
+            const region = document.getElementById('sourceRegion').value;
+            const url = document.getElementById('sourceUrl').value.trim();
+
+            if (!name || !url || !region) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (editingId !== null) {
+                const source = findSource(editingId);
+                if (source) {
+                    source.name = name;
+                    source.region = region;
+                    source.url = url;
+                    // id, order, dead, and favorite are preserved untouched
+                }
+            } else {
+                const maxOrder = sources.reduce((m, s) => Math.max(m, s.order), -10);
+                sources.push({ id: makeId(), name, region, url, favorite: false, dead: false, order: maxOrder + 10 });
+            }
+
+            saveSources();
+            closeSourceModal();
+            renderGrid();
+        });
+
+        // ============================================================
+        // EXPORT / IMPORT
+        // ============================================================
+        function exportSources() {
+            const dataStr = JSON.stringify(sources, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'news-wall-sources.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importSources() {
+            document.getElementById('importInput').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        sources = migrateSources(imported);
+                        activeId = null;
+                        saveSources();
+                        renderGrid();
+                        alert('Sources imported successfully!');
+                    } else {
+                        alert('Invalid file format');
+                    }
+                } catch (err) {
+                    alert('Error reading file');
+                }
+            };
+            reader.readAsText(file);
+
+            // Reset input
+            event.target.value = '';
+        }
+
+        // ============================================================
+        // GIST SYNC — cross-device persistence via GitHub Gists
+        // ============================================================
+        // The wall's sources live in a single secret Gist file. Each
+        // device holds a GitHub token (Gists permission only) and the
+        // Gist ID in localStorage. Push writes, Pull reads. Conflict
+        // model is deliberately simple: last write wins, with a
+        // timestamp check that warns you before overwriting anything.
+        // Because every source carries a stable id, pulling from the
+        // Gist reuses this same incremental renderer: a source whose
+        // id and url are unchanged keeps its live iframe; only genuinely
+        // new/changed/removed sources cause any reload.
+
+        const GIST_FILENAME = 'news-wall-sources.json';
+        const GIST_API = 'https://api.github.com/gists';
+
+        let gistConfig = {
+            token: localStorage.getItem('newsWallGistToken') || '',
+            gistId: localStorage.getItem('newsWallGistId') || '',
+            autoSync: localStorage.getItem('newsWallGistAutoSync') === 'true'
+        };
+        let lastSyncedAt = localStorage.getItem('newsWallLastSyncedAt') || null;
+        let autoPushTimer = null;
+        let syncInFlight = false;
+
+        function gistConfigured() {
+            return !!(gistConfig.token && gistConfig.gistId);
+        }
+
+        function gistHeaders() {
+            return {
+                'Accept': 'application/vnd.github+json',
+                'Authorization': `Bearer ${gistConfig.token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function buildSyncPayload() {
+            return JSON.stringify({
+                version: 1,
+                updatedAt: new Date().toISOString(),
+                sources: sources
+            }, null, 2);
+        }
+
+        // Accepts both the sync envelope and a bare array (legacy exports)
+        function parseSyncPayload(text) {
+            const data = JSON.parse(text);
+            if (Array.isArray(data)) {
+                return { sources: data, updatedAt: null };
+            }
+            if (data && Array.isArray(data.sources)) {
+                return { sources: data.sources, updatedAt: data.updatedAt || null };
+            }
+            throw new Error('Unrecognized data format in Gist');
+        }
+
+        function friendlyGistError(res) {
+            if (res.status === 401) return 'Token rejected (401). Check that it has the Gists permission and has not expired.';
+            if (res.status === 403) return 'Forbidden (403). You may have hit the API rate limit — wait a few minutes.';
+            if (res.status === 404) return 'Gist not found (404). Check the Gist ID, and that this token belongs to the account that owns the Gist.';
+            if (res.status === 422) return 'GitHub rejected the request (422). The Gist may be malformed.';
+            return `GitHub API error (${res.status}).`;
+        }
+
+        function setSyncStatus(message, isError = false) {
+            const el = document.getElementById('syncStatus');
+            el.textContent = message;
+            el.classList.toggle('error', isError);
+        }
+
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('visible'), 4000);
+        }
+
+        function openSyncModal() {
+            document.getElementById('gistTokenInput').value = gistConfig.token;
+            document.getElementById('gistIdInput').value = gistConfig.gistId;
+            document.getElementById('gistAutoSyncInput').checked = gistConfig.autoSync;
+            refreshSyncStatusLine();
+            document.getElementById('syncModal').classList.add('active');
+        }
+
+        function closeSyncModal() {
+            document.getElementById('syncModal').classList.remove('active');
+        }
+
+        function refreshSyncStatusLine() {
+            if (!gistConfig.token) {
+                setSyncStatus('Not configured — add a GitHub token to begin.');
+            } else if (!gistConfig.gistId) {
+                setSyncStatus('Token saved. Create a Gist (first device) or paste an existing Gist ID.');
+            } else {
+                const when = lastSyncedAt ? new Date(lastSyncedAt).toLocaleString() : 'never';
+                setSyncStatus(`Connected to Gist ${gistConfig.gistId} • last synced: ${when}`);
+            }
+        }
+
+        function saveSyncSettings() {
+            gistConfig.token = document.getElementById('gistTokenInput').value.trim();
+            gistConfig.gistId = document.getElementById('gistIdInput').value.trim();
+            gistConfig.autoSync = document.getElementById('gistAutoSyncInput').checked;
+            localStorage.setItem('newsWallGistToken', gistConfig.token);
+            localStorage.setItem('newsWallGistId', gistConfig.gistId);
+            localStorage.setItem('newsWallGistAutoSync', String(gistConfig.autoSync));
+            refreshSyncStatusLine();
+            showToast('Sync settings saved');
+        }
+
+        function syncModalOpen() {
+            return document.getElementById('syncModal').classList.contains('active');
+        }
+
+        async function createSyncGist() {
+            if (syncModalOpen()) saveSyncSettings();
+            if (!gistConfig.token) {
+                setSyncStatus('Add a GitHub token first.', true);
+                return;
+            }
+            if (gistConfig.gistId) {
+                if (!confirm('A Gist ID is already set. Create a NEW gist anyway? (The old one will be left untouched.)')) return;
+            }
+            setSyncStatus('Creating Gist…');
+            try {
+                const res = await fetch(GIST_API, {
+                    method: 'POST',
+                    headers: gistHeaders(),
+                    body: JSON.stringify({
+                        description: 'News Wall sources (synced)',
+                        public: false,
+                        files: { [GIST_FILENAME]: { content: buildSyncPayload() } }
+                    })
+                });
+                if (!res.ok) throw new Error(friendlyGistError(res));
+                const data = await res.json();
+                gistConfig.gistId = data.id;
+                localStorage.setItem('newsWallGistId', data.id);
+                document.getElementById('gistIdInput').value = data.id;
+                lastSyncedAt = new Date().toISOString();
+                localStorage.setItem('newsWallLastSyncedAt', lastSyncedAt);
+                setSyncStatus(`Gist created: ${data.id} — copy this ID to your other devices.`);
+                showToast('Gist created and sources pushed');
+            } catch (err) {
+                setSyncStatus(`Create failed: ${err.message}`, true);
+            }
+        }
+
+        async function pushToGist(silent = false) {
+            if (!gistConfigured()) {
+                if (!silent) setSyncStatus('Configure a token and Gist ID first.', true);
+                return;
+            }
+            if (syncInFlight) return;
+            syncInFlight = true;
+            if (!silent) setSyncStatus('Pushing…');
+            try {
+                const payload = buildSyncPayload();
+                const res = await fetch(`${GIST_API}/${gistConfig.gistId}`, {
+                    method: 'PATCH',
+                    headers: gistHeaders(),
+                    body: JSON.stringify({ files: { [GIST_FILENAME]: { content: payload } } })
+                });
+                if (!res.ok) throw new Error(friendlyGistError(res));
+                lastSyncedAt = JSON.parse(payload).updatedAt;
+                localStorage.setItem('newsWallLastSyncedAt', lastSyncedAt);
+                refreshSyncStatusLine();
+                if (!silent) showToast(`Pushed ${sources.length} sources to Gist`);
+            } catch (err) {
+                setSyncStatus(`Push failed: ${err.message}`, true);
+                if (silent) showToast(`Auto-push failed: ${err.message}`);
+            } finally {
+                syncInFlight = false;
+            }
+        }
+
+        async function fetchRemotePayload() {
+            const res = await fetch(`${GIST_API}/${gistConfig.gistId}`, { headers: gistHeaders() });
+            if (!res.ok) throw new Error(friendlyGistError(res));
+            const data = await res.json();
+            const file = data.files && data.files[GIST_FILENAME];
+            if (!file) throw new Error(`File "${GIST_FILENAME}" not found in this Gist.`);
+            let content = file.content;
+            if (file.truncated) {
+                const rawRes = await fetch(file.raw_url);
+                if (!rawRes.ok) throw new Error('Could not fetch full Gist content.');
+                content = await rawRes.text();
+            }
+            return parseSyncPayload(content);
+        }
+
+        async function pullFromGist() {
+            if (syncModalOpen()) saveSyncSettings();
+            if (!gistConfigured()) {
+                setSyncStatus('Configure a token and Gist ID first.', true);
+                return;
+            }
+            setSyncStatus('Pulling…');
+            try {
+                const remote = await fetchRemotePayload();
+                const remoteWhen = remote.updatedAt ? new Date(remote.updatedAt).toLocaleString() : 'unknown time';
+                const ok = confirm(
+                    `Replace ${sources.length} local sources with ${remote.sources.length} from the Gist (updated ${remoteWhen})?\n\n` +
+                    `Tip: if you have local changes you want to keep, Cancel and Push instead.`
+                );
+                if (!ok) {
+                    refreshSyncStatusLine();
+                    return;
+                }
+                sources = migrateSources(remote.sources);
+                if (!findSource(activeId)) activeId = null;
+                saveSources({ skipSync: true });
+                renderGrid();
+                lastSyncedAt = remote.updatedAt || new Date().toISOString();
+                localStorage.setItem('newsWallLastSyncedAt', lastSyncedAt);
+                refreshSyncStatusLine();
+                showToast(`Pulled ${sources.length} sources from Gist`);
+            } catch (err) {
+                setSyncStatus(`Pull failed: ${err.message}`, true);
+            }
+        }
+
+        // Debounced auto-push, fired by saveSources() when enabled
+        function scheduleAutoPush() {
+            if (!gistConfig.autoSync || !gistConfigured()) return;
+            clearTimeout(autoPushTimer);
+            autoPushTimer = setTimeout(() => pushToGist(true), 3000);
+        }
+
+        // On startup: quietly check whether another device pushed newer
+        // data. Never auto-overwrites — just tells you.
+        async function checkRemoteFreshness() {
+            if (!gistConfigured()) return;
+            try {
+                const remote = await fetchRemotePayload();
+                if (remote.updatedAt && (!lastSyncedAt || new Date(remote.updatedAt) > new Date(lastSyncedAt))) {
+                    showToast('Newer sources found in your Gist — open SYNC to pull them.');
+                }
+            } catch (err) {
+                // Non-fatal: stay quiet on startup, surface details in the sync modal
+                console.warn('Gist freshness check failed:', err.message);
+            }
+        }
+
+        // Initialize. If migration just assigned any missing id/order
+        // fields, persist them immediately so a reload doesn't
+        // reassign fresh random ids before the first real edit.
+        saveSources({ skipSync: true });
+        renderGrid();
+        checkRemoteFreshness();
+
+        // Auto-activate first panel after initial render
+        if (sources.length > 0 && activeId === null) {
+            const first = [...sources].sort((a, b) => a.order - b.order)[0];
+            setTimeout(() => toggleAudio(first.id), 1000);
+        }
+
+        // Show keyboard shortcuts hint on first visit
+        if (!localStorage.getItem('newsWallSeenShortcuts')) {
+            setTimeout(() => {
+                const help = document.getElementById('shortcutsHelp');
+                help.classList.add('visible');
+                setTimeout(() => {
+                    help.classList.remove('visible');
+                    localStorage.setItem('newsWallSeenShortcuts', 'true');
+                }, 5000);
+            }, 2000);
+        }
+
+        // Comprehensive keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            const key = e.key.toLowerCase();
+
+            // ESC - Close lightbox, cancel bulk select, or mute all
+            if (key === 'escape') {
+                if (document.getElementById('lightbox').classList.contains('active')) {
+                    closeLightbox();
+                } else if (bulkSelectMode) {
+                    cancelBulkSelect();
+                } else {
+                    muteAll();
+                }
+                return;
+            }
+
+            // ? - Toggle shortcuts help
+            if (key === '?') {
+                document.getElementById('shortcutsHelp').classList.toggle('visible');
+                return;
+            }
+
+            // Ctrl/Cmd + S - Toggle footer
+            if (key === 's' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                toggleFooter();
+                return;
+            }
+
+            // B - Bulk select mode
+            if (key === 'b') {
+                if (bulkSelectMode) cancelBulkSelect(); else enterBulkSelectMode();
+                return;
+            }
+
+            // M - Mute all
+            if (key === 'm') {
+                muteAll();
+                return;
+            }
+
+            // Space - Toggle audio on active panel
+            if (key === ' ' && activeId !== null) {
+                e.preventDefault();
+                const iframe = document.getElementById(`player-${activeId}`);
+                if (iframe) {
+                    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                }
+                return;
+            }
+
+            // F - Fullscreen active panel
+            if (key === 'f' && activeId !== null) {
+                openLightbox(activeId);
+                return;
+            }
+
+            // Number keys 1-9 - Switch to specific panel, by visual position
+            if (key >= '1' && key <= '9') {
+                const panelIndex = parseInt(key) - 1;
+                const visiblePanels = getVisiblePanelsInVisualOrder();
+                if (visiblePanels[panelIndex]) {
+                    toggleAudio(visiblePanels[panelIndex].dataset.id);
+                }
+                return;
+            }
+
+            // Arrow keys - Navigate between panels, by visual position
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+                e.preventDefault();
+                const visiblePanels = getVisiblePanelsInVisualOrder();
+                if (activeId === null) {
+                    if (visiblePanels[0]) toggleAudio(visiblePanels[0].dataset.id);
+                    return;
+                }
+
+                const currentIndex = visiblePanels.findIndex(p => p.dataset.id === activeId);
+                if (currentIndex === -1) return;
+
+                const gridCols = getComputedStyle(document.getElementById('gridContainer')).gridTemplateColumns.split(' ').length;
+                let nextIndex;
+
+                switch (key) {
+                    case 'arrowleft': nextIndex = currentIndex - 1; break;
+                    case 'arrowright': nextIndex = currentIndex + 1; break;
+                    case 'arrowup': nextIndex = currentIndex - gridCols; break;
+                    case 'arrowdown': nextIndex = currentIndex + gridCols; break;
+                }
+
+                if (nextIndex >= 0 && nextIndex < visiblePanels.length) {
+                    const nextPanel = visiblePanels[nextIndex];
+                    toggleAudio(nextPanel.dataset.id);
+                    nextPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+        });
+
+        // Close lightbox on click outside
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') {
+                closeLightbox();
+            }
+        });
+    </script>
 </body>
 </html>
