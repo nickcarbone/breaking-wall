@@ -759,8 +759,10 @@ const NATIONAL_FLAGSHIP_HINTS = {
 // here if other networks in your candidates list also run parallel
 // per-language editions (e.g. "France 24 English", "France 24 Español").
 const NETWORK_BRANDS = [
-    'Euronews', 'DW', 'France 24', 'RT', 'TRT World', 'CGTN',
+    'Euronews', 'DW', 'France 24', 'RT', 'TRT', 'CGTN',
     'Al Jazeera', 'NHK World', 'RFI', 'Sputnik', 'Voice of America',
+    'Africanews', 'BBC', 'Sky News', 'CNBC',
+    'NDTV', 'ABP', 'TV9', 'TV5', 'Republic', 'Times Now', 'Asianet', 'PTV',
 ];
 
 function detectNetwork(name) {
@@ -783,6 +785,14 @@ function isTranslationExcluded(c) {
     const allowed = networkPrefs[brand];
     if (!allowed) return false; // never configured — don't filter
     return !allowed.includes(c.language);
+}
+
+// Famelack occasionally uses "uk" instead of the correct ISO 3166-1 code "gb".
+// "uk" isn't a valid flag-emoji region code either, so left unnormalized it
+// breaks the flag, the country name lookup, and region assignment.
+function normalizeCountryCode(code) {
+    const c = (code || '').toLowerCase();
+    return c === 'uk' ? 'gb' : c;
 }
 
 function countryFlag(code) {
@@ -867,6 +877,7 @@ async function loadData() {
         if (!candRes.ok) throw new Error('candidates.json not found');
 
         candidates = await candRes.json();
+        candidates.forEach(c => { c.country = normalizeCountryCode(c.country); });
 
         if (srcRes.ok) {
             existingSources = await srcRes.json();
