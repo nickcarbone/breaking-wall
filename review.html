@@ -269,6 +269,25 @@
         .network-lang-row input { cursor: pointer; }
         .network-lang-count { opacity: 0.4; font-size: 0.65rem; }
 
+        #networkModal .api-modal-content {
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #networkModalBody {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            padding-right: 0.5rem;
+        }
+
+        #networkModal .api-modal-actions {
+            flex-shrink: 0;
+            border-top: 1px solid #222;
+            padding-top: 1rem;
+        }
+
         .card-meta { display: flex; flex-direction: column; gap: 0.3rem; }
         .meta-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.7rem; }
         .meta-label { opacity: 0.4; min-width: 60px; }
