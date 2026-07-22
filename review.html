@@ -260,6 +260,14 @@
         .badge-dupe { background: #2a2a10; color: #ffd60a; border: 1px solid #665510; }
         .badge-flagship-nat { background: #1a2a3a; color: #5ab4ff; border: 1px solid #2a4a66; }
         .badge-flagship-global { background: #251a3a; color: #bf5af2; border: 1px solid #4a2a66; }
+        .badge-translation { background: #232323; color: #999; border: 1px solid #444; }
+
+        .network-block { border-top: 1px solid #222; padding-top: 0.75rem; margin-top: 0.75rem; }
+        .network-block:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+        .network-block-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; color: #00d9ff; }
+        .network-lang-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; padding: 0.25rem 0; cursor: pointer; }
+        .network-lang-row input { cursor: pointer; }
+        .network-lang-count { opacity: 0.4; font-size: 0.65rem; }
 
         .card-meta { display: flex; flex-direction: column; gap: 0.3rem; }
         .meta-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.7rem; }
@@ -445,6 +453,7 @@
         <div class="header-title">CANDIDATE REVIEW</div>
         <div class="header-nav">
             <button class="icon-btn" onclick="openApiModal()">⚙ API KEY</button>
+            <button class="icon-btn" onclick="openNetworkModal()">🌐 NETWORK PREFS</button>
             <a href="index.html" class="nav-link">← WALL</a>
             <a href="manage.html" class="nav-link">MANAGE →</a>
         </div>
@@ -506,6 +515,7 @@
     <button class="toggle-btn" id="toggleGeoblocked" onclick="toggleFlag('hideGeoblocked')">HIDE GEO-BLOCKED</button>
     <button class="toggle-btn" id="toggleFlagshipOnly" onclick="toggleFlag('flagshipOnly')">FLAGSHIP ONLY</button>
     <button class="toggle-btn" id="toggleDupesOnly" onclick="toggleFlag('dupesOnly')">DUPES ONLY</button>
+    <button class="toggle-btn" id="toggleHideTranslations" onclick="toggleFlag('hideTranslations')">HIDE TRANSLATIONS</button>
 
     <button class="toggle-btn" onclick="fetchStatsForVisible()" id="fetchStatsBtn">⟳ FETCH STATS FOR VISIBLE</button>
 
@@ -554,6 +564,23 @@
         <div class="api-modal-actions">
             <button class="api-btn-cancel" onclick="closeApiModal()">Cancel</button>
             <button class="api-btn-save" onclick="saveApiKey()">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="networkModal" class="api-modal">
+    <div class="api-modal-content" style="max-width:560px">
+        <div class="api-modal-title">Network language preferences</div>
+        <div class="api-modal-desc">
+            Detected multi-language networks below. Uncheck the editions you don't want —
+            unchecked languages get flagged as translation editions and can be hidden with
+            the "HIDE TRANSLATIONS" toggle. A network you never configure here stays
+            untouched — nothing gets filtered until you save preferences for it.
+        </div>
+        <div id="networkModalBody"></div>
+        <div class="api-modal-actions" style="margin-top:1rem">
+            <button class="api-btn-cancel" onclick="closeNetworkModal()">Cancel</button>
+            <button class="api-btn-save" onclick="saveNetworkPrefs()">Save preferences</button>
         </div>
     </div>
 </div>
@@ -709,6 +736,36 @@ const NATIONAL_FLAGSHIP_HINTS = {
     ca: ['cbc','ctv news'],
 };
 
+// Known multi-language network brands. Non-exhaustive — add more prefixes
+// here if other networks in your candidates list also run parallel
+// per-language editions (e.g. "France 24 English", "France 24 Español").
+const NETWORK_BRANDS = [
+    'Euronews', 'DW', 'France 24', 'RT', 'TRT World', 'CGTN',
+    'Al Jazeera', 'NHK World', 'RFI', 'Sputnik', 'Voice of America',
+];
+
+function detectNetwork(name) {
+    const n = (name || '').trim();
+    const nLower = n.toLowerCase();
+    // Sort longest-first so "France 24" matches before any shorter false positive
+    const sorted = [...NETWORK_BRANDS].sort((a, b) => b.length - a.length);
+    for (const brand of sorted) {
+        const bLower = brand.toLowerCase();
+        if (nLower === bLower || nLower.startsWith(bLower + ' ')) {
+            return brand;
+        }
+    }
+    return null;
+}
+
+function isTranslationExcluded(c) {
+    const brand = detectNetwork(c.name);
+    if (!brand) return false;
+    const allowed = networkPrefs[brand];
+    if (!allowed) return false; // never configured — don't filter
+    return !allowed.includes(c.language);
+}
+
 function countryFlag(code) {
     if (!code || code.length !== 2) return '🌐';
     try {
@@ -744,7 +801,8 @@ let candidates = [];
 let existingUrls = new Set();
 let existingSources = [];
 let promoted = [];
-let flags = { hideAdded: true, hideGeoblocked: false, flagshipOnly: false, dupesOnly: false };
+let flags = { hideAdded: true, hideGeoblocked: false, flagshipOnly: false, dupesOnly: false, hideTranslations: false };
+let networkPrefs = {};   // brand -> array of allowed language codes (undefined = unconfigured, no filtering)
 let drawerOpen = false;
 let coverageOpen = false;
 let dupeGroups = {};      // normalizedName -> [urls]
@@ -757,7 +815,12 @@ let apiKey = '';
 function loadPersisted() {
     try { editorialTags = JSON.parse(localStorage.getItem('newsWallEditorialTags') || '{}'); } catch { editorialTags = {}; }
     try { statsCache = JSON.parse(localStorage.getItem('newsWallCandidateStats') || '{}'); } catch { statsCache = {}; }
+    try { networkPrefs = JSON.parse(localStorage.getItem('newsWallNetworkPrefs') || '{}'); } catch { networkPrefs = {}; }
     apiKey = localStorage.getItem('newsWallYoutubeApiKey') || '';
+}
+
+function saveNetworkPrefsToStorage() {
+    localStorage.setItem('newsWallNetworkPrefs', JSON.stringify(networkPrefs));
 }
 
 function saveTags() {
@@ -930,6 +993,7 @@ function renderGrid() {
         }
 
         if (flags.dupesOnly && !isDupe(c)) return false;
+        if (flags.hideTranslations && isTranslationExcluded(c)) return false;
 
         return true;
     });
@@ -1010,6 +1074,7 @@ function buildCard(c) {
     if (dupe) badges += '<span class="badge badge-dupe">POSSIBLE DUPE</span>';
     if (tag.national || heuristic.national) badges += '<span class="badge badge-flagship-nat">NATIONAL FLAGSHIP</span>';
     if (tag.global || heuristic.global) badges += '<span class="badge badge-flagship-global">GLOBAL FLAGSHIP</span>';
+    if (isTranslationExcluded(c)) badges += '<span class="badge badge-translation">TRANSLATION</span>';
 
     const statsHtml = stats
         ? `<div class="meta-row"><span class="meta-label">subs</span><span class="meta-value stat-loaded">${formatCount(stats.subs)}</span></div>
@@ -1228,6 +1293,78 @@ function saveApiKey() {
     showToast(apiKey ? 'API key saved' : 'API key cleared', 'success');
 }
 
+// ── Network preferences modal ──────────────────────────────────────────────────
+
+function openNetworkModal() {
+    // Group current candidates by detected network brand, collecting
+    // language -> {count, exampleName} for each.
+    const groups = {}; // brand -> { lang -> {count, name} }
+
+    candidates.forEach(c => {
+        const brand = detectNetwork(c.name);
+        if (!brand) return;
+        if (!groups[brand]) groups[brand] = {};
+        const lang = c.language || 'unk';
+        if (!groups[brand][lang]) groups[brand][lang] = { count: 0, name: c.name };
+        groups[brand][lang].count += 1;
+    });
+
+    const body = document.getElementById('networkModalBody');
+    const brands = Object.keys(groups).sort();
+
+    if (!brands.length) {
+        body.innerHTML = '<div style="font-size:0.75rem; opacity:0.5; padding:1rem 0;">No multi-language networks detected in the current candidate list.</div>';
+        document.getElementById('networkModal').classList.add('active');
+        return;
+    }
+
+    body.innerHTML = brands.map(brand => {
+        const langs = Object.entries(groups[brand]).sort((a, b) => a[0].localeCompare(b[0]));
+        const saved = networkPrefs[brand]; // undefined = unconfigured -> default all checked
+        const rows = langs.map(([lang, info]) => {
+            const langLabel = LANG_NAME[lang] || lang;
+            const checked = saved ? saved.includes(lang) : true;
+            return `
+                <label class="network-lang-row">
+                    <input type="checkbox" data-brand="${esc(brand)}" data-lang="${esc(lang)}" ${checked ? 'checked' : ''}>
+                    ${esc(langLabel)} <span class="network-lang-count">(${info.count} · e.g. "${esc(info.name)}")</span>
+                </label>
+            `;
+        }).join('');
+
+        return `
+            <div class="network-block">
+                <div class="network-block-title">${esc(brand)}</div>
+                ${rows}
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('networkModal').classList.add('active');
+}
+
+function closeNetworkModal() {
+    document.getElementById('networkModal').classList.remove('active');
+}
+
+function saveNetworkPrefs() {
+    const checkboxes = document.querySelectorAll('#networkModalBody input[type="checkbox"]');
+    const byBrand = {};
+    checkboxes.forEach(cb => {
+        const brand = cb.dataset.brand;
+        const lang = cb.dataset.lang;
+        if (!byBrand[brand]) byBrand[brand] = [];
+        if (cb.checked) byBrand[brand].push(lang);
+    });
+
+    Object.assign(networkPrefs, byBrand);
+    saveNetworkPrefsToStorage();
+    closeNetworkModal();
+    showToast('Network preferences saved', 'success');
+    renderGrid();
+    updateStats();
+}
+
 // ── YouTube stats fetching ─────────────────────────────────────────────────────
 
 const STATS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -1346,6 +1483,7 @@ function toggleFlag(name) {
         hideGeoblocked: 'toggleGeoblocked',
         flagshipOnly: 'toggleFlagshipOnly',
         dupesOnly: 'toggleDupesOnly',
+        hideTranslations: 'toggleHideTranslations',
     };
     document.getElementById(idMap[name]).classList.toggle('active', flags[name]);
     renderGrid();
@@ -1377,9 +1515,12 @@ document.getElementById('previewModal').addEventListener('click', e => {
 document.getElementById('apiModal').addEventListener('click', e => {
     if (e.target.id === 'apiModal') closeApiModal();
 });
+document.getElementById('networkModal').addEventListener('click', e => {
+    if (e.target.id === 'networkModal') closeNetworkModal();
+});
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closePreview(); closeApiModal(); }
+    if (e.key === 'Escape') { closePreview(); closeApiModal(); closeNetworkModal(); }
 });
 
 // ── Init ───────────────────────────────────────────────────────────────────────
