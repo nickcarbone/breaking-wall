@@ -825,10 +825,95 @@
         .toast.visible {
             opacity: 1;
         }
+        /* ── Self-healing ingest banner ───────────────────────────── */
+        .heal-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.96);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #30d158;
+            padding: 0.85rem 1.25rem;
+            z-index: 2600;
+            display: none;
+            font-size: 0.72rem;
+            max-height: 45vh;
+            overflow-y: auto;
+        }
+
+        .heal-banner.visible { display: block; }
+
+        .heal-banner-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .heal-banner-title {
+            font-weight: 600;
+            color: #30d158;
+            letter-spacing: 0.04em;
+        }
+
+        .heal-banner-dismiss {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .heal-banner-dismiss:hover { border-color: #30d158; color: #30d158; }
+
+        .heal-row {
+            display: grid;
+            grid-template-columns: minmax(120px, 200px) 1fr auto;
+            gap: 0.75rem;
+            padding: 0.3rem 0;
+            border-top: 1px solid #1c1c1c;
+            align-items: baseline;
+        }
+
+        .heal-row-name { font-weight: 600; }
+        .heal-row-detail { opacity: 0.65; word-break: break-all; }
+        .heal-row-via {
+            opacity: 0.9;
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            border: 1px solid #30d158;
+            color: #30d158;
+            white-space: nowrap;
+        }
+        .heal-row-via.weak { border-color: #ffd60a; color: #ffd60a; }
+        .heal-subhead {
+            margin: 0.75rem 0 0.25rem;
+            font-weight: 600;
+            color: #ffd60a;
+            letter-spacing: 0.04em;
+        }
+        .heal-note { opacity: 0.55; margin-top: 0.5rem; line-height: 1.5; }
+
     </style>
 </head>
 <body>
     <!-- Grid -->
+    <!-- Self-healing ingest report -->
+    <div id="healBanner" class="heal-banner">
+        <div class="heal-banner-head">
+            <div class="heal-banner-title" id="healBannerTitle">HEALED 0 PANELS</div>
+            <button class="heal-banner-dismiss" onclick="dismissHealBanner()">DISMISS</button>
+        </div>
+        <div id="healBannerBody"></div>
+    </div>
+
     <div id="gridContainer"></div>
 
     <!-- Empty State -->
@@ -859,6 +944,7 @@
                 <button class="grid-size-btn active" onclick="setGridSize('medium')" title="Medium">◾◾</button>
                 <button class="grid-size-btn" onclick="setGridSize('large')" title="Large">◾</button>
             </div>
+            <button class="footer-btn" onclick="healFromSources({ manual: true })">↻ HEAL LINKS</button>
             <button class="footer-btn" onclick="openManageSources()">MANAGE SOURCES</button>
             <button class="footer-btn" onclick="openSyncModal()">SYNC</button>
             <button class="footer-btn" onclick="exportSources()">EXPORT</button>
@@ -1897,12 +1983,253 @@
             }
         }
 
+        // ============================================================
+        // SELF-HEALING INGEST
+        // ============================================================
+        // Pulls news_sources.json (the file validate_streams.py writes)
+        // and repairs local sources whose stream URL has rotated.
+        //
+        // Identity is resolved in strict order of evidence quality:
+        //
+        //   1. channel_id  — hard identity. Survives any number of URL
+        //                    rotations. Only used when BOTH sides have it.
+        //   2. dead_url    — proof-grade. validate_streams.py records the
+        //                    exact URL it replaced, so a local source
+        //                    sitting on that URL is provably the same
+        //                    stream. Survives one rotation, not a chain.
+        //   3. name        — NEVER auto-applied. Surfaced as a suggestion
+        //                    only. Normalized name similarity produces
+        //                    real-world collisions (KBS/SBS,
+        //                    CityTV Bogota/CityTv Toronto) and silently
+        //                    swapping one broadcaster for another is a
+        //                    sourcing error, not a bug.
+        //
+        // A URL is only rewritten when the remote entry is status:"live"
+        // AND its video id differs from the local one. The `dead` flag is
+        // cleared only on an actual URL swap — a manually flagged panel
+        // whose URL hasn't changed stays flagged, because the reason for
+        // flagging it (geo-block, wrong-language feed, low quality) is
+        // not something the API can see.
+
+        const HEAL_FEED_URL = './news_sources.json';
+
+        function healVideoId(url) {
+            if (!url) return null;
+            try {
+                const u = new URL(url, location.href);
+                if (u.hostname.includes('youtu.be')) return u.pathname.split('/')[1] || null;
+                if (u.pathname.startsWith('/live/')) return u.pathname.split('/')[2] || null;
+                if (u.pathname.startsWith('/embed/')) return u.pathname.split('/')[2] || null;
+                return u.searchParams.get('v');
+            } catch (err) {
+                const m = String(url).match(/[?&]v=([^&]+)/);
+                return m ? m[1] : null;
+            }
+        }
+
+        function healNormName(name) {
+            return String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
+        function dismissHealBanner() {
+            document.getElementById('healBanner').classList.remove('visible');
+        }
+
+        function renderHealReport(report, opts = {}) {
+            const banner = document.getElementById('healBanner');
+            const body = document.getElementById('healBannerBody');
+            const title = document.getElementById('healBannerTitle');
+
+            const bits = [];
+            if (report.healed.length) bits.push(`HEALED ${report.healed.length} PANEL${report.healed.length === 1 ? '' : 'S'}`);
+            if (report.suggestions.length) bits.push(`${report.suggestions.length} NEED REVIEW`);
+            if (report.backfilled) bits.push(`${report.backfilled} CHANNEL ID${report.backfilled === 1 ? '' : 'S'} BACKFILLED`);
+            title.textContent = bits.join('  ·  ') || 'NOTHING TO HEAL';
+
+            let html = '';
+            report.healed.forEach(h => {
+                html += `<div class="heal-row">
+                    <div class="heal-row-name">${escapeHtml(h.name)}</div>
+                    <div class="heal-row-detail">${escapeHtml(h.fromId || '?')} &rarr; ${escapeHtml(h.toId)}${h.remoteName && healNormName(h.remoteName) !== healNormName(h.name) ? ` <span style="color:#ffd60a">(feed lists this as "${escapeHtml(h.remoteName)}" — verify)</span>` : ''}</div>
+                    <div class="heal-row-via">via ${escapeHtml(h.via)}</div>
+                </div>`;
+            });
+
+            if (report.suggestions.length) {
+                html += '<div class="heal-subhead">NOT APPLIED — VERIFY BEFORE ACCEPTING</div>';
+                report.suggestions.forEach(s => {
+                    html += `<div class="heal-row">
+                        <div class="heal-row-name">${escapeHtml(s.name)}</div>
+                        <div class="heal-row-detail">${escapeHtml(s.detail)}</div>
+                        <div class="heal-row-via weak">${escapeHtml(s.via)}</div>
+                    </div>`;
+                });
+            }
+
+            if (report.healed.length || report.suggestions.length) {
+                html += '<div class="heal-note">Auto-applied rows matched on channel_id or on the exact URL that validate_streams.py replaced. Name-only matches are never applied automatically — open MANAGE SOURCES to accept one by hand.</div>';
+            }
+
+            body.innerHTML = html || '<div class="heal-note">No URL rotations found in news_sources.json for the sources currently on this wall.</div>';
+
+            if (report.healed.length || report.suggestions.length || opts.showWhenEmpty) {
+                banner.classList.add('visible');
+            }
+        }
+
+        async function healFromSources(options = {}) {
+            const { manual = false } = options;
+            let remote;
+            try {
+                const res = await fetch(`${HEAL_FEED_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                remote = await res.json();
+            } catch (err) {
+                if (manual) showToast(`Heal failed: could not read news_sources.json (${err.message})`);
+                return null;
+            }
+            if (!Array.isArray(remote)) {
+                if (manual) showToast('Heal failed: news_sources.json is not an array');
+                return null;
+            }
+
+            const live = remote.filter(r => r && r.status === 'live' && r.url);
+
+            // channel_id -> entry, but only when unambiguous. A channel
+            // with two live entries (e.g. two language feeds) is skipped
+            // rather than guessed at.
+            const byChannel = new Map();
+            const channelCounts = new Map();
+            live.forEach(r => {
+                if (!r.channel_id) return;
+                channelCounts.set(r.channel_id, (channelCounts.get(r.channel_id) || 0) + 1);
+                byChannel.set(r.channel_id, r);
+            });
+            for (const [cid, n] of channelCounts) if (n > 1) byChannel.delete(cid);
+
+            const byDeadId = new Map();
+            live.forEach(r => {
+                const d = healVideoId(r.dead_url);
+                if (d) byDeadId.set(d, r);
+            });
+
+            // Any entry, live or not, keyed by its current video id —
+            // used purely to backfill channel_id onto local sources.
+            const byCurrentId = new Map();
+            remote.forEach(r => {
+                const v = healVideoId(r.url);
+                if (v && r.channel_id) byCurrentId.set(v, r);
+            });
+
+            const liveNames = new Map();
+            const nameCounts = new Map();
+            live.forEach(r => {
+                const n = healNormName(r.name);
+                if (!n) return;
+                nameCounts.set(n, (nameCounts.get(n) || 0) + 1);
+                liveNames.set(n, r);
+            });
+            for (const [n, c] of nameCounts) if (c > 1) liveNames.delete(n);
+
+            const report = { healed: [], suggestions: [], backfilled: 0, at: new Date().toISOString() };
+            let changed = false;
+
+            sources.forEach(s => {
+                const localId = healVideoId(s.url);
+
+                // Backfill channel_id so future rotations match on
+                // hard identity instead of falling back to dead_url.
+                if (!s.channel_id && localId && byCurrentId.has(localId)) {
+                    s.channel_id = byCurrentId.get(localId).channel_id;
+                    report.backfilled++;
+                    changed = true;
+                }
+
+                let match = null;
+                let via = null;
+                if (s.channel_id && byChannel.has(s.channel_id)) {
+                    match = byChannel.get(s.channel_id);
+                    via = 'channel_id';
+                } else if (localId && byDeadId.has(localId)) {
+                    match = byDeadId.get(localId);
+                    via = 'dead_url';
+                }
+
+                if (match) {
+                    const remoteId = healVideoId(match.url);
+                    if (remoteId && remoteId !== localId) {
+                        report.healed.push({
+                            id: s.id,
+                            name: s.name,
+                            remoteName: match.name,
+                            fromId: localId,
+                            toId: remoteId,
+                            from: s.url,
+                            to: match.url,
+                            via
+                        });
+                        s.previous_url = s.url;
+                        s.url = match.url;
+                        s.dead = false;
+                        s.healed_at = report.at;
+                        s.healed_via = via;
+                        if (!s.channel_id && match.channel_id) s.channel_id = match.channel_id;
+                        changed = true;
+                    } else if (s.dead && remoteId === localId) {
+                        // Same URL, remote says it is live. Do not clear
+                        // the flag — it may have been set for a reason the
+                        // API cannot detect.
+                        report.suggestions.push({
+                            name: s.name,
+                            detail: `flagged dead locally, but news_sources.json reports this same URL as live — clear the flag manually if the reason no longer applies`,
+                            via: `${via} · flag only`
+                        });
+                    }
+                    return;
+                }
+
+                if (s.dead) {
+                    const n = healNormName(s.name);
+                    const guess = n && liveNames.get(n);
+                    if (guess && healVideoId(guess.url) !== localId) {
+                        report.suggestions.push({
+                            name: s.name,
+                            detail: `possible replacement "${guess.name}" (${guess.url}) — matched on name only, no channel_id on this source, so NOT applied`,
+                            via: 'name only'
+                        });
+                    } else {
+                        report.suggestions.push({
+                            name: s.name,
+                            detail: 'dead, and no live entry in news_sources.json could be matched to it — needs a new link from review.html',
+                            via: 'unresolved'
+                        });
+                    }
+                }
+            });
+
+            if (changed) {
+                saveSources();
+                renderGrid();
+            }
+
+            try {
+                localStorage.setItem('newsWallHealReport', JSON.stringify(report));
+            } catch (err) { /* quota — report is cosmetic */ }
+
+            renderHealReport(report, { showWhenEmpty: manual });
+            if (manual && !report.healed.length && !report.suggestions.length) {
+                showToast('Nothing to heal — every source matched a live entry');
+            }
+            return report;
+        }
+
         // Initialize. If migration just assigned any missing id/order
         // fields, persist them immediately so a reload doesn't
         // reassign fresh random ids before the first real edit.
         saveSources({ skipSync: true });
         renderGrid();
         checkRemoteFreshness();
+        healFromSources();
 
         // Auto-activate first panel after initial render
         if (sources.length > 0 && activeId === null) {
