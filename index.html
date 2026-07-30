@@ -2223,31 +2223,62 @@
             return report;
         }
 
+        // Seed a completely empty wall — a brand-new visitor with no
+        // localStorage at all, e.g. someone opening a shared review
+        // link — from news_sources.json, the same curated/validated
+        // feed healFromSources() already reads every load. Anyone who
+        // already has sources locally is untouched by this; it only
+        // fires when there is nothing to lose.
+        async function seedIfEmpty() {
+            if (sources.length > 0) return;
+            try {
+                const res = await fetch(`${HEAL_FEED_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) return;
+                const remote = await res.json();
+                if (!Array.isArray(remote)) return;
+                sources = migrateSources(remote.map(r => ({
+                    name: r.name,
+                    url: r.url,
+                    region: r.region || 'other',
+                    channel_id: r.channel_id || undefined,
+                    dead: r.status !== 'live'
+                })));
+            } catch (err) {
+                // Offline, or the file isn't deployed yet — wall just stays
+                // empty, exactly as it always has for a fresh visitor.
+                console.warn('Seed from news_sources.json failed:', err.message);
+            }
+        }
+
         // Initialize. If migration just assigned any missing id/order
-        // fields, persist them immediately so a reload doesn't
-        // reassign fresh random ids before the first real edit.
-        saveSources({ skipSync: true });
-        renderGrid();
-        checkRemoteFreshness();
-        healFromSources();
+        // fields (or seedIfEmpty just populated the wall), persist them
+        // immediately so a reload doesn't reassign fresh random ids or
+        // refetch before the first real edit.
+        (async function initializeWall() {
+            await seedIfEmpty();
+            saveSources({ skipSync: true });
+            renderGrid();
+            checkRemoteFreshness();
+            healFromSources();
 
-        // Auto-activate first panel after initial render
-        if (sources.length > 0 && activeId === null) {
-            const first = [...sources].sort((a, b) => a.order - b.order)[0];
-            setTimeout(() => toggleAudio(first.id), 1000);
-        }
+            // Auto-activate first panel after initial render
+            if (sources.length > 0 && activeId === null) {
+                const first = [...sources].sort((a, b) => a.order - b.order)[0];
+                setTimeout(() => toggleAudio(first.id), 1000);
+            }
 
-        // Show keyboard shortcuts hint on first visit
-        if (!localStorage.getItem('newsWallSeenShortcuts')) {
-            setTimeout(() => {
-                const help = document.getElementById('shortcutsHelp');
-                help.classList.add('visible');
+            // Show keyboard shortcuts hint on first visit
+            if (!localStorage.getItem('newsWallSeenShortcuts')) {
                 setTimeout(() => {
-                    help.classList.remove('visible');
-                    localStorage.setItem('newsWallSeenShortcuts', 'true');
-                }, 5000);
-            }, 2000);
-        }
+                    const help = document.getElementById('shortcutsHelp');
+                    help.classList.add('visible');
+                    setTimeout(() => {
+                        help.classList.remove('visible');
+                        localStorage.setItem('newsWallSeenShortcuts', 'true');
+                    }, 5000);
+                }, 2000);
+            }
+        })();
 
         // Comprehensive keyboard shortcuts
         document.addEventListener('keydown', (e) => {
