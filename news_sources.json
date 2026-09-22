@@ -8,10 +8,10 @@
     "country": "gb",
     "favorite": true,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=qaX8Uc_tR5U",
     "replacement_found": true,
-    "concurrent_viewers": 6403
+    "concurrent_viewers": 3694
   },
   {
     "name": "Telemundo",
@@ -22,8 +22,8 @@
     "country": "us",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 3687
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 3431
   },
   {
     "name": "ABC Australia",
@@ -34,8 +34,8 @@
     "country": "au",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 585
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 1964
   },
   {
     "name": "Al Jazeera Arabic",
@@ -47,8 +47,8 @@
     "favorite": false,
     "note": "Confirm this URL is the Arabic stream, not the English one",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 35976
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 36157
   },
   {
     "name": "Al Hadath",
@@ -59,10 +59,10 @@
     "country": "sa",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=2YkEX2Z8Vds",
     "replacement_found": true,
-    "concurrent_viewers": 10242
+    "concurrent_viewers": 9173
   },
   {
     "name": "Berita RTM",
@@ -73,7 +73,7 @@
     "country": "my",
     "favorite": false,
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=yI-O0LEBRVs"
   },
   {
@@ -85,10 +85,10 @@
     "country": "ar",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=A4yjB85WbEo",
     "replacement_found": true,
-    "concurrent_viewers": 19902
+    "concurrent_viewers": 27341
   },
   {
     "name": "Channels TV Nigeria",
@@ -99,8 +99,8 @@
     "country": "ng",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 507
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 878
   },
   {
     "name": "Citizen TV Kenya",
@@ -111,7 +111,7 @@
     "country": "ke",
     "favorite": false,
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=DVSRNx8VSFM"
   },
   {
@@ -123,7 +123,7 @@
     "country": "co",
     "favorite": false,
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=mJ0y59mwJOU"
   },
   {
@@ -135,8 +135,8 @@
     "country": "sg",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 502
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 318
   },
   {
     "name": "Bloomberg",
@@ -147,10 +147,10 @@
     "country": "us",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=iEpJwprxDdk",
     "replacement_found": true,
-    "concurrent_viewers": 7980
+    "concurrent_viewers": 4310
   },
   {
     "name": "Current Time TV",
@@ -162,8 +162,8 @@
     "favorite": false,
     "note": "RFE/RL Russian-language service",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 627
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 381
   },
   {
     "name": "DZRH Philippines",
@@ -174,10 +174,10 @@
     "country": "ph",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=E_4BcEdOk70",
     "replacement_found": true,
-    "concurrent_viewers": 38
+    "concurrent_viewers": 3884
   },
   {
     "name": "Ekattor TV Bangladesh",
@@ -188,10 +188,10 @@
     "country": "bd",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=Wom7VjY8OTk",
     "replacement_found": true,
-    "concurrent_viewers": 188
+    "concurrent_viewers": 37
   },
   {
     "name": "France 24",
@@ -203,10 +203,10 @@
     "favorite": true,
     "note": "Verify this is the French-language stream, not the English one",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=EqC2bH0M9lM",
     "replacement_found": true,
-    "concurrent_viewers": 6787
+    "concurrent_viewers": 7252
   },
   {
     "name": "Geo News",
@@ -217,10 +217,10 @@
     "country": "pk",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=_FwympjOSNE",
     "replacement_found": true,
-    "concurrent_viewers": 454
+    "concurrent_viewers": 217
   },
   {
     "name": "KBS",
@@ -232,7 +232,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English",
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=cA5TXs7YLmc"
   },
   {
@@ -244,8 +244,8 @@
     "country": "id",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 1708
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 701
   },
   {
     "name": "Kronen Zeitung",
@@ -256,9 +256,10 @@
     "country": "at",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=InpduzWL218",
-    "replacement_found": true
+    "replacement_found": true,
+    "concurrent_viewers": 1
   },
   {
     "name": "LN Argentina",
@@ -269,7 +270,7 @@
     "country": "ar",
     "favorite": false,
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=xBX6mf0Juj0"
   },
   {
@@ -282,7 +283,7 @@
     "favorite": false,
     "note": "State broadcaster — flag as state-run if desired in UI",
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false
   },
@@ -295,8 +296,8 @@
     "country": "kr",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 148
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 217
   },
   {
     "name": "Metro TV Indonesia",
@@ -307,10 +308,10 @@
     "country": "id",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=hjNOqYN6UJo",
     "replacement_found": true,
-    "concurrent_viewers": 586
+    "concurrent_viewers": 286
   },
   {
     "name": "TV Azteca Mexico",
@@ -321,10 +322,10 @@
     "country": "mx",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=ys7QuChSaLA",
     "replacement_found": true,
-    "concurrent_viewers": 678
+    "concurrent_viewers": 1892
   },
   {
     "name": "RTVE",
@@ -335,10 +336,10 @@
     "country": "es",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=ku09JnYKhz0",
     "replacement_found": true,
-    "concurrent_viewers": 2734
+    "concurrent_viewers": 3186
   },
   {
     "name": "Canal 8 Costa Rica",
@@ -349,10 +350,10 @@
     "country": "cr",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=GNFoQAt2DAo",
     "replacement_found": true,
-    "concurrent_viewers": 93
+    "concurrent_viewers": 431
   },
   {
     "name": "NBC News Now",
@@ -363,9 +364,10 @@
     "country": "us",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=v2-4wJ0dANQ",
-    "replacement_found": true
+    "replacement_found": true,
+    "concurrent_viewers": 2851
   },
   {
     "name": "NHK World",
@@ -377,10 +379,10 @@
     "favorite": false,
     "note": "⚠️ AUDIT: This is NHK's English international service. For local Japanese, find NHK News 7 or NHK24 Japanese stream",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=f0lYkdA-Gtw",
     "replacement_found": true,
-    "concurrent_viewers": 44
+    "concurrent_viewers": 38
   },
   {
     "name": "NTV Japan",
@@ -391,8 +393,8 @@
     "country": "jp",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 382
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 530
   },
   {
     "name": "OE24",
@@ -403,10 +405,10 @@
     "country": "at",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=oZVJoFj12qY",
     "replacement_found": true,
-    "concurrent_viewers": 100
+    "concurrent_viewers": 697
   },
   {
     "name": "Radio France Internationale",
@@ -417,10 +419,10 @@
     "country": "fr",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=5r1vzOpvW1E",
     "replacement_found": true,
-    "concurrent_viewers": 221
+    "concurrent_viewers": 165
   },
   {
     "name": "T13",
@@ -431,10 +433,10 @@
     "country": "cl",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=pu2KU7BKL4w",
     "replacement_found": true,
-    "concurrent_viewers": 1151
+    "concurrent_viewers": 1481
   },
   {
     "name": "TBS News Japan",
@@ -445,8 +447,8 @@
     "country": "jp",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 967
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 949
   },
   {
     "name": "Telewizja Republika",
@@ -457,8 +459,8 @@
     "country": "pl",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 14378
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 12943
   },
   {
     "name": "TN Todo Noticias",
@@ -469,8 +471,8 @@
     "country": "ar",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 80863
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 48880
   },
   {
     "name": "TVBS Taiwan",
@@ -481,8 +483,8 @@
     "country": "tw",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 3975
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 1832
   },
   {
     "name": "TRT Haber",
@@ -494,10 +496,10 @@
     "favorite": false,
     "note": "State broadcaster",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=eqxFPKDlloo",
     "replacement_found": true,
-    "concurrent_viewers": 5620
+    "concurrent_viewers": 1828
   },
   {
     "name": "TV Libertad",
@@ -508,10 +510,10 @@
     "country": "pe",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": true,
-    "concurrent_viewers": 3
+    "concurrent_viewers": 1
   },
   {
     "name": "Yonhap News TV",
@@ -522,8 +524,8 @@
     "country": "kr",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 1310
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 1690
   },
   {
     "name": "Belsat",
@@ -535,8 +537,8 @@
     "favorite": false,
     "note": "Independent Belarusian broadcaster based in Poland",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 86
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 13
   },
   {
     "name": "1+1 Ukraine",
@@ -547,7 +549,7 @@
     "country": "ua",
     "favorite": false,
     "status": "dead",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=REV0qoIFmWM",
     "replacement_found": false
   },
@@ -560,8 +562,8 @@
     "country": "ua",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 595
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 472
   },
   {
     "name": "KTN Kenya",
@@ -572,10 +574,10 @@
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=HpMtfIoUDvU",
     "replacement_found": true,
-    "concurrent_viewers": 2196
+    "concurrent_viewers": 684
   },
   {
     "name": "YTN",
@@ -586,10 +588,10 @@
     "country": "kr",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=FJfwehhzIhw",
     "replacement_found": true,
-    "concurrent_viewers": 2095
+    "concurrent_viewers": 3298
   },
   {
     "name": "CBS News",
@@ -600,9 +602,10 @@
     "country": "us",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
     "dead_url": "https://www.youtube.com/watch?v=qQSg9v7pMf0",
-    "replacement_found": true
+    "replacement_found": true,
+    "concurrent_viewers": 458
   },
   {
     "name": "ABC News",
@@ -613,8 +616,8 @@
     "country": "us",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 1159
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 949
   },
   {
     "name": "News 12 New York",
@@ -625,8 +628,8 @@
     "country": "us",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 410
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 246
   },
   {
     "name": "WION",
@@ -637,8 +640,8 @@
     "country": "in",
     "favorite": false,
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 639
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 181
   },
   {
     "name": "DW Deutsch",
@@ -650,7 +653,7 @@
     "favorite": false,
     "note": "⚠️ AUDIT: Verify this is the German-language DW stream, not DW English or DW Arabic",
     "status": "live",
-    "last_checked": "2026-09-22T15:55:12.613119+00:00",
-    "concurrent_viewers": 490
+    "last_checked": "2026-09-22T20:37:58.122656+00:00",
+    "concurrent_viewers": 465
   }
 ]
