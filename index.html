@@ -6,11 +6,7 @@
     <title>News Wall</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background: #000;
@@ -19,48 +15,19 @@
             overflow-x: hidden;
         }
 
-        /* Grid */
-        .grid {
-            display: grid;
-            gap: 2px;
-            min-height: 100vh;
-            padding: 2px;
-        }
-
-        .grid.compact {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .grid.medium {
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        }
-
-        .grid.large {
-            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
-        }
-
-        @media (max-width: 1400px) {
-            .grid.medium {
-                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            }
-        }
-
+        /* ── Grid ─────────────────────────────────────────────── */
+        .grid { display: grid; gap: 2px; min-height: 100vh; padding: 2px; align-content: start; }
+        .grid.compact { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+        .grid.medium  { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
+        .grid.large   { grid-template-columns: repeat(auto-fill, minmax(550px, 1fr)); }
+        @media (max-width: 1400px) { .grid.medium  { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); } }
         @media (max-width: 1000px) {
-            .grid.compact {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-            .grid.medium {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            }
+            .grid.compact { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+            .grid.medium  { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
         }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr !important; } }
 
-        @media (max-width: 600px) {
-            .grid {
-                grid-template-columns: 1fr !important;
-            }
-        }
-
-        /* Panel */
+        /* ── Panel ────────────────────────────────────────────── */
         .panel {
             position: relative;
             background: #0a0a0a;
@@ -69,2326 +36,897 @@
             cursor: grab;
             transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
+        .panel.dragging { opacity: 0.5; cursor: grabbing; transform: scale(0.95); }
+        .panel.drag-over { box-shadow: 0 0 0 3px #ffd60a; }
+        .panel.favorite { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3); }
+        .panel.active { box-shadow: 0 0 0 2px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4); }
+        .panel.favorite.active { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 0 4px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4); }
+        .panel.filtered { display: none; }
 
-        .panel.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-            transform: scale(0.95);
+        .panel iframe { width: 100%; height: 100%; border: none; display: block; pointer-events: none; }
+        .panel.active iframe { pointer-events: auto; }
+
+        .panel-overlay { position: absolute; inset: 0; z-index: 1; cursor: grab; }
+        .panel.active .panel-overlay { display: none; }
+
+        .paused-badge {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); padding: 0.5rem 1rem; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 600; z-index: 3; display: none; pointer-events: none;
         }
+        .panel.paused .paused-badge { display: block; }
 
-        .panel.drag-over {
-            box-shadow: 0 0 0 3px #ffd60a;
-        }
-
-        .panel.favorite {
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-        }
-
-        .panel.favorite.active {
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 0 4px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4);
-        }
-
-        .panel.active {
-            box-shadow: 0 0 0 2px #bf5af2, 0 0 20px rgba(191, 90, 242, 0.4);
-        }
-
-        .panel iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-            pointer-events: none;
-        }
-
-        .panel-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-            cursor: grab;
-        }
-
-        .panel.active .panel-overlay {
-            cursor: pointer;
-        }
-
-        .panel.dragging .panel-overlay {
-            cursor: grabbing;
-        }
-
-        /* Source name label on hover */
+        /* Label: always-on slim bar, or hover-only */
         .source-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-            padding: 1.5rem 0.75rem 0.5rem;
-            color: #fff;
-            font-size: 0.75rem;
-            font-weight: 600;
-            z-index: 2;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            pointer-events: none;
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+            padding: 1.25rem 0.6rem 0.35rem;
+            color: #fff; font-size: 0.7rem; font-weight: 600;
+            z-index: 2; pointer-events: none;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            opacity: 0; transition: opacity 0.2s ease;
         }
-
-        .panel:hover .source-label {
-            opacity: 1;
-        }
-
-        /* Dead source indicator */
-        .panel.dead {
-            opacity: 0.4;
-            pointer-events: none;
-        }
-
-        .panel.dead::after {
-            content: '💀 DEAD LINK';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #ff4444;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .panel.dead .panel-overlay {
-            pointer-events: auto;
-        }
-
-        /* Bulk selection */
-        .panel.selecting {
-            cursor: pointer;
-        }
-
-        .panel.selected {
-            box-shadow: 0 0 0 3px #ffd60a, 0 0 20px rgba(255, 214, 10, 0.4);
-        }
-
-        .selection-checkbox {
-            position: absolute;
-            top: 0.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #fff;
-            border-radius: 4px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 3;
-            color: #ffd60a;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .selecting .selection-checkbox {
-            display: flex;
-        }
-
-        .panel.selected .selection-checkbox {
-            background: #ffd60a;
-            color: #000;
-        }
-
-        /* Bulk actions bar */
-        .bulk-actions {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 2px solid #ffd60a;
-            padding: 1rem 2rem;
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1500;
-        }
-
-        .bulk-actions.active {
-            display: flex;
-        }
-
-        .bulk-actions-left {
-            font-size: 0.875rem;
-            color: #ffd60a;
-            font-weight: 600;
-        }
-
-        .bulk-actions-right {
-            display: flex;
-            gap: 1rem;
-        }
-
-        /* Lightbox */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .lightbox.active {
-            display: flex;
-        }
-
-        .lightbox-content {
-            width: 90vw;
-            height: 90vh;
-            max-width: 1920px;
-            max-height: 1080px;
-            position: relative;
-            background: #000;
-        }
-
-        .lightbox-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .lightbox-close {
-            position: absolute;
-            top: -3rem;
-            right: 0;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 2rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            opacity: 0.8;
-            transition: opacity 0.2s ease;
-        }
-
-        .lightbox-close:hover {
-            opacity: 1;
-        }
-
-        .lightbox-title {
-            position: absolute;
-            top: -3rem;
-            left: 0;
-            color: #fff;
-            font-size: 1rem;
-            opacity: 0.8;
-        }
-
-        /* Keyboard shortcuts help */
-        .shortcuts-help {
-            position: fixed;
-            bottom: 1rem;
-            left: 1rem;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 1rem;
-            font-size: 0.7rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 2500;
-            pointer-events: none;
-        }
-
-        .shortcuts-help.visible {
-            opacity: 1;
-        }
-
-        .shortcuts-help kbd {
-            background: #222;
-            padding: 0.15rem 0.4rem;
-            border-radius: 3px;
-            border: 1px solid #444;
-            font-family: 'JetBrains Mono', monospace;
-            margin: 0 0.25rem;
-        }
-
-        .shortcuts-help-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #bf5af2;
-        }
+        .source-label .lang { opacity: 0.6; font-weight: 400; }
+        body.labels-on .source-label,
+        .panel:hover .source-label { opacity: 1; }
 
         .favorite-star {
-            position: absolute;
-            top: 0.5rem;
-            left: 0.5rem;
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            z-index: 2;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            pointer-events: none;
+            position: absolute; top: 0.5rem; left: 0.5rem; width: 24px; height: 24px;
+            background: rgba(0, 0, 0, 0.7); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.875rem; z-index: 2; cursor: pointer;
+            opacity: 0; transition: opacity 0.2s ease;
         }
-
-        .panel:hover .favorite-star,
-        .panel.favorite .favorite-star {
-            opacity: 1;
-        }
-
-        .panel.favorite .favorite-star {
-            color: #ffd60a;
-        }
+        .panel:hover .favorite-star, .panel.favorite .favorite-star { opacity: 1; }
+        .panel.favorite .favorite-star { color: #ffd60a; }
 
         .panel-actions {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            display: flex;
-            gap: 0.25rem;
-            z-index: 2;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            display: flex; gap: 0.25rem; z-index: 2;
+            opacity: 0; transition: opacity 0.2s ease;
         }
-
-        .panel:hover .panel-actions {
-            opacity: 1;
-        }
-
+        .panel:hover .panel-actions { opacity: 1; }
         .panel-action-btn {
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.7);
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 24px; height: 24px; background: rgba(0, 0, 0, 0.7);
+            border: none; border-radius: 50%; color: #fff; font-size: 0.75rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.2s ease;
         }
+        .panel-action-btn:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
 
-        .panel-action-btn:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: scale(1.1);
-        }
-
-        .panel.active iframe {
-            pointer-events: auto;
-        }
-
-        /* Empty state */
+        /* ── States ───────────────────────────────────────────── */
         .empty-state {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            flex-direction: column;
-            gap: 2rem;
-            padding: 2rem;
-            text-align: center;
+            display: none; align-items: center; justify-content: center;
+            min-height: 100vh; flex-direction: column; gap: 1.25rem;
+            padding: 2rem; text-align: center;
         }
+        .empty-title { font-size: 2.5rem; font-weight: 600; letter-spacing: -0.02em; }
+        .empty-subtitle { font-size: 0.9rem; opacity: 0.6; max-width: 40rem; line-height: 1.6; }
 
-        .empty-title {
-            font-size: 3rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
+        /* ── Feed health chip ─────────────────────────────────── */
+        .health {
+            position: fixed; top: 0.6rem; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85); border: 1px solid #333; border-radius: 999px;
+            padding: 0.3rem 0.8rem; font-size: 0.65rem; z-index: 900;
+            display: flex; gap: 0.5rem; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
         }
+        body.chrome .health, .health.warn { opacity: 1; }
+        .health .dot { width: 7px; height: 7px; border-radius: 50%; background: #30d158; }
+        .health.warn { border-color: #ff9f0a; }
+        .health.warn .dot { background: #ff9f0a; }
+        .health.bad { border-color: #ff453a; }
+        .health.bad .dot { background: #ff453a; }
 
-        .empty-subtitle {
-            font-size: 1rem;
-            opacity: 0.6;
-        }
-
-        .empty-btn {
-            background: #00d9ff;
-            color: #000;
-            border: none;
-            padding: 1rem 2rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .empty-btn:hover {
-            background: #00b8e6;
-            transform: translateY(-2px);
-        }
-
-        /* Footer */
+        /* ── Footer ───────────────────────────────────────────── */
         .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #333;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid #333; padding: 0.9rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+            z-index: 1000; transform: translateY(100%); transition: transform 0.3s ease;
+            flex-wrap: wrap;
         }
-
-        .footer.visible {
-            transform: translateY(0);
-        }
-
-        .footer-left {
-            font-size: 0.875rem;
-            opacity: 0.8;
-        }
-
-        .footer-right {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .grid-size-controls {
-            display: flex;
-            gap: 0.25rem;
-            border: 1px solid #333;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .grid-size-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            padding: 0.5rem 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            opacity: 0.5;
-        }
-
-        .grid-size-btn.active {
-            background: #bf5af2;
-            opacity: 1;
-        }
-
-        .grid-size-btn:hover {
-            opacity: 1;
-        }
+        body.chrome .footer { transform: translateY(0); }
+        .footer-left { font-size: 0.8rem; opacity: 0.8; }
+        .footer-right { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
 
         .footer-btn {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.5rem 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s ease;
+            background: transparent; border: 1px solid #333; color: #fff;
+            padding: 0.45rem 0.9rem; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem; cursor: pointer; border-radius: 4px; transition: all 0.2s ease;
         }
+        .footer-btn:hover { border-color: #00d9ff; color: #00d9ff; }
+        .footer-btn.on { border-color: #bf5af2; color: #bf5af2; }
+        select.footer-btn { padding: 0.4rem 0.7rem; }
+        select.footer-btn option { background: #111; }
 
-        .footer-btn:hover {
-            border-color: #00d9ff;
-            color: #00d9ff;
+        .grid-size-controls { display: flex; gap: 0.25rem; border: 1px solid #333; border-radius: 4px; overflow: hidden; }
+        .grid-size-btn {
+            background: transparent; border: none; color: #fff; padding: 0.45rem 0.7rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; cursor: pointer;
+            transition: all 0.2s ease; opacity: 0.5;
         }
+        .grid-size-btn.active { background: #bf5af2; opacity: 1; }
+        .grid-size-btn:hover { opacity: 1; }
 
         .footer-toggle {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #333;
-            color: #fff;
-            width: 40px;
-            height: 40px;
-            font-size: 1.25rem;
-            cursor: pointer;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            transition: all 0.2s ease;
+            position: fixed; bottom: 1rem; right: 1rem;
+            background: rgba(0, 0, 0, 0.8); border: 1px solid #333; color: #fff;
+            width: 40px; height: 40px; font-size: 1.25rem; cursor: pointer; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1001; transition: all 0.2s ease;
         }
+        .footer-toggle:hover { background: #00d9ff; color: #000; border-color: #00d9ff; }
+        body.chrome .footer-toggle { bottom: 5rem; }
 
-        .footer-toggle:hover {
-            background: #00d9ff;
-            color: #000;
-            border-color: #00d9ff;
-        }
-
-        /* Modal */
+        /* ── Sources drawer ───────────────────────────────────── */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9);
+            z-index: 2000; align-items: center; justify-content: center; padding: 2rem;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            max-width: 1000px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 2rem;
+            background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
+            max-width: 900px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 1.5rem 1.75rem;
         }
-
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #333; gap: 1rem;
         }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
+        .modal-title { font-size: 1.2rem; font-weight: 600; }
+        .modal-sub { font-size: 0.7rem; opacity: 0.55; line-height: 1.5; margin-bottom: 1rem; }
         .close-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 2rem;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.6;
-            transition: opacity 0.2s ease;
+            background: transparent; border: none; color: #fff; font-size: 1.8rem;
+            cursor: pointer; opacity: 0.6; line-height: 1;
         }
+        .close-btn:hover { opacity: 1; }
 
-        .close-btn:hover {
-            opacity: 1;
+        .src-group { margin: 1rem 0 0.4rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; color: #bf5af2; }
+        .src-row {
+            display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center;
+            padding: 0.45rem 0; border-top: 1px solid #1a1a1a; font-size: 0.75rem;
         }
+        .src-name { font-weight: 600; }
+        .src-meta { opacity: 0.5; font-size: 0.68rem; margin-top: 0.15rem; }
+        .src-meta.bad { color: #ff9f0a; opacity: 0.85; }
+        .src-actions { display: flex; gap: 0.4rem; }
+        .mini-btn {
+            background: transparent; border: 1px solid #333; color: #fff;
+            padding: 0.3rem 0.6rem; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem; cursor: pointer; border-radius: 4px;
+        }
+        .mini-btn:hover { border-color: #00d9ff; color: #00d9ff; }
+        .mini-btn.fav-on { border-color: #ffd60a; color: #ffd60a; }
 
-        .sources-list {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 2rem;
+        /* ── Lightbox ─────────────────────────────────────────── */
+        .lightbox {
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
+            z-index: 3000; align-items: center; justify-content: center; padding: 2rem;
         }
+        .lightbox.active { display: flex; }
+        .lightbox-content { width: 90vw; height: 90vh; max-width: 1920px; max-height: 1080px; position: relative; background: #000; }
+        .lightbox-content iframe { width: 100%; height: 100%; border: none; }
+        .lightbox-close {
+            position: absolute; top: -3rem; right: 0; background: transparent; border: none;
+            color: #fff; font-size: 2rem; cursor: pointer; padding: 0.5rem; opacity: 0.8;
+        }
+        .lightbox-title { position: absolute; top: -2.6rem; left: 0; color: #fff; font-size: 0.95rem; opacity: 0.8; }
 
-        .source-item {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* ── Shortcuts + toast + notice ───────────────────────── */
+        .shortcuts-help {
+            position: fixed; bottom: 1rem; left: 1rem; background: rgba(0, 0, 0, 0.92);
+            border: 1px solid #333; border-radius: 8px; padding: 1rem; font-size: 0.7rem;
+            line-height: 1.7; opacity: 0; transition: opacity 0.3s ease; z-index: 2500; pointer-events: none;
         }
-
-        .source-info {
-            flex: 1;
+        .shortcuts-help.visible { opacity: 1; }
+        .shortcuts-help kbd {
+            background: #222; padding: 0.1rem 0.4rem; border-radius: 3px; border: 1px solid #444;
+            font-family: 'JetBrains Mono', monospace; margin-right: 0.35rem;
         }
-
-        .source-name {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .source-meta {
-            font-size: 0.75rem;
-            opacity: 0.6;
-        }
-
-        .source-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .fav-btn, .edit-btn, .delete-btn {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.5rem 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .fav-btn:hover {
-            border-color: #ffd60a;
-            color: #ffd60a;
-        }
-
-        .fav-btn.active {
-            background: #ffd60a;
-            color: #000;
-            border-color: #ffd60a;
-        }
-
-        .edit-btn:hover {
-            border-color: #00d9ff;
-            color: #00d9ff;
-        }
-
-        .delete-btn:hover {
-            border-color: #ff4444;
-            color: #ff4444;
-        }
-
-        .add-btn {
-            background: #00d9ff;
-            color: #000;
-            border: none;
-            padding: 1rem 2rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
-            transition: all 0.2s ease;
-        }
-
-        .add-btn:hover {
-            background: #00b8e6;
-        }
-
-        /* Form */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.75rem;
-            margin-bottom: 0.5rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .form-input {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            border-radius: 4px;
-            transition: border-color 0.2s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #00d9ff;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-primary {
-            background: #00d9ff;
-            color: #000;
-            border: none;
-            padding: 0.75rem 2rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 4px;
-            flex: 1;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background: #00b8e6;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 0.75rem 2rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            cursor: pointer;
-            border-radius: 4px;
-            flex: 1;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            border-color: #fff;
-        }
-
-        /* Gist Sync */
-        .form-hint {
-            font-size: 0.7rem;
-            opacity: 0.5;
-            margin-top: 0.4rem;
-            line-height: 1.5;
-        }
-
-        .sync-status {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 0.75rem 1rem;
-            font-size: 0.75rem;
-            margin-bottom: 1.5rem;
-            color: #00d9ff;
-            word-break: break-word;
-        }
-
-        .sync-status.error {
-            color: #ff4444;
-            border-color: #ff4444;
-        }
-
-        .checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .checkbox-row input {
-            accent-color: #bf5af2;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
+        .shortcuts-help-title { font-weight: 600; margin-bottom: 0.4rem; color: #bf5af2; }
 
         .toast {
-            position: fixed;
-            top: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.95);
-            border: 1px solid #bf5af2;
-            color: #fff;
-            padding: 0.75rem 1.25rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            z-index: 4000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            max-width: 90vw;
-            text-align: center;
+            position: fixed; top: 2.6rem; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95); border: 1px solid #bf5af2; color: #fff;
+            padding: 0.7rem 1.2rem; border-radius: 6px; font-size: 0.75rem; z-index: 4000;
+            opacity: 0; transition: opacity 0.3s ease; pointer-events: none; max-width: 90vw; text-align: center;
         }
+        .toast.visible { opacity: 1; }
 
-        .toast.visible {
-            opacity: 1;
+        .notice {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 2600;
+            background: rgba(0, 0, 0, 0.96); border-bottom: 2px solid #ff9f0a;
+            padding: 0.85rem 1.25rem; font-size: 0.72rem; line-height: 1.6; display: none;
         }
-        /* ── Self-healing ingest banner ───────────────────────────── */
-        .heal-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.96);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid #30d158;
-            padding: 0.85rem 1.25rem;
-            z-index: 2600;
-            display: none;
-            font-size: 0.72rem;
-            max-height: 45vh;
-            overflow-y: auto;
-        }
-
-        .heal-banner.visible { display: block; }
-
-        .heal-banner-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .heal-banner-title {
-            font-weight: 600;
-            color: #30d158;
-            letter-spacing: 0.04em;
-        }
-
-        .heal-banner-dismiss {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            padding: 0.3rem 0.7rem;
-            border-radius: 4px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .heal-banner-dismiss:hover { border-color: #30d158; color: #30d158; }
-
-        .heal-row {
-            display: grid;
-            grid-template-columns: minmax(120px, 200px) 1fr auto;
-            gap: 0.75rem;
-            padding: 0.3rem 0;
-            border-top: 1px solid #1c1c1c;
-            align-items: baseline;
-        }
-
-        .heal-row-name { font-weight: 600; }
-        .heal-row-detail { opacity: 0.65; word-break: break-all; }
-        .heal-row-via {
-            opacity: 0.9;
-            font-size: 0.65rem;
-            padding: 0.1rem 0.4rem;
-            border-radius: 3px;
-            border: 1px solid #30d158;
-            color: #30d158;
-            white-space: nowrap;
-        }
-        .heal-row-via.weak { border-color: #ffd60a; color: #ffd60a; }
-        .heal-subhead {
-            margin: 0.75rem 0 0.25rem;
-            font-weight: 600;
-            color: #ffd60a;
-            letter-spacing: 0.04em;
-        }
-        .heal-note { opacity: 0.55; margin-top: 0.5rem; line-height: 1.5; }
-
+        .notice.visible { display: block; }
+        .notice-head { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 0.3rem; }
+        .notice-title { font-weight: 600; color: #ff9f0a; }
+        .notice-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
     </style>
 </head>
-<body>
-    <!-- Grid -->
-    <!-- Self-healing ingest report -->
-    <div id="healBanner" class="heal-banner">
-        <div class="heal-banner-head">
-            <div class="heal-banner-title" id="healBannerTitle">HEALED 0 PANELS</div>
-            <button class="heal-banner-dismiss" onclick="dismissHealBanner()">DISMISS</button>
+<body class="labels-on">
+    <!-- One-time notice (migration from the old browser-held list) -->
+    <div id="notice" class="notice">
+        <div class="notice-head">
+            <div class="notice-title" id="noticeTitle"></div>
+            <div class="notice-actions">
+                <button class="mini-btn" id="noticeCopy">COPY LIST</button>
+                <button class="mini-btn" onclick="dismissNotice()">DISMISS</button>
+            </div>
         </div>
-        <div id="healBannerBody"></div>
+        <div id="noticeBody"></div>
     </div>
 
-    <div id="gridContainer"></div>
+    <div id="health" class="health"><span class="dot"></span><span id="healthText">Loading feed…</span></div>
 
-    <!-- Empty State -->
+    <div id="gridContainer" class="grid medium"></div>
+
     <div id="emptyState" class="empty-state">
         <div class="empty-title">NEWS WALL</div>
-        <div class="empty-subtitle">Click below to add your first news source</div>
-        <button class="empty-btn" onclick="openAddSource()">+ ADD SOURCE</button>
+        <div class="empty-subtitle" id="emptyText">Loading…</div>
     </div>
 
     <!-- Footer -->
     <div id="footer" class="footer">
         <div class="footer-left">NEWS WALL</div>
         <div class="footer-right">
-            <select id="regionFilter" class="footer-btn" onchange="filterByRegion(this.value)" style="padding: 0.4rem 0.8rem;">
-                <option value="all">All Regions</option>
-                <option value="us">United States</option>
-                <option value="europe">Europe</option>
-                <option value="latam">Latin America</option>
-                <option value="mena">MENA</option>
-                <option value="asia">Asia-Pacific</option>
-                <option value="africa">Africa</option>
-                <option value="other">Other</option>
-            </select>
-            <button class="footer-btn" onclick="enterBulkSelectMode()">BULK SELECT</button>
+            <select id="regionFilter" class="footer-btn" onchange="setRegion(this.value)"></select>
             <button class="footer-btn" onclick="muteAll()">MUTE ALL</button>
+            <button class="footer-btn" id="labelsBtn" onclick="toggleLabels()">LABELS</button>
             <div class="grid-size-controls">
-                <button class="grid-size-btn" onclick="setGridSize('compact')" title="Compact">◾◾◾</button>
-                <button class="grid-size-btn active" onclick="setGridSize('medium')" title="Medium">◾◾</button>
-                <button class="grid-size-btn" onclick="setGridSize('large')" title="Large">◾</button>
+                <button class="grid-size-btn" data-size="compact" onclick="setGridSize('compact')" title="Compact">◾◾◾</button>
+                <button class="grid-size-btn" data-size="medium" onclick="setGridSize('medium')" title="Medium">◾◾</button>
+                <button class="grid-size-btn" data-size="large" onclick="setGridSize('large')" title="Large">◾</button>
             </div>
-            <button class="footer-btn" onclick="healFromSources({ manual: true })">↻ HEAL LINKS</button>
-            <button class="footer-btn" onclick="openManageSources()">MANAGE SOURCES</button>
-            <button class="footer-btn" onclick="openSyncModal()">SYNC</button>
-            <button class="footer-btn" onclick="exportSources()">EXPORT</button>
-            <button class="footer-btn" onclick="importSources()">IMPORT</button>
+            <button class="footer-btn" id="sourcesBtn" onclick="openSources()">SOURCES</button>
         </div>
     </div>
+    <button id="footerToggle" class="footer-toggle" onclick="toggleChrome()" title="Controls (Ctrl+S)">⚙</button>
 
-    <!-- Footer Toggle -->
-    <button id="footerToggle" class="footer-toggle" onclick="toggleFooter()">⚙</button>
-
-    <!-- Manage Sources Modal -->
-    <div id="manageModal" class="modal">
+    <!-- Sources drawer: everything in the feed, with status, favourite and hide -->
+    <div id="sourcesModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">Manage Sources</div>
-                <button class="close-btn" onclick="closeManageModal()">&times;</button>
+                <div class="modal-title">Sources</div>
+                <button class="close-btn" onclick="closeSources()">&times;</button>
             </div>
-            <div id="sourcesList" class="sources-list"></div>
-            <button class="add-btn" onclick="openAddSource()">+ ADD NEW SOURCE</button>
+            <div class="modal-sub">
+                The list comes from news_sources.json, which the daily validator keeps current.
+                Favourites, hides and panel order are saved in this browser only.
+            </div>
+            <div id="sourcesList"></div>
         </div>
     </div>
 
-    <!-- Add/Edit Source Modal -->
-    <div id="sourceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="sourceModalTitle">Add Source</div>
-                <button class="close-btn" onclick="closeSourceModal()">&times;</button>
-            </div>
-            <form id="sourceForm">
-                <div class="form-group">
-                    <label class="form-label">Name *</label>
-                    <input type="text" id="sourceName" class="form-input" placeholder="e.g., BBC News" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Region *</label>
-                    <select id="sourceRegion" class="form-input" required>
-                        <option value="us">United States</option>
-                        <option value="europe">Europe</option>
-                        <option value="latam">Latin America</option>
-                        <option value="mena">MENA</option>
-                        <option value="asia">Asia-Pacific</option>
-                        <option value="africa">Africa</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">YouTube Video URL *</label>
-                    <input type="text" id="sourceUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." required>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeSourceModal()">Cancel</button>
-                    <button type="submit" class="btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Hidden file input for import -->
-    <input type="file" id="importInput" accept=".json" style="display: none;" onchange="handleImport(event)">
-
-    <!-- Gist Sync Modal -->
-    <div id="syncModal" class="modal">
-        <div class="modal-content" style="max-width: 640px;">
-            <div class="modal-header">
-                <div class="modal-title">Cloud Sync</div>
-                <button class="close-btn" onclick="closeSyncModal()">&times;</button>
-            </div>
-            <div id="syncStatus" class="sync-status">Not configured</div>
-            <div class="form-group">
-                <label class="form-label">GitHub Token</label>
-                <input type="password" id="gistTokenInput" class="form-input" placeholder="github_pat_… or ghp_…" autocomplete="off">
-                <div class="form-hint">
-                    Create at github.com → Settings → Developer settings → Personal access tokens.
-                    Fine-grained token: grant only "Gists" (read &amp; write) under Account permissions.
-                    Classic token: check only the "gist" scope. The token is stored in this browser's
-                    localStorage only — it never leaves your device except to talk to api.github.com.
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Gist ID</label>
-                <input type="text" id="gistIdInput" class="form-input" placeholder="Blank on first device — click CREATE GIST below" autocomplete="off">
-                <div class="form-hint">
-                    On your first device: paste your token, then click CREATE GIST. On every other
-                    device: paste the same token and this Gist ID, then click PULL FROM GIST.
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="checkbox-row">
-                    <input type="checkbox" id="gistAutoSyncInput">
-                    Auto-push changes to Gist (3s after any edit)
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" onclick="saveSyncSettings()">Save Settings</button>
-                <button type="button" class="btn-secondary" onclick="createSyncGist()">Create Gist</button>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn-primary" onclick="pushToGist()">⬆ Push to Gist</button>
-                <button type="button" class="btn-primary" onclick="pullFromGist()">⬇ Pull from Gist</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast -->
     <div id="toast" class="toast"></div>
 
-    <!-- Lightbox -->
     <div id="lightbox" class="lightbox">
         <div class="lightbox-content">
             <div class="lightbox-title" id="lightboxTitle"></div>
             <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-            <iframe id="lightboxFrame"></iframe>
+            <iframe id="lightboxFrame" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
         </div>
     </div>
 
-    <!-- Bulk Actions Bar -->
-    <div id="bulkActions" class="bulk-actions">
-        <div class="bulk-actions-left">
-            <span id="selectedCount">0</span> selected
-        </div>
-        <div class="bulk-actions-right">
-            <button class="footer-btn" onclick="bulkFavorite()">★ Favorite</button>
-            <button class="footer-btn" onclick="bulkMarkDead()">💀 Mark Dead</button>
-            <button class="footer-btn" onclick="bulkDelete()">Delete</button>
-            <button class="footer-btn" onclick="cancelBulkSelect()">Cancel</button>
-        </div>
-    </div>
-
-    <!-- Keyboard Shortcuts Help -->
     <div id="shortcutsHelp" class="shortcuts-help">
         <div class="shortcuts-help-title">KEYBOARD SHORTCUTS</div>
-        <div><kbd>1-9</kbd> Switch to panel 1-9</div>
-        <div><kbd>Space</kbd> Toggle active panel audio</div>
-        <div><kbd>F</kbd> Fullscreen active panel</div>
-        <div><kbd>M</kbd> Mute all</div>
-        <div><kbd>B</kbd> Bulk select mode</div>
-        <div><kbd>Esc</kbd> Close lightbox / Cancel bulk / Mute all</div>
-        <div><kbd>?</kbd> Toggle this help</div>
-        <div><kbd>Ctrl+S</kbd> Toggle footer</div>
+        <div><kbd>1–9</kbd>Listen to panel 1–9</div>
+        <div><kbd>←↑→↓</kbd>Move between panels</div>
+        <div><kbd>Space</kbd>Pause / resume active panel</div>
+        <div><kbd>F</kbd>Fullscreen active panel</div>
+        <div><kbd>H</kbd>Hide active panel</div>
+        <div><kbd>M</kbd>Mute all</div>
+        <div><kbd>L</kbd>Labels always on / hover only</div>
+        <div><kbd>Esc</kbd>Close / mute all</div>
+        <div><kbd>Ctrl+S</kbd>Controls</div>
+        <div><kbd>?</kbd>This help</div>
     </div>
 
     <script>
         // ============================================================
-        // DATA MODEL
+        // MODEL
         // ============================================================
-        // Every source has a stable `id` (UUID) that never changes, and
-        // an `order` (float) that determines its position in the grid.
-        // Rendering, drag-and-drop, sync, and keyboard nav all key off
-        // `id` — never off array position — so deleting or reordering
-        // one source can't silently reassign another source's identity.
+        // news_sources.json is the master list. The validator keeps it
+        // current every hour, and the wall reads it fresh on every load,
+        // so a rotated stream URL is already fixed by the time you look.
+        //
+        // The browser only stores layout: order, favourites, hides, grid
+        // size, labels, region filter. Everything is keyed by each feed
+        // entry's stable `key`, which never changes even when the URL or
+        // channel_id does.
 
-        function makeId() {
-            if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-            // Fallback for non-secure contexts / older browsers
-            return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+        const FEED_URL = './news_sources.json';
+        const PREFS_KEY = 'breakingWallPrefs';
+        const LEGACY_KEY = 'newsWallSources';          // old browser-held list; read once, never deleted
+        const REFRESH_AFTER_MS = 15 * 60 * 1000;        // re-read the feed when you come back to the tab
+        const REPO_FALLBACK = { owner: 'nickcarbone', repo: 'breaking-wall' };
+
+        const REGION_LABELS = {
+            us: 'United States', europe: 'Europe', latam: 'Latin America', mena: 'MENA',
+            asia: 'Asia', oceania: 'Oceania', africa: 'Africa', other: 'Other'
+        };
+        const STATUS_LABELS = {
+            live: 'Live', scheduled: 'Scheduled', offline: 'Off air', dead: 'Dead link',
+            blocked: 'Blocked', pending: 'Awaiting first check'
+        };
+
+        let feed = [];                 // every entry in news_sources.json
+        let feedLoadedAt = 0;
+        let prefs = loadPrefs();
+        let activeKey = null;
+        let draggedKey = null;
+        const panelEls = new Map();    // key -> panel element (created once, updated in place)
+        const pausedKeys = new Set();
+
+        function loadPrefs() {
+            const base = { v: 1, order: {}, fav: {}, hidden: {}, grid: 'medium', labels: true, region: 'all', migrated: false };
+            try {
+                const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null');
+                return saved ? { ...base, ...saved } : base;
+            } catch (e) { return base; }
         }
 
-        // Backfills id/order on any source missing them (legacy data,
-        // imports, or a Gist written by an older version of the wall).
-        // Order is assigned by appending after the current maximum so
-        // existing relative order is preserved.
-        function migrateSources(list) {
-            if (!Array.isArray(list)) return [];
-            let maxOrder = list.reduce((m, s) => typeof s.order === 'number' ? Math.max(m, s.order) : m, -10);
-            return list.map(s => {
-                const copy = { ...s };
-                if (!copy.id) copy.id = makeId();
-                if (typeof copy.order !== 'number') {
-                    maxOrder += 10;
-                    copy.order = maxOrder;
-                }
-                if (typeof copy.favorite !== 'boolean') copy.favorite = false;
-                if (typeof copy.dead !== 'boolean') copy.dead = false;
-                return copy;
-            });
+        function savePrefs() {
+            try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); }
+            catch (e) { showToast('Could not save layout (browser storage full or blocked)'); }
         }
 
-        // Load sources from localStorage
-        let sources = migrateSources(JSON.parse(localStorage.getItem('newsWallSources')) || []);
-        let gridSize = localStorage.getItem('newsWallGridSize') || 'medium';
-        let currentRegionFilter = 'all';
-        let activeId = null;
-        let editingId = null;
-        let draggedId = null;
-        let bulkSelectMode = false;
-        let selectedIds = new Set();
+        function keyOf(s) { return s.key || s.channel_id || `${normName(s.name)}-${(s.country || 'xx').toLowerCase()}`; }
+        function normName(n) { return String(n || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''); }
+        function isPlayable(s) { return s.status === 'live'; }
+        function isFavorite(s) { const k = keyOf(s); return k in prefs.fav ? prefs.fav[k] : !!s.favorite; }
+        function isHidden(s) { return !!prefs.hidden[keyOf(s)]; }
 
-        // id -> panel DOM element. Panels are created once per id and
-        // then only ever updated in place — never rebuilt — so an
-        // iframe keeps streaming through favorite toggles, region
-        // filtering, drag reorders, and sync pulls. It is only
-        // recreated if its own source is deleted, or its own URL changes.
-        const panelEls = new Map();
-
-        function saveSources(options = {}) {
-            localStorage.setItem('newsWallSources', JSON.stringify(sources));
-            if (!options.skipSync) scheduleAutoPush();
+        function videoIdOf(url) {
+            const m = String(url || '').match(/(?:[?&]v=|youtu\.be\/|\/live\/|\/embed\/)([A-Za-z0-9_-]{6,15})/);
+            return m ? m[1] : null;
+        }
+        // Two embed modes. The validator sets embed:"channel" only for a
+        // channel it has seen running exactly one live broadcast; those are
+        // embedded by channel ID, so YouTube resolves the current broadcast
+        // at page load and a rotated URL never shows. Everything else uses
+        // its specific video id.
+        function embedSrc(s, opts = {}) {
+            const p = new URLSearchParams({ autoplay: opts.paused ? '0' : '1', controls: '1', playsinline: '1', enablejsapi: '1' });
+            if (!opts.sound) p.set('mute', '1');
+            if (s.embed === 'channel' && /^UC[\w-]{22}$/.test(s.channel_id || '')) {
+                p.set('channel', s.channel_id);
+                return `https://www.youtube.com/embed/live_stream?${p}`;
+            }
+            const id = videoIdOf(s.url);
+            return id ? `https://www.youtube.com/embed/${id}?${p}` : 'about:blank';
         }
 
-        // Escape user-provided strings before injecting into innerHTML
+        function flagOf(cc) {
+            if (!cc || cc.length !== 2) return '';
+            const c = cc.toUpperCase() === 'UK' ? 'GB' : cc.toUpperCase();
+            return String.fromCodePoint(...[...c].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+        }
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.textContent = str ?? '';
             return div.innerHTML;
         }
 
-        // Convert any common YouTube URL form to an embed URL.
-        // Handles: watch?v=ID, youtu.be/ID, /live/ID, /embed/ID
-        function toEmbedUrl(url) {
-            try {
-                const u = new URL(url);
-                let id = null;
-                if (u.hostname.includes('youtu.be')) {
-                    id = u.pathname.split('/')[1];
-                } else if (u.pathname.startsWith('/live/')) {
-                    id = u.pathname.split('/')[2];
-                } else if (u.pathname.startsWith('/embed/')) {
-                    return `https://www.youtube.com/embed/${u.pathname.split('/')[2]}`;
-                } else if (u.searchParams.get('v')) {
-                    id = u.searchParams.get('v');
+        // Order: saved order wins; anything new goes after, in feed order.
+        function orderedFeed() {
+            const idx = new Map(feed.map((s, i) => [keyOf(s), i]));
+            const maxSaved = Math.max(-10, ...Object.values(prefs.order));
+            return [...feed].sort((a, b) => {
+                const oa = prefs.order[keyOf(a)] ?? (maxSaved + 10 + idx.get(keyOf(a)));
+                const ob = prefs.order[keyOf(b)] ?? (maxSaved + 10 + idx.get(keyOf(b)));
+                return oa - ob;
+            });
+        }
+
+        // ============================================================
+        // FEED
+        // ============================================================
+        async function loadFeed() {
+            const res = await fetch(`${FEED_URL}?t=${Date.now()}`, { cache: 'no-store' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!Array.isArray(data)) throw new Error('news_sources.json is not a list');
+            feed = data.filter(s => s && s.url);
+            feedLoadedAt = Date.now();
+        }
+
+        // One-time carry-over of order/favourites from the old wall, which
+        // kept its own copy of the list in the browser. The old data is
+        // left in place untouched; this only reads it.
+        function migrateLegacy() {
+            if (prefs.migrated) return;
+            prefs.migrated = true;
+            let legacy = [];
+            try { legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]'); } catch (e) { legacy = []; }
+            if (!Array.isArray(legacy) || !legacy.length) { savePrefs(); return; }
+
+            const byChannel = new Map(), byVideo = new Map(), byName = new Map();
+            feed.forEach(s => {
+                if (s.channel_id) byChannel.set(s.channel_id, s);
+                [s.url, s.dead_url].forEach(u => { const v = videoIdOf(u); if (v) byVideo.set(v, s); });
+                byName.set(`${normName(s.name)}`, s);
+            });
+
+            const sortedLegacy = [...legacy].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+            const orphans = [];
+            sortedLegacy.forEach((old, i) => {
+                const match = (old.channel_id && byChannel.get(old.channel_id))
+                    || byVideo.get(videoIdOf(old.url)) || byVideo.get(videoIdOf(old.previous_url))
+                    || byName.get(normName(old.name));
+                if (!match) { orphans.push(old); return; }
+                const k = keyOf(match);
+                if (!(k in prefs.order)) prefs.order[k] = i * 10;
+                if (old.favorite) prefs.fav[k] = true;
+            });
+            savePrefs();
+
+            if (orphans.length) {
+                showNotice(
+                    `${orphans.length} source${orphans.length === 1 ? '' : 's'} from your old wall ${orphans.length === 1 ? 'is' : 'are'} not in the feed`,
+                    `The wall now plays news_sources.json only. These were saved in this browser and are still there, untouched: ` +
+                    orphans.map(o => `<b>${escapeHtml(o.name)}</b>`).join(', ') +
+                    `. Copy the list if you want any of them added to the feed.`,
+                    JSON.stringify(orphans.map(o => ({ name: o.name, url: o.url, region: o.region })), null, 2)
+                );
+            }
+        }
+
+        // ============================================================
+        // RENDERING — panels are created once and updated in place.
+        // Visual order comes from the CSS `order` property, because
+        // moving an iframe in the DOM reloads it.
+        // ============================================================
+        function render() {
+            const container = document.getElementById('gridContainer');
+            const empty = document.getElementById('emptyState');
+            container.className = `grid ${prefs.grid}`;
+
+            const ordered = orderedFeed();
+            const onWall = ordered.filter(s => isPlayable(s) && !isHidden(s));
+            const onWallKeys = new Set(onWall.map(keyOf));
+
+            // Remove panels that are no longer live or have been hidden.
+            for (const [k, el] of panelEls) {
+                if (!onWallKeys.has(k)) {
+                    el.remove();
+                    panelEls.delete(k);
+                    pausedKeys.delete(k);
+                    if (activeKey === k) activeKey = null;
                 }
-                if (id) return `https://www.youtube.com/embed/${id}`;
-            } catch (err) { /* fall through to legacy behavior */ }
-            return url.replace('watch?v=', 'embed/');
+            }
+
+            onWall.forEach((s, i) => {
+                const k = keyOf(s);
+                let panel = panelEls.get(k);
+                if (!panel) {
+                    panel = createPanel(s);
+                    panelEls.set(k, panel);
+                    container.appendChild(panel);
+                }
+                updatePanel(panel, s, i);
+            });
+
+            const visible = onWall.filter(s => prefs.region === 'all' || s.region === prefs.region);
+            if (!feed.length) {
+                showEmpty('No sources in the feed yet.');
+            } else if (!visible.length) {
+                showEmpty(prefs.region === 'all'
+                    ? 'Nothing is live right now. Open SOURCES (Ctrl+S) to see what is off air.'
+                    : 'Nothing live in this region. Pick another from the controls (Ctrl+S).');
+            } else {
+                empty.style.display = 'none';
+                container.style.display = 'grid';
+            }
+
+            document.body.classList.toggle('labels-on', !!prefs.labels);
+            document.getElementById('labelsBtn').classList.toggle('on', !!prefs.labels);
+            document.querySelectorAll('.grid-size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === prefs.grid));
+            buildRegionFilter();
+            updateHealthCounts();
         }
 
-        function saveGridSize() {
-            localStorage.setItem('newsWallGridSize', gridSize);
+        function showEmpty(text) {
+            document.getElementById('emptyText').textContent = text;
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('gridContainer').style.display = 'none';
         }
 
-        function findSource(id) {
-            return sources.find(s => s.id === id);
-        }
-
-        // ============================================================
-        // RENDERING — incremental, no reloads
-        // ============================================================
-        // Visual order comes entirely from the CSS `order` property on
-        // each panel, never from DOM position. That's the key trick:
-        // moving a node in the DOM (insertBefore/appendChild) forces
-        // browsers to reload its iframe, but changing a CSS property
-        // does not. So panels are appended once and never moved again —
-        // reordering, favoriting, and region filtering are all just
-        // style/class updates on existing nodes.
-
-        function createPanelElement(source) {
+        function createPanel(s) {
+            const k = keyOf(s);
             const panel = document.createElement('div');
             panel.className = 'panel';
-            panel.dataset.id = source.id;
-
-            const embedUrl = toEmbedUrl(source.url);
+            panel.dataset.key = k;
+            panel.draggable = true;
             panel.innerHTML = `
-                <iframe
-                    id="player-${source.id}"
-                    src="${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
+                <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 <div class="source-label"></div>
-                <div class="selection-checkbox">✓</div>
-                <div class="favorite-star"></div>
+                <div class="paused-badge">❚❚ PAUSED</div>
+                <div class="favorite-star" title="Favourite"></div>
                 <div class="panel-actions">
-                    <button class="panel-action-btn" title="Fullscreen">⛶</button>
-                    <button class="panel-action-btn">💀</button>
-                    <button class="panel-action-btn" title="Edit">✎</button>
+                    <button class="panel-action-btn" data-act="full" title="Fullscreen (F)">⛶</button>
+                    <button class="panel-action-btn" data-act="hide" title="Hide (H)">✕</button>
                 </div>
-                <div class="panel-overlay"></div>
-            `;
-            panel.querySelector('iframe').dataset.embedBase = embedUrl;
+                <div class="panel-overlay" title="Click to listen"></div>`;
+            // A panel born outside the current region filter starts filtered
+            // and doesn't autoplay, so it costs nothing until it's shown.
+            const inRegion = prefs.region === 'all' || s.region === prefs.region;
+            panel.classList.toggle('filtered', !inRegion);
+            const iframe = panel.querySelector('iframe');
+            iframe.src = embedSrc(s, { paused: !inRegion });
+            iframe.dataset.src = embedSrc(s);
 
-            panel.addEventListener('dragstart', handleDragStart);
-            panel.addEventListener('dragend', handleDragEnd);
-            panel.addEventListener('dragover', handleDragOver);
-            panel.addEventListener('drop', handleDrop);
-            panel.addEventListener('dragleave', handleDragLeave);
+            panel.addEventListener('dragstart', onDragStart);
+            panel.addEventListener('dragend', onDragEnd);
+            panel.addEventListener('dragover', onDragOver);
+            panel.addEventListener('dragleave', onDragLeave);
+            panel.addEventListener('drop', onDrop);
 
-            // All click handlers read the id from the panel's own
-            // dataset at click-time, not from a closed-over source
-            // object, so they stay correct even after `sources` is
-            // replaced wholesale (import, Gist pull).
-            const overlay = panel.querySelector('.panel-overlay');
-            overlay.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const id = panel.dataset.id;
-                if (bulkSelectMode) togglePanelSelection(id); else toggleAudio(id);
-            });
-
-            const star = panel.querySelector('.favorite-star');
-            star.style.pointerEvents = 'auto';
-            star.style.cursor = 'pointer';
-            star.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleFavorite(panel.dataset.id);
-            });
-
-            const actionBtns = panel.querySelectorAll('.panel-action-btn');
-            actionBtns[0].style.pointerEvents = 'auto';
-            actionBtns[0].addEventListener('click', (e) => {
-                e.stopPropagation();
-                openLightbox(panel.dataset.id);
-            });
-            actionBtns[1].style.pointerEvents = 'auto';
-            actionBtns[1].addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleDead(panel.dataset.id);
-            });
-            actionBtns[2].style.pointerEvents = 'auto';
-            actionBtns[2].addEventListener('click', (e) => {
-                e.stopPropagation();
-                editSource(panel.dataset.id);
-            });
-
+            panel.querySelector('.panel-overlay').addEventListener('click', (e) => { e.stopPropagation(); listenTo(panel.dataset.key); });
+            panel.querySelector('.favorite-star').addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(panel.dataset.key); });
+            panel.querySelector('[data-act="full"]').addEventListener('click', (e) => { e.stopPropagation(); openLightbox(panel.dataset.key); });
+            panel.querySelector('[data-act="hide"]').addEventListener('click', (e) => { e.stopPropagation(); hideSource(panel.dataset.key); });
             return panel;
         }
 
-        // Updates a panel to match its current source data. Never
-        // touches the iframe unless the underlying URL actually
-        // changed (e.g. after an edit or an auto dead-link swap).
-        function updatePanelState(panel, source, orderIndex) {
+        function updatePanel(panel, s, orderIndex) {
+            const k = keyOf(s);
             panel.style.order = orderIndex;
-            panel.classList.toggle('favorite', !!source.favorite);
-            panel.classList.toggle('dead', !!source.dead);
-            panel.classList.toggle('selecting', bulkSelectMode);
-            panel.classList.toggle('selected', selectedIds.has(source.id));
-            panel.classList.toggle('active', activeId === source.id);
-            panel.draggable = !bulkSelectMode;
-
-            const regionMatch = (currentRegionFilter === 'all' || source.region === currentRegionFilter);
-            panel.style.display = regionMatch ? '' : 'none';
-
+            panel.classList.toggle('favorite', isFavorite(s));
+            panel.classList.toggle('active', activeKey === k);
+            panel.classList.toggle('paused', pausedKeys.has(k));
+            panel.querySelector('.favorite-star').textContent = isFavorite(s) ? '★' : '☆';
             panel.querySelector('.source-label').innerHTML =
-                `${escapeHtml(source.name)}${source.region ? ' • ' + escapeHtml(source.region).toUpperCase() : ''}`;
-            panel.querySelector('.favorite-star').textContent = source.favorite ? '★' : '☆';
+                `${flagOf(s.country)} ${escapeHtml(s.name)} <span class="lang">· ${escapeHtml((s.language || '').toUpperCase())}</span>`;
 
-            const actionBtns = panel.querySelectorAll('.panel-action-btn');
-            actionBtns[1].textContent = source.dead ? '🔄' : '💀';
-            actionBtns[1].title = source.dead ? 'Mark Alive' : 'Mark Dead';
+            // Region filter: hide and pause, so a filtered-out panel stops
+            // using bandwidth without losing its place.
+            const inRegion = prefs.region === 'all' || s.region === prefs.region;
+            const wasFiltered = panel.classList.contains('filtered');
+            panel.classList.toggle('filtered', !inRegion);
+            if (wasFiltered !== !inRegion) command(k, inRegion && !pausedKeys.has(k) ? 'playVideo' : 'pauseVideo');
+            if (!inRegion && activeKey === k) muteAll();
 
+            // Only touch the iframe if the stream URL actually changed.
             const iframe = panel.querySelector('iframe');
-            const embedUrl = toEmbedUrl(source.url);
-            if (iframe.dataset.embedBase !== embedUrl) {
-                iframe.src = `${embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1`;
-                iframe.dataset.embedBase = embedUrl;
+            const src = embedSrc(s);
+            if (iframe.dataset.src !== src) {
+                iframe.src = src;
+                iframe.dataset.src = src;
+                pausedKeys.delete(k);
+                if (activeKey === k) setTimeout(() => command(k, 'unMute'), 1500);
             }
         }
 
-        function renderGrid() {
-            const container = document.getElementById('gridContainer');
-            const emptyState = document.getElementById('emptyState');
-
-            if (sources.length === 0) {
-                container.innerHTML = '';
-                container.style.display = 'none';
-                panelEls.clear();
-                emptyState.style.display = 'flex';
-                updateBulkActionsBar();
-                return;
-            }
-            emptyState.style.display = 'none';
-
-            const visibleCount = currentRegionFilter === 'all'
-                ? sources.length
-                : sources.filter(s => s.region === currentRegionFilter).length;
-
-            if (visibleCount === 0) {
-                container.style.display = 'block';
-                container.innerHTML = '<div style="text-align: center; padding: 4rem; opacity: 0.6;">No sources in this region</div>';
-                panelEls.clear();
-                updateBulkActionsBar();
-                return;
-            }
-
-            container.style.display = 'grid';
-            container.className = `grid ${gridSize}`;
-            // Clear the placeholder text node if we just came from an
-            // empty-region state — but never wipe real panel children.
-            if (!container.querySelector('.panel') && container.children.length && !panelEls.size) {
-                container.innerHTML = '';
-            }
-
-            const sortedAll = [...sources].sort((a, b) => a.order - b.order);
-            const currentIds = new Set(sortedAll.map(s => s.id));
-
-            // Remove panels for deleted sources
-            for (const [id, el] of panelEls) {
-                if (!currentIds.has(id)) {
-                    el.remove();
-                    panelEls.delete(id);
-                }
-            }
-
-            // Create-or-update every remaining panel, in place
-            sortedAll.forEach((source, i) => {
-                let panel = panelEls.get(source.id);
-                if (!panel) {
-                    panel = createPanelElement(source);
-                    panelEls.set(source.id, panel);
-                    container.appendChild(panel);
-                }
-                updatePanelState(panel, source, i);
-            });
-
-            // Update grid size buttons
-            document.querySelectorAll('.grid-size-btn').forEach(btn => btn.classList.remove('active'));
-            const sizes = ['compact', 'medium', 'large'];
-            const activeBtn = document.querySelectorAll('.grid-size-btn')[sizes.indexOf(gridSize)];
-            if (activeBtn) activeBtn.classList.add('active');
-
-            updateBulkActionsBar();
-        }
-
-        // Panels currently visible on screen (not region-filtered out,
-        // not dead), sorted by their CSS `order` — i.e. actual visual
-        // order, which no longer matches DOM insertion order.
-        function getVisiblePanelsInVisualOrder() {
-            return Array.from(document.querySelectorAll('#gridContainer .panel'))
-                .filter(p => p.style.display !== 'none' && !p.classList.contains('dead'))
-                .sort((a, b) => parseFloat(a.style.order) - parseFloat(b.style.order));
+        function buildRegionFilter() {
+            const sel = document.getElementById('regionFilter');
+            const present = [...new Set(feed.filter(isPlayable).map(s => s.region || 'other'))]
+                .sort((a, b) => (REGION_LABELS[a] || a).localeCompare(REGION_LABELS[b] || b));
+            if (prefs.region !== 'all' && !present.includes(prefs.region)) present.push(prefs.region);
+            const html = `<option value="all">All regions</option>` + present.map(r =>
+                `<option value="${escapeHtml(r)}">${escapeHtml(REGION_LABELS[r] || r)}</option>`).join('');
+            if (sel.dataset.html !== html) { sel.innerHTML = html; sel.dataset.html = html; }
+            sel.value = prefs.region;
         }
 
         // ============================================================
-        // DRAG AND DROP — explicit `order` field, favorites are
-        // visual-only and no longer affect position
+        // PLAYBACK (YouTube iframe postMessage API)
         // ============================================================
-        function handleDragStart(e) {
-            draggedId = this.dataset.id;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
+        function iframeOf(k) { const p = panelEls.get(k); return p ? p.querySelector('iframe') : null; }
+        function command(k, func) {
+            const f = iframeOf(k);
+            if (f && f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args: [] }), '*');
         }
 
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('drag-over'));
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            this.classList.add('drag-over');
-            return false;
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            this.classList.remove('drag-over');
-
-            const targetId = this.dataset.id;
-            if (!draggedId || draggedId === targetId) return;
-
-            const dragged = findSource(draggedId);
-            if (!dragged) return;
-
-            // Insert dragged immediately before target, within the
-            // currently-visible sorted order (drag/drop is a visual
-            // operation, so it should follow what's on screen).
-            const visible = [...sources]
-                .filter(s => currentRegionFilter === 'all' || s.region === currentRegionFilter)
-                .sort((a, b) => a.order - b.order)
-                .filter(s => s.id !== draggedId);
-            const targetIdx = visible.findIndex(s => s.id === targetId);
-            if (targetIdx === -1) return;
-
-            const prevOrder = targetIdx > 0 ? visible[targetIdx - 1].order : null;
-            const nextOrder = visible[targetIdx].order;
-            dragged.order = (prevOrder !== null) ? (prevOrder + nextOrder) / 2 : nextOrder - 10;
-
-            // Periodically renumber to clean integers so repeated
-            // drops at the same spot never run into float precision
-            // limits.
-            renumberOrders();
-
-            saveSources();
-            renderGrid();
-            draggedId = null;
-        }
-
-        function renumberOrders() {
-            const sorted = [...sources].sort((a, b) => a.order - b.order);
-            sorted.forEach((s, i) => { s.order = i * 10; });
-        }
-
-        // ============================================================
-        // PLAYBACK
-        // ============================================================
-        function toggleAudio(id) {
-            if (activeId !== null && activeId !== id) {
-                const prevPanel = panelEls.get(activeId);
-                if (prevPanel) prevPanel.classList.remove('active');
-                const prevIframe = document.getElementById(`player-${activeId}`);
-                if (prevIframe) {
-                    prevIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-                }
+        function listenTo(k) {
+            if (!panelEls.has(k)) return;
+            if (activeKey && activeKey !== k) {
+                command(activeKey, 'mute');
+                panelEls.get(activeKey)?.classList.remove('active');
             }
-
-            if (activeId === id) return; // clicking the same panel keeps it active
-
-            activeId = id;
-            const panel = panelEls.get(id);
-            if (panel) panel.classList.add('active');
-            const iframe = document.getElementById(`player-${id}`);
-            if (iframe) {
-                iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-            }
-        }
-
-        function toggleFooter() {
-            document.getElementById('footer').classList.toggle('visible');
-        }
-
-        function setGridSize(size) {
-            gridSize = size;
-            saveGridSize();
-            renderGrid();
-        }
-
-        function toggleFavorite(id) {
-            const source = findSource(id);
-            if (!source) return;
-            source.favorite = !source.favorite;
-            saveSources();
-            renderGrid();
-        }
-
-        function toggleDead(id) {
-            const source = findSource(id);
-            if (!source) return;
-            source.dead = !source.dead;
-            saveSources();
-            renderGrid();
-        }
-
-        function filterByRegion(region) {
-            currentRegionFilter = region;
-            renderGrid();
+            activeKey = k;
+            panelEls.get(k).classList.add('active');
+            if (pausedKeys.has(k)) { pausedKeys.delete(k); panelEls.get(k).classList.remove('paused'); command(k, 'playVideo'); }
+            command(k, 'unMute');
         }
 
         function muteAll() {
-            if (activeId !== null) {
-                const panel = panelEls.get(activeId);
-                if (panel) panel.classList.remove('active');
-                const iframe = document.getElementById(`player-${activeId}`);
-                if (iframe) {
-                    iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-                }
-                activeId = null;
+            if (activeKey) {
+                command(activeKey, 'mute');
+                panelEls.get(activeKey)?.classList.remove('active');
             }
+            activeKey = null;
         }
 
-        function openLightbox(id) {
-            const source = findSource(id);
-            if (!source) return;
-            const embedUrl = toEmbedUrl(source.url);
+        function togglePause(k) {
+            if (!k || !panelEls.has(k)) return;
+            const paused = pausedKeys.has(k);
+            command(k, paused ? 'playVideo' : 'pauseVideo');
+            if (paused) pausedKeys.delete(k); else pausedKeys.add(k);
+            panelEls.get(k).classList.toggle('paused', !paused);
+        }
 
-            document.getElementById('lightboxTitle').textContent = source.name;
-            document.getElementById('lightboxFrame').src = embedUrl + '?autoplay=1&controls=1&modestbranding=1';
+        let lightboxKey = null;
+        function openLightbox(k) {
+            const s = feed.find(x => keyOf(x) === k);
+            if (!s) return;
+            lightboxKey = k;
+            if (activeKey) command(activeKey, 'mute');   // avoid two copies of the same audio
+            document.getElementById('lightboxTitle').textContent = s.name;
+            document.getElementById('lightboxFrame').src = embedSrc(s, { sound: true });
             document.getElementById('lightbox').classList.add('active');
         }
-
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
-            document.getElementById('lightboxFrame').src = '';
+            document.getElementById('lightboxFrame').src = 'about:blank';
+            if (activeKey) command(activeKey, 'unMute');
+            lightboxKey = null;
         }
 
         // ============================================================
-        // BULK SELECTION
+        // LAYOUT ACTIONS (saved in this browser only)
         // ============================================================
-        function enterBulkSelectMode() {
-            bulkSelectMode = true;
-            selectedIds.clear();
-            renderGrid();
+        function toggleFavorite(k) {
+            const s = feed.find(x => keyOf(x) === k);
+            if (!s) return;
+            prefs.fav[k] = !isFavorite(s);
+            savePrefs();
+            render();
+            if (document.getElementById('sourcesModal').classList.contains('active')) renderSources();
         }
 
-        function exitBulkSelectMode() {
-            bulkSelectMode = false;
-            selectedIds.clear();
-            document.getElementById('bulkActions').classList.remove('active');
-            renderGrid();
+        function hideSource(k) {
+            const s = feed.find(x => keyOf(x) === k);
+            prefs.hidden[k] = true;
+            savePrefs();
+            render();
+            if (s) showToast(`Hidden: ${s.name}. Bring it back from SOURCES.`);
+            if (document.getElementById('sourcesModal').classList.contains('active')) renderSources();
+        }
+        function unhideSource(k) {
+            delete prefs.hidden[k];
+            savePrefs();
+            render();
+            renderSources();
         }
 
-        function togglePanelSelection(id) {
-            if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
-            const panel = panelEls.get(id);
-            if (panel) panel.classList.toggle('selected');
-            updateBulkActionsBar();
-        }
+        function setGridSize(size) { prefs.grid = size; savePrefs(); render(); }
+        function setRegion(r) { prefs.region = r; savePrefs(); render(); }
+        function toggleLabels() { prefs.labels = !prefs.labels; savePrefs(); render(); }
+        function toggleChrome() { document.body.classList.toggle('chrome'); }
 
-        function updateBulkActionsBar() {
-            const bar = document.getElementById('bulkActions');
-            const count = document.getElementById('selectedCount');
-            if (bulkSelectMode && selectedIds.size > 0) {
-                bar.classList.add('active');
-                count.textContent = selectedIds.size;
-            } else if (!bulkSelectMode) {
-                bar.classList.remove('active');
-            }
-        }
-
-        function bulkFavorite() {
-            selectedIds.forEach(id => {
-                const s = findSource(id);
-                if (s) s.favorite = true;
-            });
-            saveSources();
-            exitBulkSelectMode();
-        }
-
-        function bulkMarkDead() {
-            selectedIds.forEach(id => {
-                const s = findSource(id);
-                if (s) s.dead = true;
-            });
-            saveSources();
-            exitBulkSelectMode();
-        }
-
-        function bulkDelete() {
-            if (confirm(`Delete ${selectedIds.size} sources?`)) {
-                sources = sources.filter(s => !selectedIds.has(s.id));
-                if (selectedIds.has(activeId)) activeId = null;
-                saveSources();
-                exitBulkSelectMode();
-            }
-        }
-
-        function cancelBulkSelect() {
-            exitBulkSelectMode();
-        }
-
-        // ============================================================
-        // MANAGE SOURCES MODAL
-        // ============================================================
-        function openManageSources() {
-            const list = document.getElementById('sourcesList');
-            list.innerHTML = '';
-
-            if (sources.length === 0) {
-                list.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 2rem;">No sources yet</div>';
-            } else {
-                [...sources].sort((a, b) => a.order - b.order).forEach((source) => {
-                    const item = document.createElement('div');
-                    item.className = 'source-item';
-                    const deadIndicator = source.dead ? '💀 ' : '';
-                    const favoriteIndicator = source.favorite ? '★ ' : '';
-
-                    item.innerHTML = `
-                        <div class="source-info">
-                            <div class="source-name">${deadIndicator}${favoriteIndicator}${escapeHtml(source.name)}</div>
-                            <div class="source-meta">${source.region ? escapeHtml(source.region).toUpperCase() : 'OTHER'} • ${escapeHtml(source.url)}</div>
-                        </div>
-                        <div class="source-actions">
-                            <button class="fav-btn ${source.favorite ? 'active' : ''}" onclick="toggleFavoriteFromModal('${source.id}')">${source.favorite ? '★' : '☆'}</button>
-                            <button class="edit-btn" onclick="editSource('${source.id}')">Edit</button>
-                            <button class="delete-btn" onclick="deleteSource('${source.id}')">Delete</button>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
-            }
-
-            document.getElementById('manageModal').classList.add('active');
-        }
-
-        function toggleFavoriteFromModal(id) {
-            toggleFavorite(id);
-            openManageSources(); // Refresh the modal
-        }
-
-        function closeManageModal() {
-            document.getElementById('manageModal').classList.remove('active');
-        }
-
-        function openAddSource() {
-            editingId = null;
-            document.getElementById('sourceModalTitle').textContent = 'Add Source';
-            document.getElementById('sourceName').value = '';
-            document.getElementById('sourceRegion').value = 'us';
-            document.getElementById('sourceUrl').value = '';
-            closeManageModal();
-            document.getElementById('sourceModal').classList.add('active');
-        }
-
-        function editSource(id) {
-            const source = findSource(id);
-            if (!source) return;
-            editingId = id;
-            document.getElementById('sourceModalTitle').textContent = 'Edit Source';
-            document.getElementById('sourceName').value = source.name;
-            document.getElementById('sourceRegion').value = source.region || 'other';
-            document.getElementById('sourceUrl').value = source.url;
-            closeManageModal();
-            document.getElementById('sourceModal').classList.add('active');
-        }
-
-        function deleteSource(id) {
-            const source = findSource(id);
-            if (!source) return;
-            if (confirm(`Delete ${source.name}?`)) {
-                sources = sources.filter(s => s.id !== id);
-                if (activeId === id) activeId = null;
-                saveSources();
-                renderGrid();
-                openManageSources();
-            }
-        }
-
-        function closeSourceModal() {
-            document.getElementById('sourceModal').classList.remove('active');
-        }
-
-        document.getElementById('sourceForm').addEventListener('submit', (e) => {
+        // Drag and drop → rewrite the saved order for every source in the
+        // feed (cheap: about 50 numbers).
+        function onDragStart() { draggedKey = this.dataset.key; this.classList.add('dragging'); }
+        function onDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.panel').forEach(p => p.classList.remove('drag-over')); }
+        function onDragOver(e) { e.preventDefault(); this.classList.add('drag-over'); }
+        function onDragLeave() { this.classList.remove('drag-over'); }
+        function onDrop(e) {
             e.preventDefault();
-
-            const name = document.getElementById('sourceName').value.trim();
-            const region = document.getElementById('sourceRegion').value;
-            const url = document.getElementById('sourceUrl').value.trim();
-
-            if (!name || !url || !region) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            if (editingId !== null) {
-                const source = findSource(editingId);
-                if (source) {
-                    source.name = name;
-                    source.region = region;
-                    source.url = url;
-                    // id, order, dead, and favorite are preserved untouched
-                }
-            } else {
-                const maxOrder = sources.reduce((m, s) => Math.max(m, s.order), -10);
-                sources.push({ id: makeId(), name, region, url, favorite: false, dead: false, order: maxOrder + 10 });
-            }
-
-            saveSources();
-            closeSourceModal();
-            renderGrid();
-        });
-
-        // ============================================================
-        // EXPORT / IMPORT
-        // ============================================================
-        function exportSources() {
-            const dataStr = JSON.stringify(sources, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'news-wall-sources.json';
-            link.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function importSources() {
-            document.getElementById('importInput').click();
-        }
-
-        function handleImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        sources = migrateSources(imported);
-                        activeId = null;
-                        saveSources();
-                        renderGrid();
-                        alert('Sources imported successfully!');
-                    } else {
-                        alert('Invalid file format');
-                    }
-                } catch (err) {
-                    alert('Error reading file');
-                }
-            };
-            reader.readAsText(file);
-
-            // Reset input
-            event.target.value = '';
+            this.classList.remove('drag-over');
+            const target = this.dataset.key;
+            if (!draggedKey || draggedKey === target) return;
+            const keys = orderedFeed().map(keyOf).filter(k => k !== draggedKey);
+            keys.splice(keys.indexOf(target), 0, draggedKey);
+            prefs.order = Object.fromEntries(keys.map((k, i) => [k, i * 10]));
+            savePrefs();
+            draggedKey = null;
+            render();
         }
 
         // ============================================================
-        // GIST SYNC — cross-device persistence via GitHub Gists
+        // SOURCES DRAWER
         // ============================================================
-        // The wall's sources live in a single secret Gist file. Each
-        // device holds a GitHub token (Gists permission only) and the
-        // Gist ID in localStorage. Push writes, Pull reads. Conflict
-        // model is deliberately simple: last write wins, with a
-        // timestamp check that warns you before overwriting anything.
-        // Because every source carries a stable id, pulling from the
-        // Gist reuses this same incremental renderer: a source whose
-        // id and url are unchanged keeps its live iframe; only genuinely
-        // new/changed/removed sources cause any reload.
+        function openSources() { renderSources(); document.getElementById('sourcesModal').classList.add('active'); }
+        function closeSources() { document.getElementById('sourcesModal').classList.remove('active'); }
 
-        const GIST_FILENAME = 'news-wall-sources.json';
-        const GIST_API = 'https://api.github.com/gists';
-
-        let gistConfig = {
-            token: localStorage.getItem('newsWallGistToken') || '',
-            gistId: localStorage.getItem('newsWallGistId') || '',
-            autoSync: localStorage.getItem('newsWallGistAutoSync') === 'true'
-        };
-        let lastSyncedAt = localStorage.getItem('newsWallLastSyncedAt') || null;
-        let autoPushTimer = null;
-        let syncInFlight = false;
-
-        function gistConfigured() {
-            return !!(gistConfig.token && gistConfig.gistId);
+        function renderSources() {
+            const list = document.getElementById('sourcesList');
+            const ordered = orderedFeed();
+            const groups = [
+                ['ON THE WALL', ordered.filter(s => isPlayable(s) && !isHidden(s))],
+                ['HIDDEN BY YOU', ordered.filter(s => isHidden(s))],
+                ['OFF AIR OR BROKEN — the validator is handling these', ordered.filter(s => !isPlayable(s) && !isHidden(s))]
+            ];
+            list.innerHTML = groups.filter(([, items]) => items.length).map(([title, items]) => `
+                <div class="src-group">${title} (${items.length})</div>
+                ${items.map(s => {
+                    const k = keyOf(s);
+                    const bad = !isPlayable(s);
+                    const meta = [
+                        REGION_LABELS[s.region] || s.region || 'Other',
+                        (s.language || '').toUpperCase(),
+                        bad ? `${STATUS_LABELS[s.status] || s.status}${s.status_reason ? ' — ' + s.status_reason : ''}` : null
+                    ].filter(Boolean).join(' · ');
+                    return `<div class="src-row">
+                        <div>
+                            <div class="src-name">${flagOf(s.country)} ${escapeHtml(s.name)}</div>
+                            <div class="src-meta ${bad ? 'bad' : ''}">${escapeHtml(meta)}</div>
+                        </div>
+                        <div class="src-actions">
+                            <button class="mini-btn ${isFavorite(s) ? 'fav-on' : ''}" data-fav="${escapeHtml(k)}">${isFavorite(s) ? '★' : '☆'}</button>
+                            ${isHidden(s)
+                                ? `<button class="mini-btn" data-unhide="${escapeHtml(k)}">SHOW</button>`
+                                : `<button class="mini-btn" data-hide="${escapeHtml(k)}">HIDE</button>`}
+                        </div>
+                    </div>`;
+                }).join('')}`).join('');
+            list.querySelectorAll('[data-fav]').forEach(b => b.onclick = () => toggleFavorite(b.dataset.fav));
+            list.querySelectorAll('[data-hide]').forEach(b => b.onclick = () => hideSource(b.dataset.hide));
+            list.querySelectorAll('[data-unhide]').forEach(b => b.onclick = () => unhideSource(b.dataset.unhide));
         }
 
-        function gistHeaders() {
-            return {
-                'Accept': 'application/vnd.github+json',
-                'Authorization': `Bearer ${gistConfig.token}`,
-                'Content-Type': 'application/json'
-            };
-        }
+        // ============================================================
+        // FEED HEALTH — counts from the feed, last check time from the
+        // public GitHub API (no token needed; 60 requests/hour per IP).
+        // ============================================================
+        let lastRun = null;   // { at: Date, ok: boolean }
 
-        function buildSyncPayload() {
-            return JSON.stringify({
-                version: 1,
-                updatedAt: new Date().toISOString(),
-                sources: sources
-            }, null, 2);
-        }
-
-        // Accepts both the sync envelope and a bare array (legacy exports)
-        function parseSyncPayload(text) {
-            const data = JSON.parse(text);
-            if (Array.isArray(data)) {
-                return { sources: data, updatedAt: null };
+        function repoFromLocation() {
+            const host = location.hostname;
+            if (host.endsWith('.github.io')) {
+                const owner = host.split('.')[0];
+                const repo = location.pathname.split('/').filter(Boolean)[0];
+                if (repo && !repo.includes('.')) return { owner, repo };
             }
-            if (data && Array.isArray(data.sources)) {
-                return { sources: data.sources, updatedAt: data.updatedAt || null };
+            return REPO_FALLBACK;
+        }
+
+        async function loadLastRun() {
+            try {
+                const { owner, repo } = repoFromLocation();
+                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/validate-streams.yml/runs?per_page=1&status=completed`);
+                if (!res.ok) return;
+                const run = (await res.json()).workflow_runs?.[0];
+                if (run) lastRun = { at: new Date(run.updated_at), ok: run.conclusion === 'success' };
+            } catch (e) { /* offline or rate-limited: chip just omits the time */ }
+            updateHealthCounts();
+        }
+
+        function ago(d) {
+            const m = Math.round((Date.now() - d.getTime()) / 60000);
+            if (m < 1) return 'just now';
+            if (m < 60) return `${m} min ago`;
+            const h = Math.round(m / 60);
+            return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+        }
+
+        function updateHealthCounts() {
+            const chip = document.getElementById('health');
+            const live = feed.filter(isPlayable).length;
+            const off = feed.length - live;
+            const bits = [`${live} live`, `${off} off air`];
+            chip.classList.remove('warn', 'bad');
+            if (lastRun) {
+                bits.unshift(`checked ${ago(lastRun.at)}`);
+                const stale = Date.now() - lastRun.at.getTime() > 30 * 3600 * 1000;   // daily schedule + slack
+                if (!lastRun.ok) { chip.classList.add('bad'); bits.unshift('validator failing'); }
+                else if (stale) chip.classList.add('warn');
             }
-            throw new Error('Unrecognized data format in Gist');
+            document.getElementById('healthText').textContent = bits.join(' · ');
         }
 
-        function friendlyGistError(res) {
-            if (res.status === 401) return 'Token rejected (401). Check that it has the Gists permission and has not expired.';
-            if (res.status === 403) return 'Forbidden (403). You may have hit the API rate limit — wait a few minutes.';
-            if (res.status === 404) return 'Gist not found (404). Check the Gist ID, and that this token belongs to the account that owns the Gist.';
-            if (res.status === 422) return 'GitHub rejected the request (422). The Gist may be malformed.';
-            return `GitHub API error (${res.status}).`;
-        }
-
-        function setSyncStatus(message, isError = false) {
-            const el = document.getElementById('syncStatus');
-            el.textContent = message;
-            el.classList.toggle('error', isError);
-        }
-
+        // ============================================================
+        // NOTICES + TOASTS
+        // ============================================================
         let toastTimer = null;
         function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('visible');
+            const t = document.getElementById('toast');
+            t.textContent = message;
+            t.classList.add('visible');
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toast.classList.remove('visible'), 4000);
+            toastTimer = setTimeout(() => t.classList.remove('visible'), 4000);
         }
-
-        function openSyncModal() {
-            document.getElementById('gistTokenInput').value = gistConfig.token;
-            document.getElementById('gistIdInput').value = gistConfig.gistId;
-            document.getElementById('gistAutoSyncInput').checked = gistConfig.autoSync;
-            refreshSyncStatusLine();
-            document.getElementById('syncModal').classList.add('active');
+        function showNotice(title, html, copyText) {
+            document.getElementById('noticeTitle').textContent = title;
+            document.getElementById('noticeBody').innerHTML = html;
+            const btn = document.getElementById('noticeCopy');
+            btn.style.display = copyText ? '' : 'none';
+            btn.onclick = () => navigator.clipboard?.writeText(copyText).then(() => showToast('Copied'), () => showToast('Copy failed'));
+            document.getElementById('notice').classList.add('visible');
         }
-
-        function closeSyncModal() {
-            document.getElementById('syncModal').classList.remove('active');
-        }
-
-        function refreshSyncStatusLine() {
-            if (!gistConfig.token) {
-                setSyncStatus('Not configured — add a GitHub token to begin.');
-            } else if (!gistConfig.gistId) {
-                setSyncStatus('Token saved. Create a Gist (first device) or paste an existing Gist ID.');
-            } else {
-                const when = lastSyncedAt ? new Date(lastSyncedAt).toLocaleString() : 'never';
-                setSyncStatus(`Connected to Gist ${gistConfig.gistId} • last synced: ${when}`);
-            }
-        }
-
-        function saveSyncSettings() {
-            gistConfig.token = document.getElementById('gistTokenInput').value.trim();
-            gistConfig.gistId = document.getElementById('gistIdInput').value.trim();
-            gistConfig.autoSync = document.getElementById('gistAutoSyncInput').checked;
-            localStorage.setItem('newsWallGistToken', gistConfig.token);
-            localStorage.setItem('newsWallGistId', gistConfig.gistId);
-            localStorage.setItem('newsWallGistAutoSync', String(gistConfig.autoSync));
-            refreshSyncStatusLine();
-            showToast('Sync settings saved');
-        }
-
-        function syncModalOpen() {
-            return document.getElementById('syncModal').classList.contains('active');
-        }
-
-        async function createSyncGist() {
-            if (syncModalOpen()) saveSyncSettings();
-            if (!gistConfig.token) {
-                setSyncStatus('Add a GitHub token first.', true);
-                return;
-            }
-            if (gistConfig.gistId) {
-                if (!confirm('A Gist ID is already set. Create a NEW gist anyway? (The old one will be left untouched.)')) return;
-            }
-            setSyncStatus('Creating Gist…');
-            try {
-                const res = await fetch(GIST_API, {
-                    method: 'POST',
-                    headers: gistHeaders(),
-                    body: JSON.stringify({
-                        description: 'News Wall sources (synced)',
-                        public: false,
-                        files: { [GIST_FILENAME]: { content: buildSyncPayload() } }
-                    })
-                });
-                if (!res.ok) throw new Error(friendlyGistError(res));
-                const data = await res.json();
-                gistConfig.gistId = data.id;
-                localStorage.setItem('newsWallGistId', data.id);
-                document.getElementById('gistIdInput').value = data.id;
-                lastSyncedAt = new Date().toISOString();
-                localStorage.setItem('newsWallLastSyncedAt', lastSyncedAt);
-                setSyncStatus(`Gist created: ${data.id} — copy this ID to your other devices.`);
-                showToast('Gist created and sources pushed');
-            } catch (err) {
-                setSyncStatus(`Create failed: ${err.message}`, true);
-            }
-        }
-
-        async function pushToGist(silent = false) {
-            if (!gistConfigured()) {
-                if (!silent) setSyncStatus('Configure a token and Gist ID first.', true);
-                return;
-            }
-            if (syncInFlight) return;
-            syncInFlight = true;
-            if (!silent) setSyncStatus('Pushing…');
-            try {
-                const payload = buildSyncPayload();
-                const res = await fetch(`${GIST_API}/${gistConfig.gistId}`, {
-                    method: 'PATCH',
-                    headers: gistHeaders(),
-                    body: JSON.stringify({ files: { [GIST_FILENAME]: { content: payload } } })
-                });
-                if (!res.ok) throw new Error(friendlyGistError(res));
-                lastSyncedAt = JSON.parse(payload).updatedAt;
-                localStorage.setItem('newsWallLastSyncedAt', lastSyncedAt);
-                refreshSyncStatusLine();
-                if (!silent) showToast(`Pushed ${sources.length} sources to Gist`);
-            } catch (err) {
-                setSyncStatus(`Push failed: ${err.message}`, true);
-                if (silent) showToast(`Auto-push failed: ${err.message}`);
-            } finally {
-                syncInFlight = false;
-            }
-        }
-
-        async function fetchRemotePayload() {
-            const res = await fetch(`${GIST_API}/${gistConfig.gistId}`, { headers: gistHeaders() });
-            if (!res.ok) throw new Error(friendlyGistError(res));
-            const data = await res.json();
-            const file = data.files && data.files[GIST_FILENAME];
-            if (!file) throw new Error(`File "${GIST_FILENAME}" not found in this Gist.`);
-            let content = file.content;
-            if (file.truncated) {
-                const rawRes = await fetch(file.raw_url);
-                if (!rawRes.ok) throw new Error('Could not fetch full Gist content.');
-                content = await rawRes.text();
-            }
-            return parseSyncPayload(content);
-        }
-
-        async function pullFromGist() {
-            if (syncModalOpen()) saveSyncSettings();
-            if (!gistConfigured()) {
-                setSyncStatus('Configure a token and Gist ID first.', true);
-                return;
-            }
-            setSyncStatus('Pulling…');
-            try {
-                const remote = await fetchRemotePayload();
-                const remoteWhen = remote.updatedAt ? new Date(remote.updatedAt).toLocaleString() : 'unknown time';
-                const ok = confirm(
-                    `Replace ${sources.length} local sources with ${remote.sources.length} from the Gist (updated ${remoteWhen})?\n\n` +
-                    `Tip: if you have local changes you want to keep, Cancel and Push instead.`
-                );
-                if (!ok) {
-                    refreshSyncStatusLine();
-                    return;
-                }
-                sources = migrateSources(remote.sources);
-                if (!findSource(activeId)) activeId = null;
-                saveSources({ skipSync: true });
-                renderGrid();
-                lastSyncedAt = remote.updatedAt || new Date().toISOString();
-                localStorage.setItem('newsWallLastSyncedAt', lastSyncedAt);
-                refreshSyncStatusLine();
-                showToast(`Pulled ${sources.length} sources from Gist`);
-            } catch (err) {
-                setSyncStatus(`Pull failed: ${err.message}`, true);
-            }
-        }
-
-        // Debounced auto-push, fired by saveSources() when enabled
-        function scheduleAutoPush() {
-            if (!gistConfig.autoSync || !gistConfigured()) return;
-            clearTimeout(autoPushTimer);
-            autoPushTimer = setTimeout(() => pushToGist(true), 3000);
-        }
-
-        // On startup: quietly check whether another device pushed newer
-        // data. Never auto-overwrites — just tells you.
-        async function checkRemoteFreshness() {
-            if (!gistConfigured()) return;
-            try {
-                const remote = await fetchRemotePayload();
-                if (remote.updatedAt && (!lastSyncedAt || new Date(remote.updatedAt) > new Date(lastSyncedAt))) {
-                    showToast('Newer sources found in your Gist — open SYNC to pull them.');
-                }
-            } catch (err) {
-                // Non-fatal: stay quiet on startup, surface details in the sync modal
-                console.warn('Gist freshness check failed:', err.message);
-            }
-        }
+        function dismissNotice() { document.getElementById('notice').classList.remove('visible'); }
 
         // ============================================================
-        // SELF-HEALING INGEST
+        // STARTUP + REFRESH
         // ============================================================
-        // Pulls news_sources.json (the file validate_streams.py writes)
-        // and repairs local sources whose stream URL has rotated.
-        //
-        // Identity is resolved in strict order of evidence quality:
-        //
-        //   1. channel_id  — hard identity. Survives any number of URL
-        //                    rotations. Only used when BOTH sides have it.
-        //   2. dead_url    — proof-grade. validate_streams.py records the
-        //                    exact URL it replaced, so a local source
-        //                    sitting on that URL is provably the same
-        //                    stream. Survives one rotation, not a chain.
-        //   3. name        — NEVER auto-applied. Surfaced as a suggestion
-        //                    only. Normalized name similarity produces
-        //                    real-world collisions (KBS/SBS,
-        //                    CityTV Bogota/CityTv Toronto) and silently
-        //                    swapping one broadcaster for another is a
-        //                    sourcing error, not a bug.
-        //
-        // A URL is only rewritten when the remote entry is status:"live"
-        // AND its video id differs from the local one. The `dead` flag is
-        // cleared only on an actual URL swap — a manually flagged panel
-        // whose URL hasn't changed stays flagged, because the reason for
-        // flagging it (geo-block, wrong-language feed, low quality) is
-        // not something the API can see.
-
-        const HEAL_FEED_URL = './news_sources.json';
-
-        function healVideoId(url) {
-            if (!url) return null;
+        async function refreshFeed() {
             try {
-                const u = new URL(url, location.href);
-                if (u.hostname.includes('youtu.be')) return u.pathname.split('/')[1] || null;
-                if (u.pathname.startsWith('/live/')) return u.pathname.split('/')[2] || null;
-                if (u.pathname.startsWith('/embed/')) return u.pathname.split('/')[2] || null;
-                return u.searchParams.get('v');
+                await loadFeed();
+                render();
             } catch (err) {
-                const m = String(url).match(/[?&]v=([^&]+)/);
-                return m ? m[1] : null;
+                console.warn('Feed refresh failed:', err.message);
             }
+            loadLastRun();
         }
 
-        function healNormName(name) {
-            return String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        }
-
-        function dismissHealBanner() {
-            document.getElementById('healBanner').classList.remove('visible');
-        }
-
-        function renderHealReport(report, opts = {}) {
-            const banner = document.getElementById('healBanner');
-            const body = document.getElementById('healBannerBody');
-            const title = document.getElementById('healBannerTitle');
-
-            const bits = [];
-            if (report.healed.length) bits.push(`HEALED ${report.healed.length} PANEL${report.healed.length === 1 ? '' : 'S'}`);
-            if (report.suggestions.length) bits.push(`${report.suggestions.length} NEED REVIEW`);
-            if (report.backfilled) bits.push(`${report.backfilled} CHANNEL ID${report.backfilled === 1 ? '' : 'S'} BACKFILLED`);
-            title.textContent = bits.join('  ·  ') || 'NOTHING TO HEAL';
-
-            let html = '';
-            report.healed.forEach(h => {
-                html += `<div class="heal-row">
-                    <div class="heal-row-name">${escapeHtml(h.name)}</div>
-                    <div class="heal-row-detail">${escapeHtml(h.fromId || '?')} &rarr; ${escapeHtml(h.toId)}${h.remoteName && healNormName(h.remoteName) !== healNormName(h.name) ? ` <span style="color:#ffd60a">(feed lists this as "${escapeHtml(h.remoteName)}" — verify)</span>` : ''}</div>
-                    <div class="heal-row-via">via ${escapeHtml(h.via)}</div>
-                </div>`;
-            });
-
-            if (report.suggestions.length) {
-                html += '<div class="heal-subhead">NOT APPLIED — VERIFY BEFORE ACCEPTING</div>';
-                report.suggestions.forEach(s => {
-                    html += `<div class="heal-row">
-                        <div class="heal-row-name">${escapeHtml(s.name)}</div>
-                        <div class="heal-row-detail">${escapeHtml(s.detail)}</div>
-                        <div class="heal-row-via weak">${escapeHtml(s.via)}</div>
-                    </div>`;
-                });
-            }
-
-            if (report.healed.length || report.suggestions.length) {
-                html += '<div class="heal-note">Auto-applied rows matched on channel_id or on the exact URL that validate_streams.py replaced. Name-only matches are never applied automatically — open MANAGE SOURCES to accept one by hand.</div>';
-            }
-
-            body.innerHTML = html || '<div class="heal-note">No URL rotations found in news_sources.json for the sources currently on this wall.</div>';
-
-            if (report.healed.length || report.suggestions.length || opts.showWhenEmpty) {
-                banner.classList.add('visible');
-            }
-        }
-
-        async function healFromSources(options = {}) {
-            const { manual = false } = options;
-            let remote;
+        (async function init() {
             try {
-                const res = await fetch(`${HEAL_FEED_URL}?t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                remote = await res.json();
+                await loadFeed();
             } catch (err) {
-                if (manual) showToast(`Heal failed: could not read news_sources.json (${err.message})`);
-                return null;
+                showEmpty(`Couldn't load news_sources.json (${err.message}). Check your connection and reload.`);
+                updateHealthCounts();
+                return;
             }
-            if (!Array.isArray(remote)) {
-                if (manual) showToast('Heal failed: news_sources.json is not an array');
-                return null;
-            }
+            migrateLegacy();
+            render();
+            loadLastRun();
 
-            const live = remote.filter(r => r && r.status === 'live' && r.url);
-
-            // channel_id -> entry, but only when unambiguous. A channel
-            // with two live entries (e.g. two language feeds) is skipped
-            // rather than guessed at.
-            const byChannel = new Map();
-            const channelCounts = new Map();
-            live.forEach(r => {
-                if (!r.channel_id) return;
-                channelCounts.set(r.channel_id, (channelCounts.get(r.channel_id) || 0) + 1);
-                byChannel.set(r.channel_id, r);
-            });
-            for (const [cid, n] of channelCounts) if (n > 1) byChannel.delete(cid);
-
-            const byDeadId = new Map();
-            live.forEach(r => {
-                const d = healVideoId(r.dead_url);
-                if (d) byDeadId.set(d, r);
-            });
-
-            // Any entry, live or not, keyed by its current video id —
-            // used purely to backfill channel_id onto local sources.
-            const byCurrentId = new Map();
-            remote.forEach(r => {
-                const v = healVideoId(r.url);
-                if (v && r.channel_id) byCurrentId.set(v, r);
-            });
-
-            const liveNames = new Map();
-            const nameCounts = new Map();
-            live.forEach(r => {
-                const n = healNormName(r.name);
-                if (!n) return;
-                nameCounts.set(n, (nameCounts.get(n) || 0) + 1);
-                liveNames.set(n, r);
-            });
-            for (const [n, c] of nameCounts) if (c > 1) liveNames.delete(n);
-
-            const report = { healed: [], suggestions: [], backfilled: 0, at: new Date().toISOString() };
-            let changed = false;
-
-            sources.forEach(s => {
-                const localId = healVideoId(s.url);
-
-                // Backfill channel_id so future rotations match on
-                // hard identity instead of falling back to dead_url.
-                if (!s.channel_id && localId && byCurrentId.has(localId)) {
-                    s.channel_id = byCurrentId.get(localId).channel_id;
-                    report.backfilled++;
-                    changed = true;
-                }
-
-                let match = null;
-                let via = null;
-                if (s.channel_id && byChannel.has(s.channel_id)) {
-                    match = byChannel.get(s.channel_id);
-                    via = 'channel_id';
-                } else if (localId && byDeadId.has(localId)) {
-                    match = byDeadId.get(localId);
-                    via = 'dead_url';
-                }
-
-                if (match) {
-                    const remoteId = healVideoId(match.url);
-                    if (remoteId && remoteId !== localId) {
-                        report.healed.push({
-                            id: s.id,
-                            name: s.name,
-                            remoteName: match.name,
-                            fromId: localId,
-                            toId: remoteId,
-                            from: s.url,
-                            to: match.url,
-                            via
-                        });
-                        s.previous_url = s.url;
-                        s.url = match.url;
-                        s.dead = false;
-                        s.healed_at = report.at;
-                        s.healed_via = via;
-                        if (!s.channel_id && match.channel_id) s.channel_id = match.channel_id;
-                        changed = true;
-                    } else if (s.dead && remoteId === localId) {
-                        // Same URL, remote says it is live. Do not clear
-                        // the flag — it may have been set for a reason the
-                        // API cannot detect.
-                        report.suggestions.push({
-                            name: s.name,
-                            detail: `flagged dead locally, but news_sources.json reports this same URL as live — clear the flag manually if the reason no longer applies`,
-                            via: `${via} · flag only`
-                        });
-                    }
-                    return;
-                }
-
-                if (s.dead) {
-                    const n = healNormName(s.name);
-                    const guess = n && liveNames.get(n);
-                    if (guess && healVideoId(guess.url) !== localId) {
-                        report.suggestions.push({
-                            name: s.name,
-                            detail: `possible replacement "${guess.name}" (${guess.url}) — matched on name only, no channel_id on this source, so NOT applied`,
-                            via: 'name only'
-                        });
-                    } else {
-                        report.suggestions.push({
-                            name: s.name,
-                            detail: 'dead, and no live entry in news_sources.json could be matched to it — needs a new link from review.html',
-                            via: 'unresolved'
-                        });
-                    }
-                }
-            });
-
-            if (changed) {
-                saveSources();
-                renderGrid();
-            }
+            const first = orderedFeed().find(s => isPlayable(s) && !isHidden(s) && (prefs.region === 'all' || s.region === prefs.region));
+            if (first) setTimeout(() => listenTo(keyOf(first)), 1500);
 
             try {
-                localStorage.setItem('newsWallHealReport', JSON.stringify(report));
-            } catch (err) { /* quota — report is cosmetic */ }
-
-            renderHealReport(report, { showWhenEmpty: manual });
-            if (manual && !report.healed.length && !report.suggestions.length) {
-                showToast('Nothing to heal — every source matched a live entry');
-            }
-            return report;
-        }
-
-        // Seed a completely empty wall — a brand-new visitor with no
-        // localStorage at all, e.g. someone opening a shared review
-        // link — from news_sources.json, the same curated/validated
-        // feed healFromSources() already reads every load. Anyone who
-        // already has sources locally is untouched by this; it only
-        // fires when there is nothing to lose.
-        async function seedIfEmpty() {
-            if (sources.length > 0) return;
-            try {
-                const res = await fetch(`${HEAL_FEED_URL}?t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) return;
-                const remote = await res.json();
-                if (!Array.isArray(remote)) return;
-                sources = migrateSources(remote.map(r => ({
-                    name: r.name,
-                    url: r.url,
-                    region: r.region || 'other',
-                    channel_id: r.channel_id || undefined,
-                    dead: r.status !== 'live'
-                })));
-            } catch (err) {
-                // Offline, or the file isn't deployed yet — wall just stays
-                // empty, exactly as it always has for a fresh visitor.
-                console.warn('Seed from news_sources.json failed:', err.message);
-            }
-        }
-
-        // Initialize. If migration just assigned any missing id/order
-        // fields (or seedIfEmpty just populated the wall), persist them
-        // immediately so a reload doesn't reassign fresh random ids or
-        // refetch before the first real edit.
-        (async function initializeWall() {
-            await seedIfEmpty();
-            saveSources({ skipSync: true });
-            renderGrid();
-            checkRemoteFreshness();
-            healFromSources();
-
-            // Auto-activate first panel after initial render
-            if (sources.length > 0 && activeId === null) {
-                const first = [...sources].sort((a, b) => a.order - b.order)[0];
-                setTimeout(() => toggleAudio(first.id), 1000);
-            }
-
-            // Show keyboard shortcuts hint on first visit
-            if (!localStorage.getItem('newsWallSeenShortcuts')) {
-                setTimeout(() => {
-                    const help = document.getElementById('shortcutsHelp');
-                    help.classList.add('visible');
+                if (!localStorage.getItem('newsWallSeenShortcuts')) {
                     setTimeout(() => {
-                        help.classList.remove('visible');
-                        localStorage.setItem('newsWallSeenShortcuts', 'true');
-                    }, 5000);
-                }, 2000);
-            }
+                        const help = document.getElementById('shortcutsHelp');
+                        help.classList.add('visible');
+                        setTimeout(() => { help.classList.remove('visible'); localStorage.setItem('newsWallSeenShortcuts', 'true'); }, 6000);
+                    }, 2000);
+                }
+            } catch (e) { /* storage blocked */ }
         })();
 
-        // Comprehensive keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Don't trigger shortcuts when typing in inputs
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                return;
+        // Coming back to a tab that has sat for a while: re-read the feed.
+        // Only panels whose stream actually changed reload.
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && feedLoadedAt && Date.now() - feedLoadedAt > REFRESH_AFTER_MS) {
+                refreshFeed();
             }
+        });
 
+        // ============================================================
+        // KEYBOARD
+        // ============================================================
+        function visiblePanels() {
+            return [...panelEls.values()]
+                .filter(p => !p.classList.contains('filtered'))
+                .sort((a, b) => parseFloat(a.style.order) - parseFloat(b.style.order));
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
             const key = e.key.toLowerCase();
 
-            // ESC - Close lightbox, cancel bulk select, or mute all
             if (key === 'escape') {
-                if (document.getElementById('lightbox').classList.contains('active')) {
-                    closeLightbox();
-                } else if (bulkSelectMode) {
-                    cancelBulkSelect();
-                } else {
-                    muteAll();
-                }
+                if (document.getElementById('lightbox').classList.contains('active')) closeLightbox();
+                else if (document.getElementById('sourcesModal').classList.contains('active')) closeSources();
+                else muteAll();
                 return;
             }
+            if (key === 's' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); toggleChrome(); return; }
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
 
-            // ? - Toggle shortcuts help
-            if (key === '?') {
-                document.getElementById('shortcutsHelp').classList.toggle('visible');
-                return;
-            }
+            if (key === '?') { document.getElementById('shortcutsHelp').classList.toggle('visible'); return; }
+            if (key === 'm') { muteAll(); return; }
+            if (key === 'l') { toggleLabels(); return; }
+            if (key === ' ' && activeKey) { e.preventDefault(); togglePause(activeKey); return; }
+            if (key === 'f' && activeKey) { openLightbox(activeKey); return; }
+            if (key === 'h' && activeKey) { hideSource(activeKey); return; }
 
-            // Ctrl/Cmd + S - Toggle footer
-            if (key === 's' && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                toggleFooter();
-                return;
-            }
-
-            // B - Bulk select mode
-            if (key === 'b') {
-                if (bulkSelectMode) cancelBulkSelect(); else enterBulkSelectMode();
-                return;
-            }
-
-            // M - Mute all
-            if (key === 'm') {
-                muteAll();
-                return;
-            }
-
-            // Space - Toggle audio on active panel
-            if (key === ' ' && activeId !== null) {
-                e.preventDefault();
-                const iframe = document.getElementById(`player-${activeId}`);
-                if (iframe) {
-                    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                }
-                return;
-            }
-
-            // F - Fullscreen active panel
-            if (key === 'f' && activeId !== null) {
-                openLightbox(activeId);
-                return;
-            }
-
-            // Number keys 1-9 - Switch to specific panel, by visual position
             if (key >= '1' && key <= '9') {
-                const panelIndex = parseInt(key) - 1;
-                const visiblePanels = getVisiblePanelsInVisualOrder();
-                if (visiblePanels[panelIndex]) {
-                    toggleAudio(visiblePanels[panelIndex].dataset.id);
-                }
+                const p = visiblePanels()[parseInt(key, 10) - 1];
+                if (p) listenTo(p.dataset.key);
                 return;
             }
 
-            // Arrow keys - Navigate between panels, by visual position
             if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
                 e.preventDefault();
-                const visiblePanels = getVisiblePanelsInVisualOrder();
-                if (activeId === null) {
-                    if (visiblePanels[0]) toggleAudio(visiblePanels[0].dataset.id);
-                    return;
+                const panels = visiblePanels();
+                if (!panels.length) return;
+                const i = panels.findIndex(p => p.dataset.key === activeKey);
+                if (i === -1) { listenTo(panels[0].dataset.key); return; }
+                const cols = getComputedStyle(document.getElementById('gridContainer')).gridTemplateColumns.split(' ').length;
+                const next = { arrowleft: i - 1, arrowright: i + 1, arrowup: i - cols, arrowdown: i + cols }[key];
+                if (next >= 0 && next < panels.length) {
+                    listenTo(panels[next].dataset.key);
+                    panels[next].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-
-                const currentIndex = visiblePanels.findIndex(p => p.dataset.id === activeId);
-                if (currentIndex === -1) return;
-
-                const gridCols = getComputedStyle(document.getElementById('gridContainer')).gridTemplateColumns.split(' ').length;
-                let nextIndex;
-
-                switch (key) {
-                    case 'arrowleft': nextIndex = currentIndex - 1; break;
-                    case 'arrowright': nextIndex = currentIndex + 1; break;
-                    case 'arrowup': nextIndex = currentIndex - gridCols; break;
-                    case 'arrowdown': nextIndex = currentIndex + gridCols; break;
-                }
-
-                if (nextIndex >= 0 && nextIndex < visiblePanels.length) {
-                    const nextPanel = visiblePanels[nextIndex];
-                    toggleAudio(nextPanel.dataset.id);
-                    nextPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                return;
             }
         });
 
-        // Close lightbox on click outside
-        document.getElementById('lightbox').addEventListener('click', (e) => {
-            if (e.target.id === 'lightbox') {
-                closeLightbox();
-            }
-        });
+        document.getElementById('lightbox').addEventListener('click', (e) => { if (e.target.id === 'lightbox') closeLightbox(); });
+        document.getElementById('sourcesModal').addEventListener('click', (e) => { if (e.target.id === 'sourcesModal') closeSources(); });
     </script>
 </body>
 </html>
