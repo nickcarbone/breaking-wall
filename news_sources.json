@@ -62,12 +62,12 @@
   {
     "name": "Berita RTM",
     "url": "https://www.youtube.com/watch?v=KLa3JeXONak",
-    "channel_id": null,
+    "channel_id": "UCjUxj4cyy_F0tVCT8WfmdZQ",
     "language": "ms",
     "region": "asia",
     "country": "my",
     "favorite": false,
-    "status": "pending",
+    "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=yI-O0LEBRVs",
     "key": "berita-rtm-my",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster."
@@ -99,12 +99,12 @@
   {
     "name": "Citizen TV Kenya",
     "url": "https://www.youtube.com/watch?v=1Vm7lAjpZZM",
-    "channel_id": null,
+    "channel_id": "UChBQgieUidXV1CmDxSdRm3g",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
-    "status": "pending",
+    "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=DVSRNx8VSFM",
     "key": "citizen-tv-kenya-ke",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster."
@@ -112,12 +112,12 @@
   {
     "name": "CityTV Bogota",
     "url": "https://www.youtube.com/watch?v=Q1CEBkYUkeM",
-    "channel_id": null,
+    "channel_id": "UCv5Oy_TJFvGKXjeNzzJE_PQ",
     "language": "es",
     "region": "latam",
     "country": "co",
     "favorite": false,
-    "status": "pending",
+    "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=mJ0y59mwJOU",
     "key": "citytv-bogota-co",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster."
@@ -215,16 +215,17 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=QpTuRzVVSKQ",
-    "channel_id": null,
+    "url": "https://www.youtube.com/watch?v=W5mOuv70WHU",
+    "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
     "country": "kr",
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
-    "status": "pending",
-    "dead_url": "https://www.youtube.com/watch?v=cA5TXs7YLmc",
-    "key": "kbs-kr"
+    "status": "live",
+    "dead_url": "https://www.youtube.com/watch?v=QpTuRzVVSKQ",
+    "key": "kbs-kr",
+    "replacement_found": true
   },
   {
     "name": "Kompas TV",
@@ -260,7 +261,9 @@
     "favorite": false,
     "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=xBX6mf0Juj0",
-    "key": "ln-argentina-ar"
+    "key": "ln-argentina-ar",
+    "status_reason": "video no longer exists",
+    "replacement_found": false
   },
   {
     "name": "M1 Hungary",
@@ -274,7 +277,9 @@
     "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
-    "key": "m1-hungary-hu"
+    "key": "m1-hungary-hu",
+    "searched_at": "2026-10-22T17:46:15+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "MBC Korea",
@@ -334,10 +339,12 @@
     "region": "latam",
     "country": "cr",
     "favorite": false,
-    "status": "live",
+    "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=VBrwrdzImis",
-    "replacement_found": true,
-    "key": "canal-8-costa-rica-cr"
+    "replacement_found": false,
+    "key": "canal-8-costa-rica-cr",
+    "searched_at": "2026-10-22T17:46:15+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "NBC News Now",
@@ -521,7 +528,9 @@
     "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=BslHpuoU4ps",
     "replacement_found": false,
-    "key": "1-1-ukraine-ua"
+    "key": "1-1-ukraine-ua",
+    "searched_at": "2026-10-22T17:46:15+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "Espreso",
@@ -571,7 +580,8 @@
     "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=DFdWWKa2rc4",
     "replacement_found": true,
-    "key": "cbs-news-us"
+    "key": "cbs-news-us",
+    "embed": "channel"
   },
   {
     "name": "ABC News",
