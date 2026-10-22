@@ -2,44 +2,72 @@
 """
 validate_streams.py
 -------------------
-Validates YouTube live stream links for the Breaking Wall news wall.
-Uses the YouTube Data API v3 (free, ~1 unit per video checked).
+Keeps news_sources.json healthy for the Breaking Wall. news_sources.json is
+the master list: the wall reads it on every load, so whatever this script
+writes is what you see.
 
-Run manually:    python validate_streams.py
-Run via Actions: triggered by schedule in .github/workflows/validate-streams.yml
+Run manually:    YOUTUBE_API_KEY=... python scripts/validate_streams.py
+Run via Actions: .github/workflows/validate-streams.yml (daily, and on every
+                 manual edit of news_sources.json, and from the Actions tab)
 
-Requires environment variable: YOUTUBE_API_KEY
-Store as a GitHub Secret named YOUTUBE_API_KEY — never hardcode it.
+What one run does
+  1. Checks every source in batches of 50 (videos.list, 1 quota unit per 50).
+  2. Works out a status for each: live, scheduled, offline, dead, or blocked
+     (embedding disabled, or region-blocked for VIEWER_COUNTRY).
+  3. For anything not playable, looks for a replacement on the same channel:
+       a. cheap: the channel's uploads playlist (about 2 units), then
+       b. expensive: search.list eventType=live (100 units), at most once per
+          source every SEARCH_COOLDOWN_HOURS and MAX_SEARCHES_PER_RUN per run.
+  4. Decides how the wall should embed each live source. A channel that is
+     running exactly ONE live broadcast (the one on file) gets
+     embed:"channel", and the wall then embeds it by channel ID, so YouTube
+     picks the current broadcast at page load: always fresh, no quota, no
+     key in the page. A channel running several live broadcasts at once
+     keeps its specific video, because a channel embed would pick one of
+     them unpredictably.
+  5. Writes news_sources.json ONLY if something meaningful changed, so the
+     repo history records real events instead of a timestamp every run.
+  6. Writes alert.md listing anything still unresolved, with likely
+     replacements from candidates.json matched on country and name. The
+     workflow turns that into a GitHub issue (and closes it when all clear).
 
-API quota cost per run: 1 unit per video check + 100 units per search query.
-At 50 sources, a full check costs ~50 units. Daily quota is 10,000 units.
+Exit codes: 0 = ran fine (whether or not things are dead), 1 = hard failure.
+
+Quota per run at 50 sources: about 70 units, plus 100 per search (at most
+MAX_SEARCHES_PER_RUN). The free allowance is 10,000 units/day.
 """
 
 import json
 import os
+import re
 import sys
 import time
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
 import requests
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
-# Path to your sources JSON file (relative to repo root)
 SOURCES_FILE = Path("news_sources.json")
+CANDIDATES_FILE = Path("candidates.json")
+ALERT_FILE = Path("alert.md")
 
-# How many seconds to wait between API calls (be polite to the API)
-API_DELAY = 0.3
-
-# YouTube Data API base URL
 YT_API_BASE = "https://www.googleapis.com/youtube/v3"
+API_DELAY = 0.2
 
-# If a video is "dead" (deleted/privated), attempt to find a replacement
-# by searching the channel's live streams. Costs 100 API units per search.
-AUTO_SEARCH_REPLACEMENTS = True
+# The country you watch from. A stream region-blocked here counts as blocked.
+VIEWER_COUNTRY = "US"
 
-# ── Logging ────────────────────────────────────────────────────────────────────
+SEARCH_COOLDOWN_HOURS = 20     # a daily run can always search; manual re-runs can't burn quota
+MAX_SEARCHES_PER_RUN = 10
+
+# Fields that change every run and carry no editorial meaning. They are
+# stripped from the file so they never cause a commit.
+VOLATILE_FIELDS = {"last_checked", "concurrent_viewers"}
+
+PLAYABLE = {"live"}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,113 +76,250 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
 
-def extract_video_id(url: str) -> str | None:
-    """Extract the video ID from a YouTube watch URL."""
+# ── Small helpers ──────────────────────────────────────────────────────────────
+
+def now_utc() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def extract_video_id(url: str):
     if not url:
         return None
-    if "watch?v=" in url:
-        return url.split("watch?v=")[1].split("&")[0]
-    if "youtu.be/" in url:
-        return url.split("youtu.be/")[1].split("?")[0]
-    return None
+    m = re.search(r"(?:[?&]v=|youtu\.be/|/live/|/embed/)([A-Za-z0-9_-]{6,15})", url)
+    return m.group(1) if m else None
 
 
-def check_video_status(video_id: str, api_key: str) -> dict:
-    """
-    Query the YouTube API for a video's live status.
+def watch_url(video_id: str) -> str:
+    return f"https://www.youtube.com/watch?v={video_id}"
 
-    Returns a dict with:
-        status: "live" | "scheduled" | "offline" | "dead"
-        channel_id: str | None
-        title: str | None
-        concurrent_viewers: int | None
-    """
-    url = f"{YT_API_BASE}/videos"
-    params = {
-        "id": video_id,
-        "part": "snippet,liveStreamingDetails,statistics",
-        "key": api_key,
-    }
 
-    try:
-        r = requests.get(url, params=params, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-    except requests.RequestException as e:
-        log.warning(f"API request failed for {video_id}: {e}")
-        return {"status": "error", "channel_id": None, "title": None, "concurrent_viewers": None}
+def slugify(text: str) -> str:
+    s = re.sub(r"[^\w]+", "-", (text or "").lower(), flags=re.UNICODE).strip("-")
+    return s or "source"
 
-    items = data.get("items", [])
-    if not items:
-        # Video doesn't exist — deleted, privated, or ID changed
-        return {"status": "dead", "channel_id": None, "title": None, "concurrent_viewers": None}
 
-    item = items[0]
+def make_key(source: dict, taken: set) -> str:
+    """Stable identity for a source. Written once, never changed, so the
+    wall's saved order/favourites/hides survive URL rotations and channel_id
+    backfills."""
+    base = f"{slugify(source.get('name'))}-{(source.get('country') or 'xx').lower()}"
+    key, n = base, 2
+    while key in taken:
+        key, n = f"{base}-{n}", n + 1
+    return key
+
+
+def api_get(endpoint: str, params: dict, api_key: str):
+    params = {**params, "key": api_key}
+    r = requests.get(f"{YT_API_BASE}/{endpoint}", params=params, timeout=15)
+    r.raise_for_status()
+    time.sleep(API_DELAY)
+    return r.json()
+
+
+def fetch_videos(video_ids, api_key):
+    """videos.list in batches of 50. Returns (items_by_id, failed_ids)."""
+    items, failed = {}, set()
+    ids = [v for v in dict.fromkeys(video_ids) if v]
+    for i in range(0, len(ids), 50):
+        chunk = ids[i:i + 50]
+        try:
+            data = api_get("videos", {
+                "id": ",".join(chunk),
+                "part": "snippet,liveStreamingDetails,status,contentDetails",
+                "maxResults": 50,
+            }, api_key)
+        except requests.RequestException as e:
+            log.warning(f"videos.list failed for a batch of {len(chunk)}: {e}")
+            failed.update(chunk)
+            continue
+        for item in data.get("items", []):
+            items[item["id"]] = item
+    return items, failed
+
+
+def classify(item) -> tuple:
+    """Return (status, reason) for one videos.list item (or None)."""
+    if item is None:
+        return "dead", "video no longer exists"
+
     snippet = item.get("snippet", {})
     live = item.get("liveStreamingDetails", {})
+    status = item.get("status", {})
+    restriction = item.get("contentDetails", {}).get("regionRestriction", {})
 
-    channel_id = snippet.get("channelId")
-    title = snippet.get("title")
-    concurrent_viewers = None
-
-    # Determine live status
+    if status.get("privacyStatus") == "private":
+        return "dead", "video is private"
     if live.get("actualEndTime"):
-        # Stream has ended — this video ID is no longer useful
-        status = "dead"
-    elif live.get("actualStartTime") and not live.get("actualEndTime"):
-        # Stream started and hasn't ended — currently live
-        status = "live"
-        concurrent_viewers = int(live.get("concurrentViewers", 0)) or None
-    elif live.get("scheduledStartTime") and not live.get("actualStartTime"):
-        # Stream is scheduled but not yet live
-        status = "scheduled"
-    elif snippet.get("liveBroadcastContent") == "live":
-        # Fallback check via snippet field
-        status = "live"
-    elif snippet.get("liveBroadcastContent") == "upcoming":
-        status = "scheduled"
-    else:
-        # Video exists but is not currently live (could be intermittent offline)
-        status = "offline"
+        return "dead", "broadcast ended"
+    if status.get("embeddable") is False:
+        return "blocked", "embedding disabled by the broadcaster"
+    blocked = [c.upper() for c in restriction.get("blocked", [])]
+    allowed = [c.upper() for c in restriction.get("allowed", [])]
+    if VIEWER_COUNTRY in blocked or (allowed and VIEWER_COUNTRY not in allowed):
+        return "blocked", f"region-blocked in {VIEWER_COUNTRY}"
 
-    return {
-        "status": status,
-        "channel_id": channel_id,
-        "title": title,
-        "concurrent_viewers": concurrent_viewers,
-    }
+    if live.get("actualStartTime") or snippet.get("liveBroadcastContent") == "live":
+        return "live", None
+    if live.get("scheduledStartTime") or snippet.get("liveBroadcastContent") == "upcoming":
+        return "scheduled", None
+    return "offline", "not broadcasting"
 
 
-def search_for_live_stream(channel_id: str, api_key: str) -> str | None:
-    """
-    Search a channel for an active live stream.
-    Costs 100 API units. Only called when a link is confirmed dead.
-    Returns a video ID if found, else None.
-    """
-    url = f"{YT_API_BASE}/search"
-    params = {
-        "channelId": channel_id,
-        "type": "video",
-        "eventType": "live",
-        "part": "id,snippet",
-        "maxResults": 1,
-        "key": api_key,
-    }
+_uploads_cache = {}
 
-    try:
-        r = requests.get(url, params=params, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-    except requests.RequestException as e:
-        log.warning(f"Search failed for channel {channel_id}: {e}")
+
+def recent_uploads(channel_id, api_key):
+    """Most recent video ids on a channel's uploads playlist (UCxxxx ->
+    UUxxxx). 1 quota unit. Cached for the run."""
+    if channel_id in _uploads_cache:
+        return _uploads_cache[channel_id]
+    ids = []
+    if channel_id and channel_id.startswith("UC"):
+        try:
+            data = api_get("playlistItems", {
+                "playlistId": "UU" + channel_id[2:],
+                "part": "contentDetails",
+                "maxResults": 15,
+            }, api_key)
+            ids = [it["contentDetails"]["videoId"] for it in data.get("items", [])]
+        except requests.RequestException as e:
+            log.info(f"  uploads playlist unavailable for {channel_id}: {e}")
+    _uploads_cache[channel_id] = ids
+    return ids
+
+
+def find_live_on_channel(channel_id, api_key, allow_search, exclude):
+    """Look for a playable live broadcast on a channel. Returns
+    (video_id or None, used_search: bool)."""
+    candidate_ids = recent_uploads(channel_id, api_key)
+
+    def first_playable(ids):
+        ids = [v for v in ids if v and v not in exclude]
+        if not ids:
+            return None
+        items, _ = fetch_videos(ids, api_key)
+        for vid in ids:
+            item = items.get(vid)
+            if item and item.get("snippet", {}).get("channelId") == channel_id \
+                    and classify(item)[0] == "live":
+                return vid
         return None
 
-    items = data.get("items", [])
-    if items:
-        return items[0]["id"]["videoId"]
-    return None
+    found = first_playable(candidate_ids)
+    if found or not allow_search:
+        return found, False
+
+    # b) search.list. 100 units, so throttled by the caller.
+    try:
+        data = api_get("search", {
+            "channelId": channel_id,
+            "type": "video",
+            "eventType": "live",
+            "part": "id",
+            "maxResults": 5,
+        }, api_key)
+        ids = [it["id"]["videoId"] for it in data.get("items", []) if it.get("id", {}).get("videoId")]
+    except requests.RequestException as e:
+        log.warning(f"  search failed for {channel_id}: {e}")
+        return None, True
+    return first_playable(ids), True
+
+
+# ── Candidate suggestions for the alert ────────────────────────────────────────
+
+GENERIC_TOKENS = {"tv", "news", "live", "channel", "noticias", "en", "vivo",
+                  "the", "24", "24h", "hd", "online", "official", "de", "la"}
+
+
+def name_tokens(name):
+    return {t for t in re.findall(r"\w+", (name or "").lower()) if t not in GENERIC_TOKENS}
+
+
+def suggest_candidates(source, candidates, wall_ids, limit=3):
+    country = (source.get("country") or "").lower()
+    mine = name_tokens(source.get("name"))
+    scored = []
+    for c in candidates:
+        if (c.get("country") or "").lower() != country:
+            continue
+        vid = extract_video_id(c.get("url", ""))
+        if not vid or vid in wall_ids:
+            continue
+        overlap = len(mine & name_tokens(c.get("name")))
+        if overlap:
+            scored.append((overlap, c))
+    scored.sort(key=lambda x: -x[0])
+    return [c for _, c in scored[:limit]]
+
+
+def write_alert(unresolved, candidates, wall_ids):
+    if not unresolved:
+        ALERT_FILE.write_text("", encoding="utf-8")
+        return
+    lines = [
+        "## Streams that need a new link",
+        "",
+        "The validator could not find a working replacement for these on their own channels.",
+        "Possible replacements come from `candidates.json` (Famelack), matched on country and name only,",
+        "so check each one is the same broadcaster before using it.",
+        "",
+    ]
+    for s in unresolved:
+        lines.append(f"### {s['name']} (`{s.get('country', '?')}`, {s.get('language', '?')})")
+        lines.append(f"- Status: **{s['status']}** — {s.get('status_reason') or 'unknown'}")
+        lines.append(f"- Current link: {s.get('url')}")
+        if not s.get("channel_id"):
+            lines.append("- No `channel_id` on file, so automatic replacement is impossible until one is added.")
+        sugg = suggest_candidates(s, candidates, wall_ids)
+        if sugg:
+            lines.append("- Possible replacements:")
+            for c in sugg:
+                lines.append(f"  - {c.get('name')} — {c.get('url')}")
+        else:
+            lines.append("- No match in candidates.json.")
+        lines.append("")
+    lines.append("*Kept up to date by the daily validator. This issue closes itself when everything is playable again.*")
+    ALERT_FILE.write_text("\n".join(lines), encoding="utf-8")
+
+
+def decide_embed_modes(sources, api_key):
+    """embed:"channel" only where we can SEE that the channel has exactly one
+    live broadcast and it is the one on file. Anything we can't confirm
+    (playlist unavailable, several lives, the live video not visible in the
+    uploads playlist) stays on its specific video id, which is the safe
+    default and what the wall did before."""
+    live_sources = [s for s in sources if s.get("status") == "live" and s.get("channel_id")]
+    live_ids = {id(s) for s in live_sources}
+    uploads = {s["channel_id"]: recent_uploads(s["channel_id"], api_key) for s in live_sources}
+    all_ids = [v for ids in uploads.values() for v in ids]
+    items, _ = fetch_videos(all_ids, api_key) if all_ids else ({}, set())
+
+    for s in sources:
+        before = s.get("embed")
+        mode = None
+        if id(s) in live_ids:
+            cid = s["channel_id"]
+            lives = [v for v in uploads.get(cid, [])
+                     if (it := items.get(v)) and it.get("snippet", {}).get("channelId") == cid
+                     and classify(it)[0] == "live"]
+            current = extract_video_id(s.get("url", ""))
+            if len(lives) == 1 and lives[0] == current:
+                mode = "channel"
+        if mode:
+            s["embed"] = mode
+        else:
+            s.pop("embed", None)
+        if s.get("embed") != before:
+            log.info(f"[{s.get('name')}] embed mode → {s.get('embed', 'video')}")
+
+
+def set_output(name, value):
+    path = os.environ.get("GITHUB_OUTPUT")
+    if path:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(f"{name}={value}\n")
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -162,124 +327,115 @@ def search_for_live_stream(channel_id: str, api_key: str) -> str | None:
 def main():
     api_key = os.environ.get("YOUTUBE_API_KEY")
     if not api_key:
-        log.error("YOUTUBE_API_KEY environment variable is not set.")
-        log.error("Add it as a GitHub Secret or export it locally before running.")
+        log.error("YOUTUBE_API_KEY is not set (repo Settings → Secrets → Actions).")
         sys.exit(1)
-
     if not SOURCES_FILE.exists():
         log.error(f"Sources file not found: {SOURCES_FILE}")
         sys.exit(1)
 
-    with open(SOURCES_FILE, "r", encoding="utf-8") as f:
-        sources = json.load(f)
+    original_text = SOURCES_FILE.read_text(encoding="utf-8")
+    sources = json.loads(original_text)
+    if not isinstance(sources, list):
+        log.error("news_sources.json must be a JSON array")
+        sys.exit(1)
+    log.info(f"Loaded {len(sources)} sources")
 
-    log.info(f"Loaded {len(sources)} sources from {SOURCES_FILE}")
+    candidates = []
+    if CANDIDATES_FILE.exists():
+        try:
+            candidates = json.loads(CANDIDATES_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            log.warning("candidates.json is not valid JSON — skipping suggestions")
 
-    run_time = datetime.now(timezone.utc).isoformat()
-    changed = 0
-    dead_count = 0
-    live_count = 0
-    offline_count = 0
+    # Identity + strip volatile fields
+    taken = {s["key"] for s in sources if s.get("key")}
+    for s in sources:
+        for f in VOLATILE_FIELDS:
+            s.pop(f, None)
+        if not s.get("key"):
+            s["key"] = make_key(s, taken)
+            taken.add(s["key"])
 
-    for source in sources:
-        name = source.get("name", "Unknown")
-        url = source.get("url", "")
-        video_id = extract_video_id(url)
+    video_ids = {id(s): extract_video_id(s.get("url", "")) for s in sources}
+    items, failed = fetch_videos(video_ids.values(), api_key)
+    if failed and not items:
+        log.error("Every videos.list request failed (bad key or quota exhausted?)")
+        sys.exit(1)
 
-        if not video_id:
-            log.warning(f"[{name}] Could not parse video ID from URL: {url}")
-            source["status"] = "invalid_url"
-            source["last_checked"] = run_time
+    run_time = now_utc()
+    searches_used = 0
+    wall_ids = {v for v in video_ids.values() if v}
+
+    for s in sources:
+        name = s.get("name", "Unknown")
+        vid = video_ids[id(s)]
+
+        if not vid:
+            s["status"], s["status_reason"] = "dead", "could not read a video id from the URL"
+            log.warning(f"[{name}] invalid URL: {s.get('url')}")
+            continue
+        if vid in failed:
+            log.warning(f"[{name}] API error — keeping last known status")
             continue
 
-        log.info(f"[{name}] Checking {video_id}...")
-        result = check_video_status(video_id, api_key)
-        status = result["status"]
+        item = items.get(vid)
+        status, reason = classify(item)
+        if item and not s.get("channel_id"):
+            s["channel_id"] = item["snippet"].get("channelId")
+            log.info(f"[{name}] backfilled channel_id {s['channel_id']}")
 
-        # Store channel_id if we got one and don't have it yet
-        if result["channel_id"] and not source.get("channel_id"):
-            source["channel_id"] = result["channel_id"]
-            changed += 1
+        if status in PLAYABLE:
+            s["status"] = status
+            s.pop("status_reason", None)
+            s.pop("searched_at", None)
+            if s.get("replacement_found") is False:
+                s.pop("replacement_found")
+            continue
 
-        # Update concurrent viewers if live
-        if result["concurrent_viewers"] is not None:
-            source["concurrent_viewers"] = result["concurrent_viewers"]
-        elif "concurrent_viewers" in source:
-            # Clear stale viewer count if no longer live
-            del source["concurrent_viewers"]
+        # Not playable: try the same channel for a working broadcast.
+        channel_id = s.get("channel_id")
+        new_vid = None
+        if channel_id:
+            last = s.get("searched_at")
+            cooled = (not last) or (run_time - datetime.fromisoformat(last) >= timedelta(hours=SEARCH_COOLDOWN_HOURS))
+            allow_search = status in {"dead", "blocked"} and cooled and searches_used < MAX_SEARCHES_PER_RUN
+            new_vid, used_search = find_live_on_channel(channel_id, api_key, allow_search, exclude={vid})
+            if used_search:
+                searches_used += 1
+                s["searched_at"] = run_time.isoformat(timespec="seconds")
 
-        previous_status = source.get("status")
+        if new_vid:
+            log.info(f"[{name}] {status} ({reason}) → replaced with {new_vid}")
+            s["dead_url"] = s.get("url")
+            s["url"] = watch_url(new_vid)
+            s["status"] = "live"
+            s["replacement_found"] = True
+            s.pop("status_reason", None)
+            s.pop("searched_at", None)
+            wall_ids.add(new_vid)
+        else:
+            s["status"], s["status_reason"] = status, reason
+            if status in {"dead", "blocked"}:
+                s["replacement_found"] = False
+            log.info(f"[{name}] {status.upper()} — {reason}")
 
-        if status == "dead":
-            dead_count += 1
-            log.warning(f"[{name}] ❌ DEAD — video {video_id} no longer exists")
-            source["status"] = "dead"
-            source["dead_url"] = url  # preserve for reference
+    decide_embed_modes(sources, api_key)
 
-            # Attempt to find a replacement if we have a channel_id
-            channel_id = result.get("channel_id") or source.get("channel_id")
-            if AUTO_SEARCH_REPLACEMENTS and channel_id:
-                log.info(f"[{name}] Searching channel {channel_id} for live stream...")
-                time.sleep(API_DELAY)
-                new_video_id = search_for_live_stream(channel_id, api_key)
-                if new_video_id:
-                    new_url = f"https://www.youtube.com/watch?v={new_video_id}"
-                    log.info(f"[{name}] ✅ Found replacement: {new_url}")
-                    source["url"] = new_url
-                    source["status"] = "live"
-                    source["replacement_found"] = True
-                    changed += 1
-                else:
-                    log.warning(f"[{name}] No live replacement found on channel")
-                    source["replacement_found"] = False
-            elif not channel_id:
-                log.warning(f"[{name}] No channel_id stored — cannot search for replacement. Add it manually.")
+    unresolved = [s for s in sources if s.get("status") in {"dead", "blocked"}]
+    write_alert(unresolved, candidates, wall_ids)
 
-        elif status == "live":
-            live_count += 1
-            log.info(f"[{name}] ✅ LIVE ({result.get('concurrent_viewers', '?')} viewers)")
-            source["status"] = "live"
+    new_text = json.dumps(sources, ensure_ascii=False, indent=2) + "\n"
+    if new_text != original_text:
+        SOURCES_FILE.write_text(new_text, encoding="utf-8")
+        log.info("news_sources.json updated")
+    else:
+        log.info("No meaningful changes — file left untouched")
 
-        elif status == "offline":
-            offline_count += 1
-            log.info(f"[{name}] ⏸  OFFLINE (stream exists but not currently broadcasting)")
-            source["status"] = "offline"
-
-        elif status == "scheduled":
-            log.info(f"[{name}] 🕐 SCHEDULED")
-            source["status"] = "scheduled"
-
-        elif status == "error":
-            log.warning(f"[{name}] ⚠️  API error — skipping status update")
-            # Don't overwrite last known status on transient errors
-
-        if status != previous_status:
-            changed += 1
-
-        source["last_checked"] = run_time
-        time.sleep(API_DELAY)
-
-    # Write updated JSON back
-    with open(SOURCES_FILE, "w", encoding="utf-8") as f:
-        json.dump(sources, f, ensure_ascii=False, indent=2)
-
-    log.info("─" * 60)
-    log.info(f"Run complete at {run_time}")
-    log.info(f"  Live:    {live_count}")
-    log.info(f"  Offline: {offline_count}")
-    log.info(f"  Dead:    {dead_count}")
-    log.info(f"  Changes: {changed}")
-    log.info(f"  Saved:   {SOURCES_FILE}")
-
-    # Exit with non-zero code if there are dead links with no replacement
-    # This makes GitHub Actions flag the run for review
-    unresolved_dead = [
-        s["name"] for s in sources
-        if s.get("status") == "dead" and not s.get("replacement_found")
-    ]
-    if unresolved_dead:
-        log.warning(f"Unresolved dead links: {', '.join(unresolved_dead)}")
-        sys.exit(2)  # exit 2 = warnings, not a hard failure
+    counts = {}
+    for s in sources:
+        counts[s.get("status", "?")] = counts.get(s.get("status", "?"), 0) + 1
+    log.info(f"Summary: {counts} · searches used: {searches_used} · unresolved: {len(unresolved)}")
+    set_output("unresolved", len(unresolved))
 
 
 if __name__ == "__main__":
