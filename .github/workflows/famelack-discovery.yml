@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# Never overlap with the validator's commits
+concurrency:
+  group: repo-writes
+  cancel-in-progress: false
+
 jobs:
   discover:
     name: Pull candidate streams from Famelack
@@ -39,5 +44,6 @@ jobs:
           git add candidates.json
           git diff --staged --quiet || (
             git commit -m "chore: update stream candidates from Famelack [$(date -u +'%Y-%m-%dT%H:%MZ')]" &&
+            git pull --rebase origin main &&
             git push
           )
