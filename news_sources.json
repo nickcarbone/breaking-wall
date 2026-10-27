@@ -74,16 +74,17 @@
   },
   {
     "name": "C5N",
-    "url": "https://www.youtube.com/watch?v=j6oh4Kqz3UM",
+    "url": "https://www.youtube.com/watch?v=CvuuhoLcDcw",
     "channel_id": "UCFgk2Q2mVO1BklRQhSv6p0w",
     "language": "es",
     "region": "latam",
     "country": "ar",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=A4yjB85WbEo",
+    "dead_url": "https://www.youtube.com/watch?v=j6oh4Kqz3UM",
     "replacement_found": true,
-    "key": "c5n-ar"
+    "key": "c5n-ar",
+    "embed": "channel"
   },
   {
     "name": "Channels TV Nigeria",
@@ -98,14 +99,14 @@
   },
   {
     "name": "Citizen TV Kenya",
-    "url": "https://www.youtube.com/watch?v=ZDucCAYX_eY",
+    "url": "https://www.youtube.com/watch?v=Zdm69cMSOiE",
     "channel_id": "UChBQgieUidXV1CmDxSdRm3g",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=1Vm7lAjpZZM",
+    "dead_url": "https://www.youtube.com/watch?v=ZDucCAYX_eY",
     "key": "citizen-tv-kenya-ke",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "replacement_found": true
@@ -216,7 +217,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=BdkrCTm6_2c",
+    "url": "https://www.youtube.com/watch?v=fRZchiG6jqE",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -224,10 +225,9 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=q0lqatgAzVw",
+    "dead_url": "https://www.youtube.com/watch?v=BdkrCTm6_2c",
     "key": "kbs-kr",
-    "replacement_found": true,
-    "embed": "channel"
+    "replacement_found": true
   },
   {
     "name": "Kompas TV",
@@ -280,7 +280,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-10-26T16:17:21+00:00",
+    "searched_at": "2026-10-27T15:31:24+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -349,14 +349,14 @@
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=8XMyQlUX8Ks",
+    "url": "https://www.youtube.com/watch?v=wvY8yOPyNVI",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=aF9neWULq64",
+    "dead_url": "https://www.youtube.com/watch?v=8XMyQlUX8Ks",
     "replacement_found": true,
     "key": "nbc-news-now-us",
     "embed": "channel"
@@ -521,18 +521,17 @@
   },
   {
     "name": "1+1 Ukraine",
-    "url": "https://www.youtube.com/watch?v=orlJvfRrS1M",
+    "url": "https://www.youtube.com/watch?v=UtMtYLmCb0Q",
     "channel_id": "UC4simUfklnTFPS-FrbTnZPg",
     "language": "uk",
     "region": "europe",
     "country": "ua",
     "favorite": false,
-    "status": "dead",
-    "dead_url": "https://www.youtube.com/watch?v=ka_4cQC8lok",
-    "replacement_found": false,
+    "status": "live",
+    "dead_url": "https://www.youtube.com/watch?v=orlJvfRrS1M",
+    "replacement_found": true,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-10-26T16:17:21+00:00",
-    "status_reason": "broadcast ended"
+    "embed": "channel"
   },
   {
     "name": "Espreso",
@@ -573,21 +572,21 @@
   },
   {
     "name": "CBS News",
-    "url": "https://www.youtube.com/watch?v=B9UgmA3_olU",
+    "url": "https://www.youtube.com/watch?v=ZwPOtUEfhz8",
     "channel_id": "UC8p1vwvWtl6T73JiExfWs1g",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=V1b6nTzIknA",
+    "dead_url": "https://www.youtube.com/watch?v=B9UgmA3_olU",
     "replacement_found": true,
     "key": "cbs-news-us",
     "embed": "channel"
   },
   {
     "name": "ABC News",
-    "url": "https://www.youtube.com/watch?v=Ykd1rMAf6XI",
+    "url": "https://www.youtube.com/watch?v=KQhNZQ_Uag8",
     "channel_id": "UCBi2mrWuNuyYy4gbM6fU18Q",
     "language": "en",
     "region": "us",
@@ -595,7 +594,7 @@
     "favorite": false,
     "status": "live",
     "key": "abc-news-us",
-    "dead_url": "https://www.youtube.com/watch?v=YIO_WT0wsz8",
+    "dead_url": "https://www.youtube.com/watch?v=Ykd1rMAf6XI",
     "replacement_found": true
   },
   {
