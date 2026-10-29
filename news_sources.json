@@ -98,17 +98,18 @@
   },
   {
     "name": "Citizen TV Kenya",
-    "url": "https://www.youtube.com/watch?v=Zdm69cMSOiE",
+    "url": "https://www.youtube.com/watch?v=gyp8Onb4vmk",
     "channel_id": "UChBQgieUidXV1CmDxSdRm3g",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=ZDucCAYX_eY",
+    "dead_url": "https://www.youtube.com/watch?v=Zdm69cMSOiE",
     "key": "citizen-tv-kenya-ke",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
-    "replacement_found": true
+    "replacement_found": true,
+    "embed": "channel"
   },
   {
     "name": "CityTV Bogota",
@@ -216,7 +217,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=JO9DqLdB5oc",
+    "url": "https://www.youtube.com/watch?v=PbMA5Q-QHKE",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -224,9 +225,10 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=fRZchiG6jqE",
+    "dead_url": "https://www.youtube.com/watch?v=JO9DqLdB5oc",
     "key": "kbs-kr",
-    "replacement_found": true
+    "replacement_found": true,
+    "embed": "channel"
   },
   {
     "name": "Kompas TV",
@@ -279,7 +281,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-10-28T16:15:03+00:00",
+    "searched_at": "2026-10-29T16:23:29+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -334,28 +336,28 @@
   },
   {
     "name": "Canal 8 Costa Rica",
-    "url": "https://www.youtube.com/watch?v=ljtFMX5mjBg",
+    "url": "https://www.youtube.com/watch?v=GeVUDy8_pMM",
     "channel_id": "UCILU2ghO8GrOeB-zo93eYdA",
     "language": "es",
     "region": "latam",
     "country": "cr",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=0M5wWsvdZKk",
+    "dead_url": "https://www.youtube.com/watch?v=ljtFMX5mjBg",
     "replacement_found": true,
     "key": "canal-8-costa-rica-cr",
     "embed": "channel"
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=-U3bjHDsJ44",
+    "url": "https://www.youtube.com/watch?v=JYp206vrvxY",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=wvY8yOPyNVI",
+    "dead_url": "https://www.youtube.com/watch?v=-U3bjHDsJ44",
     "replacement_found": true,
     "key": "nbc-news-now-us",
     "embed": "channel"
@@ -490,10 +492,12 @@
     "region": "latam",
     "country": "pe",
     "favorite": false,
-    "status": "live",
+    "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
-    "replacement_found": true,
-    "key": "tv-libertad-pe"
+    "replacement_found": false,
+    "key": "tv-libertad-pe",
+    "searched_at": "2026-10-29T16:23:29+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "Yonhap News TV",
@@ -530,7 +534,7 @@
     "dead_url": "https://www.youtube.com/watch?v=orlJvfRrS1M",
     "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-10-28T16:15:03+00:00",
+    "searched_at": "2026-10-29T16:23:29+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -572,14 +576,14 @@
   },
   {
     "name": "CBS News",
-    "url": "https://www.youtube.com/watch?v=97aas54Le60",
+    "url": "https://www.youtube.com/watch?v=AD9eA3W0xNU",
     "channel_id": "UC8p1vwvWtl6T73JiExfWs1g",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=ZwPOtUEfhz8",
+    "dead_url": "https://www.youtube.com/watch?v=97aas54Le60",
     "replacement_found": true,
     "key": "cbs-news-us",
     "embed": "channel"
