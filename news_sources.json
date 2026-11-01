@@ -216,7 +216,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=c09w0moSwIU",
+    "url": "https://www.youtube.com/watch?v=O7Tc3EIOSS4",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -224,7 +224,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=4KSrkd3OlNs",
+    "dead_url": "https://www.youtube.com/watch?v=c09w0moSwIU",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -279,7 +279,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-10-31T15:29:19+00:00",
+    "searched_at": "2026-11-01T16:17:09+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -295,14 +295,14 @@
   },
   {
     "name": "Metro TV Indonesia",
-    "url": "https://www.youtube.com/watch?v=oUYnZv_G82Q",
+    "url": "https://www.youtube.com/watch?v=tiIOHgDI3Ow",
     "channel_id": "UCzl0OrB3-ehunyotIQvK77A",
     "language": "id",
     "region": "asia",
     "country": "id",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=hjNOqYN6UJo",
+    "dead_url": "https://www.youtube.com/watch?v=oUYnZv_G82Q",
     "replacement_found": true,
     "key": "metro-tv-indonesia-id"
   },
@@ -493,7 +493,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-10-31T15:29:19+00:00",
+    "searched_at": "2026-11-01T16:17:09+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -521,18 +521,17 @@
   },
   {
     "name": "1+1 Ukraine",
-    "url": "https://www.youtube.com/watch?v=98RBwmLkywU",
+    "url": "https://www.youtube.com/watch?v=pmGJrip2-vQ",
     "channel_id": "UC4simUfklnTFPS-FrbTnZPg",
     "language": "uk",
     "region": "europe",
     "country": "ua",
     "favorite": false,
-    "status": "dead",
-    "dead_url": "https://www.youtube.com/watch?v=UtMtYLmCb0Q",
-    "replacement_found": false,
+    "status": "live",
+    "dead_url": "https://www.youtube.com/watch?v=98RBwmLkywU",
+    "replacement_found": true,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-10-31T15:29:19+00:00",
-    "status_reason": "broadcast ended"
+    "embed": "channel"
   },
   {
     "name": "Espreso",
@@ -583,7 +582,7 @@
     "dead_url": "https://www.youtube.com/watch?v=AD9eA3W0xNU",
     "replacement_found": false,
     "key": "cbs-news-us",
-    "searched_at": "2026-10-31T15:29:19+00:00",
+    "searched_at": "2026-11-01T16:17:09+00:00",
     "status_reason": "broadcast ended"
   },
   {
