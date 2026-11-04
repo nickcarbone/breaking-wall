@@ -98,30 +98,32 @@
   },
   {
     "name": "Citizen TV Kenya",
-    "url": "https://www.youtube.com/watch?v=IdX4kFFT6I4",
+    "url": "https://www.youtube.com/watch?v=SrG_0iwxJAA",
     "channel_id": "UChBQgieUidXV1CmDxSdRm3g",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=gyp8Onb4vmk",
+    "dead_url": "https://www.youtube.com/watch?v=IdX4kFFT6I4",
     "key": "citizen-tv-kenya-ke",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "replacement_found": true
   },
   {
     "name": "CityTV Bogota",
-    "url": "https://www.youtube.com/watch?v=Q1CEBkYUkeM",
+    "url": "https://www.youtube.com/watch?v=bUFWXxn7s8E",
     "channel_id": "UCv5Oy_TJFvGKXjeNzzJE_PQ",
     "language": "es",
     "region": "latam",
     "country": "co",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=mJ0y59mwJOU",
+    "dead_url": "https://www.youtube.com/watch?v=Q1CEBkYUkeM",
     "key": "citytv-bogota-co",
-    "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster."
+    "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
+    "replacement_found": true,
+    "embed": "channel"
   },
   {
     "name": "CNA",
@@ -216,7 +218,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=dAyd8z9dvl8",
+    "url": "https://www.youtube.com/watch?v=vhnu-B_31pg",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -224,7 +226,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=O7Tc3EIOSS4",
+    "dead_url": "https://www.youtube.com/watch?v=dAyd8z9dvl8",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -279,7 +281,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-03T17:17:57+00:00",
+    "searched_at": "2026-11-04T17:27:48+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -343,22 +345,20 @@
     "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=GeVUDy8_pMM",
     "replacement_found": true,
-    "key": "canal-8-costa-rica-cr",
-    "embed": "channel"
+    "key": "canal-8-costa-rica-cr"
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=MTsZwFVKRfA",
+    "url": "https://www.youtube.com/watch?v=B9i_01yEgt0",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=Oa2E_ibzFAM",
+    "dead_url": "https://www.youtube.com/watch?v=MTsZwFVKRfA",
     "replacement_found": true,
-    "key": "nbc-news-now-us",
-    "embed": "channel"
+    "key": "nbc-news-now-us"
   },
   {
     "name": "NHK World",
@@ -480,8 +480,7 @@
     "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=CLQoypiXzQs",
     "replacement_found": true,
-    "key": "trt-haber-tr",
-    "embed": "channel"
+    "key": "trt-haber-tr"
   },
   {
     "name": "TV Libertad",
@@ -495,7 +494,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-03T17:17:57+00:00",
+    "searched_at": "2026-11-04T17:27:48+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -533,7 +532,7 @@
     "dead_url": "https://www.youtube.com/watch?v=98RBwmLkywU",
     "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-11-03T17:17:57+00:00",
+    "searched_at": "2026-11-04T17:27:48+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -549,14 +548,14 @@
   },
   {
     "name": "KTN Kenya",
-    "url": "https://www.youtube.com/watch?v=E7SkI8eoZNU",
+    "url": "https://www.youtube.com/watch?v=en3Z-kvXmgc",
     "channel_id": "UCKVsdeoHExltrWMuK0hOWmg",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=nOVv58sis3s",
+    "dead_url": "https://www.youtube.com/watch?v=E7SkI8eoZNU",
     "replacement_found": true,
     "key": "ktn-kenya-ke"
   },
@@ -575,14 +574,14 @@
   },
   {
     "name": "CBS News",
-    "url": "https://www.youtube.com/watch?v=74WjpIH4jeE",
+    "url": "https://www.youtube.com/watch?v=JJJHa3WkINw",
     "channel_id": "UC8p1vwvWtl6T73JiExfWs1g",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=Y1cGzQM1gy0",
+    "dead_url": "https://www.youtube.com/watch?v=74WjpIH4jeE",
     "replacement_found": true,
     "key": "cbs-news-us",
     "embed": "channel"
