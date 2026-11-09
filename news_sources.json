@@ -98,14 +98,14 @@
   },
   {
     "name": "Citizen TV Kenya",
-    "url": "https://www.youtube.com/watch?v=2vp_1zusL8Y",
+    "url": "https://www.youtube.com/watch?v=QEPyPz8SJRE",
     "channel_id": "UChBQgieUidXV1CmDxSdRm3g",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=WoPSzJTWjcc",
+    "dead_url": "https://www.youtube.com/watch?v=2vp_1zusL8Y",
     "key": "citizen-tv-kenya-ke",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "replacement_found": true
@@ -217,7 +217,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=PwLlpMIk1vE",
+    "url": "https://www.youtube.com/watch?v=RNiePw8YpaI",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -225,7 +225,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=ht8dqNQQnRM",
+    "dead_url": "https://www.youtube.com/watch?v=PwLlpMIk1vE",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -280,7 +280,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-08T16:16:27+00:00",
+    "searched_at": "2026-11-09T19:59:30+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -349,14 +349,14 @@
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=4a4IWlRVth0",
+    "url": "https://www.youtube.com/watch?v=gYxWuStqezM",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=rLQn87cLJTE",
+    "dead_url": "https://www.youtube.com/watch?v=4a4IWlRVth0",
     "replacement_found": true,
     "key": "nbc-news-now-us"
   },
@@ -494,7 +494,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-08T16:16:27+00:00",
+    "searched_at": "2026-11-09T19:59:30+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -528,11 +528,12 @@
     "region": "europe",
     "country": "ua",
     "favorite": false,
-    "status": "live",
+    "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=pmGJrip2-vQ",
-    "replacement_found": true,
+    "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "embed": "channel"
+    "searched_at": "2026-11-09T19:59:30+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "Espreso",
@@ -547,14 +548,14 @@
   },
   {
     "name": "KTN Kenya",
-    "url": "https://www.youtube.com/watch?v=en3Z-kvXmgc",
+    "url": "https://www.youtube.com/watch?v=-zl1ESbuFvo",
     "channel_id": "UCKVsdeoHExltrWMuK0hOWmg",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=E7SkI8eoZNU",
+    "dead_url": "https://www.youtube.com/watch?v=en3Z-kvXmgc",
     "replacement_found": true,
     "key": "ktn-kenya-ke"
   },
@@ -573,18 +574,17 @@
   },
   {
     "name": "CBS News",
-    "url": "https://www.youtube.com/watch?v=qnTjYpH1FOY",
+    "url": "https://www.youtube.com/watch?v=fpwAtea0qy0",
     "channel_id": "UC8p1vwvWtl6T73JiExfWs1g",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
-    "status": "dead",
-    "dead_url": "https://www.youtube.com/watch?v=S_-uVzcokmE",
-    "replacement_found": false,
+    "status": "live",
+    "dead_url": "https://www.youtube.com/watch?v=qnTjYpH1FOY",
+    "replacement_found": true,
     "key": "cbs-news-us",
-    "searched_at": "2026-11-08T16:16:27+00:00",
-    "status_reason": "broadcast ended"
+    "embed": "channel"
   },
   {
     "name": "ABC News",
