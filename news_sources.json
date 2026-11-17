@@ -1,14 +1,14 @@
 [
   {
     "name": "Sky News",
-    "url": "https://www.youtube.com/watch?v=umLWFz4izTM",
+    "url": "https://www.youtube.com/watch?v=53SxFKpbKDE",
     "channel_id": "UCoMdktPbSTixAyNGwb-UYkQ",
     "language": "en",
     "region": "europe",
     "country": "gb",
     "favorite": true,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=xDWQ3LkccY8",
+    "dead_url": "https://www.youtube.com/watch?v=umLWFz4izTM",
     "replacement_found": true,
     "key": "sky-news-gb"
   },
@@ -280,7 +280,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-16T19:48:44+00:00",
+    "searched_at": "2026-11-17T18:43:33+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -348,14 +348,14 @@
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=p3Iqs2N9THg",
+    "url": "https://www.youtube.com/watch?v=GQXZIzMiXow",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=Hz1cNNgtLtM",
+    "dead_url": "https://www.youtube.com/watch?v=p3Iqs2N9THg",
     "replacement_found": true,
     "key": "nbc-news-now-us"
   },
@@ -493,7 +493,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-16T19:48:44+00:00",
+    "searched_at": "2026-11-17T18:43:33+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -531,7 +531,7 @@
     "dead_url": "https://www.youtube.com/watch?v=pmGJrip2-vQ",
     "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-11-16T19:48:44+00:00",
+    "searched_at": "2026-11-17T18:43:33+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -556,8 +556,7 @@
     "status": "live",
     "dead_url": "https://www.youtube.com/watch?v=Pom2KN43cMU",
     "replacement_found": true,
-    "key": "ktn-kenya-ke",
-    "embed": "channel"
+    "key": "ktn-kenya-ke"
   },
   {
     "name": "YTN",
@@ -574,14 +573,14 @@
   },
   {
     "name": "CBS News",
-    "url": "https://www.youtube.com/watch?v=yP-vl4KBsys",
+    "url": "https://www.youtube.com/watch?v=ASwsKXCT2qI",
     "channel_id": "UC8p1vwvWtl6T73JiExfWs1g",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=4ShW2bKK2AI",
+    "dead_url": "https://www.youtube.com/watch?v=yP-vl4KBsys",
     "replacement_found": true,
     "key": "cbs-news-us",
     "embed": "channel"
