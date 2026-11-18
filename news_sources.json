@@ -67,10 +67,13 @@
     "region": "asia",
     "country": "my",
     "favorite": false,
-    "status": "live",
+    "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=yI-O0LEBRVs",
     "key": "berita-rtm-my",
-    "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster."
+    "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
+    "searched_at": "2026-11-18T18:20:46+00:00",
+    "status_reason": "broadcast ended",
+    "replacement_found": false
   },
   {
     "name": "C5N",
@@ -98,17 +101,18 @@
   },
   {
     "name": "Citizen TV Kenya",
-    "url": "https://www.youtube.com/watch?v=jJM8WpkaJC8",
+    "url": "https://www.youtube.com/watch?v=wU4ZKAfY5rM",
     "channel_id": "UChBQgieUidXV1CmDxSdRm3g",
     "language": "en",
     "region": "africa",
     "country": "ke",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=QEPyPz8SJRE",
+    "dead_url": "https://www.youtube.com/watch?v=jJM8WpkaJC8",
     "key": "citizen-tv-kenya-ke",
     "note": "Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
-    "replacement_found": true
+    "replacement_found": true,
+    "embed": "channel"
   },
   {
     "name": "CityTV Bogota",
@@ -177,14 +181,14 @@
   },
   {
     "name": "Ekattor TV Bangladesh",
-    "url": "https://www.youtube.com/watch?v=LTaSFtTHhlM",
+    "url": "https://www.youtube.com/watch?v=11yXtoPjri8",
     "channel_id": "UCtqvtAVmad5zywaziN6CbfA",
     "language": "bn",
     "region": "asia",
     "country": "bd",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=PE_dt65gvUY",
+    "dead_url": "https://www.youtube.com/watch?v=LTaSFtTHhlM",
     "replacement_found": true,
     "key": "ekattor-tv-bangladesh-bd"
   },
@@ -217,7 +221,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=_bq8sNqfe7w",
+    "url": "https://www.youtube.com/watch?v=Oh2pNQQzDhc",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -225,7 +229,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=Xgfa1LXp778",
+    "dead_url": "https://www.youtube.com/watch?v=_bq8sNqfe7w",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -280,7 +284,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-17T18:43:33+00:00",
+    "searched_at": "2026-11-18T18:20:46+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -335,27 +339,28 @@
   },
   {
     "name": "Canal 8 Costa Rica",
-    "url": "https://www.youtube.com/watch?v=cinNSu1mw4s",
+    "url": "https://www.youtube.com/watch?v=U0xYK1EA9O0",
     "channel_id": "UCILU2ghO8GrOeB-zo93eYdA",
     "language": "es",
     "region": "latam",
     "country": "cr",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=38gvZ7hwvRI",
+    "dead_url": "https://www.youtube.com/watch?v=cinNSu1mw4s",
     "replacement_found": true,
-    "key": "canal-8-costa-rica-cr"
+    "key": "canal-8-costa-rica-cr",
+    "embed": "channel"
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=GQXZIzMiXow",
+    "url": "https://www.youtube.com/watch?v=d407BwnLeVA",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=p3Iqs2N9THg",
+    "dead_url": "https://www.youtube.com/watch?v=GQXZIzMiXow",
     "replacement_found": true,
     "key": "nbc-news-now-us"
   },
@@ -493,7 +498,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-17T18:43:33+00:00",
+    "searched_at": "2026-11-18T18:20:46+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -531,7 +536,7 @@
     "dead_url": "https://www.youtube.com/watch?v=pmGJrip2-vQ",
     "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-11-17T18:43:33+00:00",
+    "searched_at": "2026-11-18T18:20:46+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -573,14 +578,14 @@
   },
   {
     "name": "CBS News",
-    "url": "https://www.youtube.com/watch?v=ASwsKXCT2qI",
+    "url": "https://www.youtube.com/watch?v=fkAhVjVttpc",
     "channel_id": "UC8p1vwvWtl6T73JiExfWs1g",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=yP-vl4KBsys",
+    "dead_url": "https://www.youtube.com/watch?v=ASwsKXCT2qI",
     "replacement_found": true,
     "key": "cbs-news-us",
     "embed": "channel"
