@@ -218,7 +218,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=eA_h088UD7g",
+    "url": "https://www.youtube.com/watch?v=asg6SsWC9vA",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -226,7 +226,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=TAyk3wrnm58",
+    "dead_url": "https://www.youtube.com/watch?v=eA_h088UD7g",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -281,7 +281,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-20T17:58:13+00:00",
+    "searched_at": "2026-11-21T16:55:16+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -350,14 +350,14 @@
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=T8OUcBT37dI",
+    "url": "https://www.youtube.com/watch?v=pJZBppLlwJo",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=AowNYm8dxFA",
+    "dead_url": "https://www.youtube.com/watch?v=T8OUcBT37dI",
     "replacement_found": true,
     "key": "nbc-news-now-us"
   },
@@ -495,7 +495,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-20T17:58:13+00:00",
+    "searched_at": "2026-11-21T16:55:16+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -523,18 +523,17 @@
   },
   {
     "name": "1+1 Ukraine",
-    "url": "https://www.youtube.com/watch?v=J8ZjdnDXDCo",
+    "url": "https://www.youtube.com/watch?v=FCW6SBi07-c",
     "channel_id": "UC4simUfklnTFPS-FrbTnZPg",
     "language": "uk",
     "region": "europe",
     "country": "ua",
     "favorite": false,
-    "status": "dead",
-    "dead_url": "https://www.youtube.com/watch?v=pmGJrip2-vQ",
-    "replacement_found": false,
+    "status": "live",
+    "dead_url": "https://www.youtube.com/watch?v=J8ZjdnDXDCo",
+    "replacement_found": true,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-11-20T17:58:13+00:00",
-    "status_reason": "broadcast ended"
+    "embed": "channel"
   },
   {
     "name": "Espreso",
@@ -581,10 +580,12 @@
     "region": "us",
     "country": "us",
     "favorite": false,
-    "status": "live",
+    "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=YwMKWQd1W7Y",
-    "replacement_found": true,
-    "key": "cbs-news-us"
+    "replacement_found": false,
+    "key": "cbs-news-us",
+    "searched_at": "2026-11-21T16:55:16+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "ABC News",
