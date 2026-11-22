@@ -218,7 +218,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=asg6SsWC9vA",
+    "url": "https://www.youtube.com/watch?v=yvpjsHOrOEg",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -226,7 +226,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=eA_h088UD7g",
+    "dead_url": "https://www.youtube.com/watch?v=asg6SsWC9vA",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -281,7 +281,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-21T16:55:16+00:00",
+    "searched_at": "2026-11-22T17:21:12+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -495,7 +495,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-21T16:55:16+00:00",
+    "searched_at": "2026-11-22T17:21:12+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -529,11 +529,12 @@
     "region": "europe",
     "country": "ua",
     "favorite": false,
-    "status": "live",
+    "status": "dead",
     "dead_url": "https://www.youtube.com/watch?v=J8ZjdnDXDCo",
-    "replacement_found": true,
+    "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "embed": "channel"
+    "searched_at": "2026-11-22T17:21:12+00:00",
+    "status_reason": "broadcast ended"
   },
   {
     "name": "Espreso",
@@ -584,7 +585,7 @@
     "dead_url": "https://www.youtube.com/watch?v=YwMKWQd1W7Y",
     "replacement_found": false,
     "key": "cbs-news-us",
-    "searched_at": "2026-11-21T16:55:16+00:00",
+    "searched_at": "2026-11-22T17:21:12+00:00",
     "status_reason": "broadcast ended"
   },
   {
