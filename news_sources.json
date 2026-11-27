@@ -218,7 +218,7 @@
   },
   {
     "name": "KBS",
-    "url": "https://www.youtube.com/watch?v=dyh5xgXuySI",
+    "url": "https://www.youtube.com/watch?v=Au2vyVFMmXE",
     "channel_id": "UCcQTRi69dsVYHN3exePtZ1A",
     "language": "ko",
     "region": "asia",
@@ -226,7 +226,7 @@
     "favorite": false,
     "note": "Verify this is Korean-language, not KBS World English Link swapped in from Famelack candidates 2026-10; verify broadcaster.",
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=_nldqMfDTA0",
+    "dead_url": "https://www.youtube.com/watch?v=dyh5xgXuySI",
     "key": "kbs-kr",
     "replacement_found": true
   },
@@ -281,7 +281,7 @@
     "dead_url": "https://www.youtube.com/watch?v=NTwyipJrdPM",
     "replacement_found": false,
     "key": "m1-hungary-hu",
-    "searched_at": "2026-11-26T19:15:13+00:00",
+    "searched_at": "2026-11-27T19:09:20+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -350,14 +350,14 @@
   },
   {
     "name": "NBC News Now",
-    "url": "https://www.youtube.com/watch?v=dlQf_B0OGrA",
+    "url": "https://www.youtube.com/watch?v=gKULTIDM-8s",
     "channel_id": "UCeY0bbntWzzVIaj2z3QigXg",
     "language": "en",
     "region": "us",
     "country": "us",
     "favorite": false,
     "status": "live",
-    "dead_url": "https://www.youtube.com/watch?v=-LSuaW99Bn0",
+    "dead_url": "https://www.youtube.com/watch?v=dlQf_B0OGrA",
     "replacement_found": true,
     "key": "nbc-news-now-us",
     "embed": "channel"
@@ -496,7 +496,7 @@
     "dead_url": "https://www.youtube.com/watch?v=mqS7FuRj3Xk",
     "replacement_found": false,
     "key": "tv-libertad-pe",
-    "searched_at": "2026-11-26T19:15:13+00:00",
+    "searched_at": "2026-11-27T19:09:20+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -534,7 +534,7 @@
     "dead_url": "https://www.youtube.com/watch?v=J8ZjdnDXDCo",
     "replacement_found": false,
     "key": "1-1-ukraine-ua",
-    "searched_at": "2026-11-26T19:15:13+00:00",
+    "searched_at": "2026-11-27T19:09:20+00:00",
     "status_reason": "broadcast ended"
   },
   {
@@ -586,7 +586,7 @@
     "dead_url": "https://www.youtube.com/watch?v=i0-fZuEsdko",
     "replacement_found": false,
     "key": "cbs-news-us",
-    "searched_at": "2026-11-26T19:15:13+00:00",
+    "searched_at": "2026-11-27T19:09:20+00:00",
     "status_reason": "broadcast ended"
   },
   {
